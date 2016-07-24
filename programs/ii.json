@@ -1,0 +1,14 @@
+{
+  "padding": 3,
+  "title": {
+    "string": "test"
+  },
+  "input": {
+    "string": "Test"
+  },
+  "menu": {
+    "button": "navigate_back",
+    "button": "navigate_forward",
+    "button": "exit"
+  }
+}

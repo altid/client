@@ -45,7 +45,7 @@ initialize() {
 			0, 0, 400, 400, 0,
 			XCB_WINDOW_CLASS_INPUT_OUTPUT,
 			screen->root_visual,
-			XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK,
+			XCB_CW_EVENT_MASK,
 			mask);
 
   char *title = "test";

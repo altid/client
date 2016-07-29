@@ -14,7 +14,7 @@ int
 main(int argc, char *argv[]) {
   (void) argc;
   initialize();
-  set_title(argv[0]);
+  //set_title(argv[0]);
   destroy();
   return 0;
 }

@@ -1,6 +1,7 @@
 {   
   "input": {
-    "string": "Test"
+    "input_box": "string",
+    "enter_button": "button"
   },
   "menu": {
     "navigate_back": "button",

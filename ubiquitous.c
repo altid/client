@@ -10,7 +10,7 @@
 
 int
 main(int argc, char *argv[]) {
-  
+
   if (argc != 2) {
     fprintf(stderr, "usage: %s <%s.json>", argv[0], argv[0]);
     return 2;
@@ -18,12 +18,10 @@ main(int argc, char *argv[]) {
 
   json_t *json;
   json_error_t error;
-  //const char *path = argv[1];  
   json = json_load_file(argv[1], 0, &error);
-  
+
   if (!json)
     fprintf(stderr, "Error loading %s: %s %d\n", argv[1], error.text, error.line);
-  
 
   initialize();
 //  set_title(argv[0]);

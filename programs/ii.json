@@ -1,9 +1,4 @@
-{
-  "padding": 3,
-  "title": {
-    "string": "test"
-  },
-  "input": {
+{  {"input": {
     "string": "Test"
   },
   "menu": {

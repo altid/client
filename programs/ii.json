@@ -3,6 +3,8 @@
     "string": "Test"
   },
   "menu": {
-    "button": ["navigate_back", "navigate_forward", "exit"]
+    "navigate_back": "button",
+    "navigate_forward": "button",
+    "exit": "button"
   }
 }

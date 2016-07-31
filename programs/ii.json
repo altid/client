@@ -7,5 +7,8 @@
     "navigate_back": "button",
     "navigate_forward": "button",
     "exit": "button"
+  },
+  "buffer": {
+    "text_buffer": "NULL"
   }
 }

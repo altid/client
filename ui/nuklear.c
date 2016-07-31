@@ -3,21 +3,21 @@
 #include "../ubiquitous.h"
 
 void
-initialize() {
-
-}
-
-void 
-navigate_back() {
-
-}
-
-void 
-navigate_forward() {
-
+initialize()
+{
 }
 
 void
-destroy() {
+navigate_back()
+{
+}
 
+void
+navigate_forward()
+{
+}
+
+void
+destroy()
+{
 }

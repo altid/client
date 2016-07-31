@@ -1,14 +1,12 @@
 {   
-  "input": {
-    "input_box": "string",
-    "enter_button": "button"
-  },
-  "menu": {
-    "navigate_back": "button",
-    "navigate_forward": "button",
-    "exit": "button"
-  },
-  "buffer": {
-    "text_buffer": "NULL"
-  }
+  "input": [
+    "input_box",
+    "enter_button"
+  ],
+  "menu": [
+    "navigate_back",
+    "navigate_forward",
+    "exit"
+  ],
+  "buffer": "text_buffer"
 }

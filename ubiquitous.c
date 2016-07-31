@@ -25,12 +25,13 @@ main(int argc, char* argv[])
     fprintf(stderr, "Error loading %s: %s %d\n", argv[1], error.text,
             error.line);
 
-  for (unsigned i = 0; i < json_array_size(json); i++) {
-    data = json_array_get(json, i);
-    if (data)
-      printf("data get\n");
-    input = json_object_get(data, "input");
-  }
+  if(menu = json_object_get(json, "menu"))
+    draw_elements(menu);
+  if(input = json_object_get(json, "input"))
+    draw_elements(menu);
+  if(buffer = json_object_get(json, "buffer"))
+    draw_elements(buffer);
+
   initialize(argv[0]);
 
   destroy();

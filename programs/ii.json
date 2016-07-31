@@ -4,9 +4,18 @@
     "enter_button"
   ],
   "menu": [
-    "navigate_back",
-    "navigate_forward",
+    "save",
     "exit"
   ],
-  "buffer": "text_buffer"
+  "buffer": [
+    "text_buffer"
+  ],
+  "title": [
+    "argv[0]"
+  ],
+  "navigation": [
+    "navigate_back",
+    "navigate_forward",
+    "navigate_keypress"
+  ]   
 }

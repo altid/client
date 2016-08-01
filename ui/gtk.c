@@ -4,7 +4,7 @@
 GtkWidget* window;
 
 void
-initialize()
+ub_initialize()
 {
 
   gtk_init(NULL, NULL);
@@ -19,6 +19,6 @@ initialize()
 }
 
 void
-destroy()
+ub_destroy()
 {
 }

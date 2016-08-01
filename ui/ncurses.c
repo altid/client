@@ -5,7 +5,7 @@
 /* Connect primitives to json definition */
 
 void
-initialize(char *title)
+ub_initialize(char *title)
 {
   initscr();
   raw();
@@ -18,17 +18,17 @@ initialize(char *title)
 }
 
 void
-navigate_back()
+ub_navigate_back()
 {
 }
 
 void
-navigate_forward()
+ub_navigate_forward()
 {
 }
 
 void
-destroy()
+ub_destroy()
 {
   endwin();
 }

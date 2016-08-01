@@ -53,7 +53,7 @@ draw(cairo_t* cr)
 }
 
 void
-initialize(char* title)
+ub_initialize(char* title)
 {
   xcb_screen_t* screen;
   xcb_window_t window;
@@ -97,7 +97,7 @@ initialize(char* title)
 }
 
 void
-destroy()
+ub_destroy()
 {
   cairo_surface_destroy(surface);
   xcb_disconnect(c);

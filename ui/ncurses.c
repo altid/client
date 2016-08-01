@@ -7,12 +7,18 @@
 void
 ub_initialize(char *title)
 {
+  (void) title;
   initscr();
   raw();
   keypad(stdscr, TRUE);
   int row, col;
   getmaxyx(stdscr, row, col);
   mvprintw(row - 1, 0, "Hello world!");
+}
+
+void
+ub_draw() 
+{
   refresh();
   getch();
 }

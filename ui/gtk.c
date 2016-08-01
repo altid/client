@@ -4,7 +4,7 @@
 GtkWidget* window;
 
 void
-ub_initialize()
+ub_initialize(char *title)
 {
 
   gtk_init(NULL, NULL);
@@ -15,6 +15,12 @@ ub_initialize()
 
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
+
+}
+
+void
+ub_draw()
+{
   gtk_main();
 }
 

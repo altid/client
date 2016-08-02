@@ -1,4 +1,3 @@
-#include "../ubiquitous.h"
 #include <cairo-xcb.h>
 #include <pango/pangocairo.h>
 #include <stdio.h>
@@ -6,6 +5,8 @@
 #include <string.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
+
+#include "../ubiquitous.h"
 
 xcb_connection_t* c;
 cairo_surface_t* surface;

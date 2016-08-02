@@ -1,21 +1,34 @@
-#include "ubiquitous.h"
+#include <unistd.h>
 #include <jansson.h>
 #include <string.h>
 
-// connect filesystem in/out to UI elements
-//
-// run main loop, listening for key events or filesystem events
+typedef union {
+  int i;
+  float f;
+  const void *v;
+} Arg;
+
+typedef struct {
+  char *k;
+  void (*func)(const Arg *);
+  const Arg arg;
+} Func;
+
+#include "ubiquitous.h"
 
 void 
 ub_element_build(json_t *json, const char *key) 
 {
-  printf("%s\n", key);
+  (void) key;
   size_t index;
   json_t *value;
   json_array_foreach(json, index, value) {
-    printf("%s\n", json_string_value(value));
+    for(size_t i = 0; i < sizeof(ub_function); i++) {
+      if(strcmp(ub_function[i].k, json_string_value(value))) {
+        ub_function[i].func(&(ub_function[i].arg));
+      }
+    }
   }
-  // Call functions for each part with argument (typedef + function pointers style)
 }
 
 int

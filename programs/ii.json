@@ -11,11 +11,11 @@
     "text_buffer"
   ],
   "title": [
-    "ii"
+    "string"
   ],
   "navigation": [
-    "navigate_back",
-    "navigate_forward",
-    "navigate_keypress"
+    "nav_back",
+    "nav_forward",
+    "nav_keypress"
   ]   
 }

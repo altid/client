@@ -1,8 +1,7 @@
-#include "../ubiquitous.h"
 #include <menu.h>
 #include <ncurses.h>
 
-/* Connect primitives to json definition */
+#include "../ubiquitous.h"
 
 void
 ub_initialize(char *title)
@@ -13,7 +12,7 @@ ub_initialize(char *title)
   keypad(stdscr, TRUE);
   int row, col;
   getmaxyx(stdscr, row, col);
-  mvprintw(row - 1, 0, "Hello world!");
+  mvprintw(row - 1, 0, "Hello World!"); 
 }
 
 void
@@ -24,17 +23,14 @@ ub_draw()
 }
 
 void
-ub_navigate_back()
-{
-}
-
-void
-ub_navigate_forward()
-{
-}
-
-void
 ub_destroy()
 {
   endwin();
+}
+
+void
+ub_input_enter_button(const char *val) 
+{ 
+  (void) val;
+  // draw a motherfucking enter button
 }

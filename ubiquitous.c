@@ -2,33 +2,28 @@
 #include <jansson.h>
 #include <string.h>
 
-typedef union {
-  int i;
-  float f;
-  const void *v;
-} Arg;
-
-typedef struct {
-  char *k;
-  void (*func)(const Arg *);
-  const Arg arg;
-} Func;
-
 #include "ubiquitous.h"
 
-void 
-ub_element_build(json_t *json, const char *key) 
+void
+ub_element_init(const char *key) 
 {
-  (void) key;
+  // Set up the element's available sizes, draw the background
+}
+
+void 
+ub_element_build(json_t *json) 
+{
   size_t index;
   json_t *value;
   json_array_foreach(json, index, value) {
-    for(size_t i = 0; i < sizeof(ub_function); i++) {
-      if(strcmp(ub_function[i].k, json_string_value(value))) {
-        ub_function[i].func(&(ub_function[i].arg));
-      }
-    }
+  // set up each sub-element
   }
+}
+
+void
+ub_element_draw(const char *key)
+{
+  // draw the element to the window 
 }
 
 int
@@ -40,11 +35,13 @@ main(int argc, char* argv[])
     return 2;
   }
   
+  // initialize keybindings, background, window
   ub_initialize(argv[0]);
   
   const char *key;
   json_t *json, *value;
   json_error_t error;
+
   json = json_load_file(argv[1], 0, &error);
 
   if (!json)
@@ -53,11 +50,17 @@ main(int argc, char* argv[])
 
 
   json_object_foreach(json, key, value) {
-    ub_element_build(json_object_get(json, key), key);
+    ub_element_init(key);
+    ub_element_build(value);
+    ub_element_draw(key);
   }
-
-  ub_draw();
   
+  // finalize and draw 
+  ub_draw();
+ 
+  // Handle inputs and update
+  ub_run_loop();
+
   ub_destroy();
   return 0;
 }

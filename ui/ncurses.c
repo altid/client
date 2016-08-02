@@ -19,18 +19,17 @@ void
 ub_draw() 
 {
   refresh();
+}
+
+void
+ub_run_loop()
+{
   getch();
+  //refresh();
 }
 
 void
 ub_destroy()
 {
   endwin();
-}
-
-void
-ub_input_enter_button(const char *val) 
-{ 
-  (void) val;
-  // draw a motherfucking enter button
 }

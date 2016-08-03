@@ -1,30 +1,23 @@
-#include <unistd.h>
+#include <stdio.h>
 #include <jansson.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "ubiquitous.h"
 
-void
-ub_element_init(const char *key) 
-{
-  // Set up the element's available sizes, draw the background
-}
+// Current directiory (buffer) ~/ii/irc.freenode.net/##ubiquitous/out|in
+typedef struct {
+  FILE  *buf;
+  FILE  *in;
+} Buffer;
 
-void 
-ub_element_build(json_t *json) 
-{
-  size_t index;
-  json_t *value;
-  json_array_foreach(json, index, value) {
-  // set up each sub-element
-  }
-}
-
-void
-ub_element_draw(const char *key)
-{
-  // draw the element to the window 
-}
+typedef struct {
+  //menu items
+  //navigation
+  //titlestring
+  //input text
+  Buffer cur;
+} State;
 
 int
 main(int argc, char* argv[])
@@ -35,9 +28,6 @@ main(int argc, char* argv[])
     return 2;
   }
   
-  // initialize keybindings, background, window
-  ub_initialize(argv[0]);
-  
   const char *key;
   json_t *json, *value;
   json_error_t error;
@@ -45,20 +35,17 @@ main(int argc, char* argv[])
   json = json_load_file(argv[1], 0, &error);
 
   if (!json)
-    fprintf(stderr, "Error loading %s: %s %d\n", argv[1], error.text,
-            error.line);
+    fprintf(stderr, "Error loading %s: %s %d\n", argv[1], error.text, error.line);
 
-
+  /* Load structs */
   json_object_foreach(json, key, value) {
-    ub_element_init(key);
-    ub_element_build(value);
-    ub_element_draw(key);
+    printf("%s\n", key);
   }
   
-  // finalize and draw 
-  ub_draw();
- 
-  // Handle inputs and update
+  /* Set up windows */
+  ub_initialize(argv[0]);
+  
+  /* Interactive loop */
   ub_run_loop();
 
   ub_destroy();

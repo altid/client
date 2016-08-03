@@ -1,5 +1,6 @@
 #include <menu.h>
 #include <ncurses.h>
+#include <string.h>
 
 #include "../ubiquitous.h"
 
@@ -10,21 +11,19 @@ ub_initialize(char *title)
   initscr();
   raw();
   keypad(stdscr, TRUE);
-  int row, col;
-  getmaxyx(stdscr, row, col);
-  mvprintw(row - 1, 0, "Hello World!"); 
-}
-
-void
-ub_draw() 
-{
-  refresh();
-}
+ }
 
 void
 ub_run_loop()
 {
-  getch();
+  char input[80] = "tmp";
+  int row, col;
+  while(strcmp(input, "/quit")) {
+    getstr(input);
+    getmaxyx(stdscr, row, col);
+    refresh();
+    mvprintw(row - 1, 0, "> %s", input);
+  }
   //refresh();
 }
 
@@ -32,4 +31,32 @@ void
 ub_destroy()
 {
   endwin();
+}
+
+void
+ub_menu() {
+ 
+}
+
+void
+ub_input() {
+
+}
+
+void
+ub_buffer() {
+
+}
+
+void
+ub_title() {
+  // This will be off by default for me, but let's set it anyways.
+  int row, col;
+  getmaxyx(stdscr, row, col);
+  mvprintw(0, 0, "This is a title");
+}
+
+void
+ub_navigation() {
+  // This will be like buffers.pl, tabs, etc. If there's multiple files to iterate over, we will check them.
 }

@@ -1,21 +1,5 @@
 {   
-  "input": [
-    "input_box",
-    "enter_button"
-  ],
-  "menu": [
-    "save",
-    "exit"
-  ],
-  "buffer": [
-    "text_buffer"
-  ],
-  "title": [
-    "string"
-  ],
-  "navigation": [
-    "nav_back",
-    "nav_forward",
-    "nav_keypress"
-  ]   
+  "menu":       [ "save", "exit" ],
+  "buffers":    [ "$XDG_RUNTIME_HOME/ii/irc.*/out", "$XDG_RUNTIME_HOME/ii/irc.*/*/out" ],
+  "navigation": [" nav_back", "nav_forward" ]   
 }

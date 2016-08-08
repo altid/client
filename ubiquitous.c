@@ -8,19 +8,19 @@
 
 // Current directiory (buffer) ~/ii/irc.freenode.net/##ubiquitous/out|in
 typedef struct {
-  FILE  *buf;
-  FILE  *in;
+  FILE  *output;
+  FILE  *input;
 } Buffer;
 
 typedef struct {
-  char *items;
+  char  *command;
+  FILE  *in_file;
 } Menu;
 
 typedef struct {
-  Menu menu;
+  char  *title;
+  Menu  menu;
   //navigation
-  //titlestring
-  //input text
   Buffer cur;
 } Window;
 

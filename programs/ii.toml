@@ -1,0 +1,17 @@
+# Simple example to tie ii in to the framework
+
+title = "ii config"
+
+[menu]
+save = "save"
+quit = "quit"
+
+# Location of buffers, in/out
+[buffers]
+files = ["in", "out"]
+main  = '$XDG_RUNTIME_HOME/ii/irc.*/'
+other = '$XDG_RUNTIME_HOME/ii/.irc.*/*/'
+
+[navigation]
+forward = "forward"
+back    = "back"

@@ -1,5 +1,0 @@
-{   
-  "menu":       [ "save", "exit" ],
-  "buffers":    [ "$XDG_RUNTIME_HOME/ii/irc.*/out", "$XDG_RUNTIME_HOME/ii/irc.*/*/out" ],
-  "navigation": [" nav_back", "nav_forward" ]   
-}

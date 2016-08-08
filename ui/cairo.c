@@ -10,6 +10,7 @@
 
 xcb_connection_t* c;
 cairo_surface_t* surface;
+cairo_t* cr;
 
 static xcb_visualtype_t*
 find_visual(xcb_connection_t* c, xcb_visualid_t visual)
@@ -32,35 +33,11 @@ find_visual(xcb_connection_t* c, xcb_visualid_t visual)
 }
 
 void
-draw(cairo_t* cr)
-{
-  cairo_set_source_rgb(cr, 0, 1, 0);
-  cairo_paint(cr);
-
-  cairo_set_source_rgb(cr, 1, 0, 0);
-  cairo_move_to(cr, 0, 0);
-  cairo_line_to(cr, 150, 0);
-  cairo_line_to(cr, 150, 150);
-  cairo_close_path(cr);
-  cairo_fill(cr);
-
-  cairo_set_source_rgb(cr, 0, 0, 1);
-  cairo_set_line_width(cr, 20);
-  cairo_move_to(cr, 0, 150);
-  cairo_line_to(cr, 150, 0);
-  cairo_stroke(cr);
-
-  cairo_surface_flush(surface);
-}
-
-void
 ub_initialize(char* title)
 {
   xcb_screen_t* screen;
   xcb_window_t window;
   xcb_visualtype_t* visual;
-  xcb_generic_event_t* event;
-  cairo_t* cr;
 
   c = xcb_connect(NULL, NULL);
 
@@ -82,6 +59,35 @@ ub_initialize(char* title)
   cr = cairo_create(surface);
 
   xcb_flush(c);
+  
+  cairo_surface_finish(surface);
+}
+
+void
+draw() {
+  cairo_set_source_rgb(cr, 0, 1, 0);
+  cairo_paint(cr);
+
+  cairo_set_source_rgb(cr, 1, 0, 0);
+  cairo_move_to(cr, 0, 0);
+  cairo_line_to(cr, 150, 0);
+  cairo_line_to(cr, 150, 150);
+  cairo_close_path(cr);
+  cairo_fill(cr);
+
+  cairo_set_source_rgb(cr, 0, 0, 1);
+  cairo_set_line_width(cr, 20);
+  cairo_move_to(cr, 0, 150);
+  cairo_line_to(cr, 150, 0);
+  cairo_stroke(cr);
+
+  cairo_surface_flush(surface);
+}
+
+void
+ub_run_loop() {
+
+  xcb_generic_event_t* event;
   while ((event = xcb_wait_for_event(c))) {
     switch (event->response_type & ~0x80) {
       case XCB_EXPOSE:
@@ -94,9 +100,7 @@ ub_initialize(char* title)
     free(event);
     xcb_flush(c);
   }
-  cairo_surface_finish(surface);
 }
-
 void
 ub_destroy()
 {

@@ -1,9 +1,10 @@
 #include <stdio.h>
-#include <jansson.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
 #include "ubiquitous.h"
+#include <toml.h>
 
 // Current directiory (buffer) ~/ii/irc.freenode.net/##ubiquitous/out|in
 typedef struct {
@@ -12,35 +13,65 @@ typedef struct {
 } Buffer;
 
 typedef struct {
-  //menu items
+  char *items;
+} Menu;
+
+typedef struct {
+  Menu menu;
   //navigation
   //titlestring
   //input text
   Buffer cur;
-} State;
+} Window;
+
+void
+ub_find_tables(struct toml_node *node, void *ctx) {
+  (void) ctx;
+  if(toml_type(node) == TOML_TABLE) {
+    // Build struct of type
+    //if (strcmp("menu", toml_name(node)))
+      
+  }
+}
 
 int
 main(int argc, char* argv[])
 {
 
   if (argc != 2) {
-    fprintf(stderr, "usage: %s <foo>.json\n", argv[0]);
+    fprintf(stderr, "usage: %s %s.toml\n", argv[0], argv[0]);
     return 2;
   }
+
+  char *buf = NULL;
+  FILE *fp;
+  int str_sz;
+  fp = fopen(argv[1], "r");
   
-  const char *key;
-  json_t *json, *value;
-  json_error_t error;
+  if (fp) 
+  {
+    fseek(fp, 0, SEEK_END);
+    str_sz = ftell(fp);
+    rewind(fp);
 
-  json = json_load_file(argv[1], 0, &error);
+    buf = (char*) malloc(sizeof(char) * (str_sz + 1) );
 
-  if (!json)
-    fprintf(stderr, "Error loading %s: %s %d\n", argv[1], error.text, error.line);
+    fread(buf, sizeof(char), str_sz, fp);
 
-  /* Load structs */
-  json_object_foreach(json, key, value) {
-    printf("%s\n", key);
+    buf[str_sz] = '\0';
+    fclose(fp);
   }
+ 
+  struct toml_node *root;
+
+  toml_init(&root);
+  toml_parse(root, buf, strlen(buf));
+  toml_node_walker fn = &ub_find_tables;
+  
+  toml_walk(root, fn, NULL);
+
+  toml_free(root);
+  free(buf);
   
   /* Set up windows */
   ub_initialize(argv[0]);

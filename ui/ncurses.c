@@ -57,6 +57,14 @@ ub_title() {
 }
 
 void
-ub_navigation() {
+ub_navigation_next(char *t) {
   // This will be like buffers.pl, tabs, etc. If there's multiple files to iterate over, we will check them.
 }
+
+void ub_buffer_main(char *t) { 
+}
+void ub_menu_quit(char *t) { 
+}
+void ub_menu_save(char *t) { 
+  printf("Works! %s\n", t);
+} 

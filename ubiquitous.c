@@ -6,31 +6,36 @@
 #include "ubiquitous.h"
 #include <toml.h>
 
-// Current directiory (buffer) ~/ii/irc.freenode.net/##ubiquitous/out|in
-typedef struct {
-  FILE  *output;
-  FILE  *input;
-} Buffer;
-
-typedef struct {
-  char  *command;
-  FILE  *in_file;
-} Menu;
-
-typedef struct {
-  char  *title;
-  Menu  menu;
-  //navigation
-  Buffer cur;
-} Window;
+void
+ub_setup(struct toml_node *node, void *ctx) {
+  
+  void (*ub_func) ();
+  
+  unsigned long i;
+  for (i = 0; i < sizeof(ub_conf) / sizeof(ub_conf[0]); i++) {
+    if(!strcmp(ub_conf[i].t, ctx) && !strcmp(ub_conf[i].k, toml_name(node))) {
+      ub_func = ub_conf[i].func;
+    }
+  }
+  
+  enum toml_type t = toml_type(node);
+  switch(t) {
+  case TOML_STRING: {
+    ub_func(toml_value_as_string(node));
+    break;
+                    }
+  }
+}
 
 void
 ub_find_tables(struct toml_node *node, void *ctx) {
   (void) ctx;
   if(toml_type(node) == TOML_TABLE) {
-    // Build struct of type
-    //if (strcmp("menu", toml_name(node)))
-      
+    toml_node_walker fn = &ub_setup;
+
+    char *name = toml_name(node);
+    toml_walk(node, fn, name);
+    free(name);
   }
 }
 

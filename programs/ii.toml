@@ -3,15 +3,18 @@
 title = "ii config"
 
 [menu]
-save = ["save", "$XDG_RUNTIME_HOME/ii/in"]
-quit = ["quit", "$XDG_RUNTIME_HOME/ii/in"]
+save = "$XDG_RUNTIME_HOME/ii/in"
+quit = "$XDG_RUNTIME_HOME/ii/in"
 
 # Location of buffers, in/out
 [buffers]
-main  = ['$XDG_RUNTIME_HOME/ii/irc.*/out', '$XDG_RUNTIME_HOME/ii/irc.*/in']
-other = ['$XDG_RUNTIME_HOME/ii/.irc.*/*/out', '$XDG_RUNTIME_HOME/ii/irc.*/*/in']
+main_out  = '$XDG_RUNTIME_HOME/ii/irc.*/out'
+main_in   = '$XDG_RUNTIME_HOME/ii/irc.*/in'
+other_out = '$XDG_RUNTIME_HOME/ii/.irc.*/*/out'
+other_in  = '$XDG_RUNTIME_HOME/ii/irc.*/*/in'
 
 # Have yet to decide how buffer swaps will occur
 [navigation]
 next = true
 prev = false
+foo = 2

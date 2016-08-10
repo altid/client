@@ -1,13 +1,14 @@
 #include <menu.h>
 #include <ncurses.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "../ubiquitous.h"
 
 void
 ub_initialize(char *title)
 {
-  (void) title;
+  win.title = title;
   initscr();
   raw();
   keypad(stdscr, TRUE);
@@ -16,15 +17,18 @@ ub_initialize(char *title)
 void
 ub_run_loop()
 {
-  char input[80] = "tmp";
+  char input[80] = "";
   int row, col;
-  while(strcmp(input, "/quit")) {
+  getmaxyx(stdscr, row, col);
+  mvprintw(row - 1, 0, "> "); 
+  while(1) {
     getstr(input);
-    getmaxyx(stdscr, row, col);
-    refresh();
-    mvprintw(row - 1, 0, "> %s", input);
+    clear();
+    mvprintw(row - 1, 0, "> %s", input); 
+    if(!strcmp(input, "/quit")) {
+      break;
+    }
   }
-  //refresh();
 }
 
 void
@@ -34,37 +38,16 @@ ub_destroy()
 }
 
 void
-ub_menu() {
- 
-}
-
-void
-ub_input() {
-
-}
-
-void
-ub_buffer() {
-
-}
-
-void
-ub_title() {
-  // This will be off by default for me, but let's set it anyways.
-  int row, col;
-  getmaxyx(stdscr, row, col);
-  mvprintw(0, 0, "This is a title");
-}
-
-void
-ub_navigation_next(char *t) {
+ub_navigation(char *t) {
   // This will be like buffers.pl, tabs, etc. If there's multiple files to iterate over, we will check them.
 }
 
-void ub_buffer_main(char *t) { 
+void ub_buffer_in(char *t) { 
+  //FILE *f;
 }
 void ub_menu_quit(char *t) { 
+  win.menu[QUIT] = t;
 }
 void ub_menu_save(char *t) { 
-  printf("Works! %s\n", t);
+  win.menu[SAVE] = t;
 } 

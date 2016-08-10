@@ -9,19 +9,18 @@
 void
 ub_setup(struct toml_node *node, void *ctx) {
   
-  void (*ub_func) ();
+  void (*ub_function) ();
   
   unsigned long i;
-  for (i = 0; i < sizeof(ub_conf) / sizeof(ub_conf[0]); i++) {
-    if(!strcmp(ub_conf[i].t, ctx) && !strcmp(ub_conf[i].k, toml_name(node))) {
-      ub_func = ub_conf[i].func;
+  for (i = 0; i < sizeof(ub_func) / sizeof(ub_func[0]); i++) {
+    if(!strcmp(ub_func[i].t, ctx) && !strcmp(ub_func[i].k, toml_name(node))) {
+      ub_function = ub_func[i].func;
     }
   }
-  
   enum toml_type t = toml_type(node);
   switch(t) {
-  case TOML_STRING: {
-    ub_func(toml_value_as_string(node));
+  case TOML_STRING:  {
+    ub_function(toml_value_as_string(node));
     break;
                     }
   }
@@ -85,5 +84,6 @@ main(int argc, char* argv[])
   ub_run_loop();
 
   ub_destroy();
+
   return 0;
 }

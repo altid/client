@@ -3,10 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../ubiquitous.h"
+#include "../ubqt.h"
 
 void
-ub_initialize(char *title)
+ubqt_initialize(char *title)
 {
   win.title = title;
   initscr();
@@ -15,7 +15,7 @@ ub_initialize(char *title)
  }
 
 void
-ub_run_loop()
+ubqt_run_loop()
 {
   char input[80] = "";
   int row, col;
@@ -32,22 +32,22 @@ ub_run_loop()
 }
 
 void
-ub_destroy()
+ubqt_destroy()
 {
   endwin();
 }
 
 void
-ub_navigation(char *t) {
+ubqt_navigation(char *t) {
   // This will be like buffers.pl, tabs, etc. If there's multiple files to iterate over, we will check them.
 }
 
-void ub_buffer_in(char *t) { 
+void ubqt_buffer_in(char *t) { 
   //FILE *f;
 }
-void ub_menu_quit(char *t) { 
+void ubqt_menu_quit(char *t) { 
   win.menu[QUIT] = t;
 }
-void ub_menu_save(char *t) { 
+void ubqt_menu_save(char *t) { 
   win.menu[SAVE] = t;
 } 

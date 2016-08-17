@@ -3,34 +3,34 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "ubiquitous.h"
+#include "ubqt.h"
 #include <toml.h>
 
 void
-ub_setup(struct toml_node *node, void *ctx) {
+ubqt_setup(struct toml_node *node, void *ctx) {
   
-  void (*ub_function) ();
+  void (*ubqt_function) ();
   
   unsigned long i;
-  for (i = 0; i < sizeof(ub_func) / sizeof(ub_func[0]); i++) {
-    if(!strcmp(ub_func[i].t, ctx) && !strcmp(ub_func[i].k, toml_name(node))) {
-      ub_function = ub_func[i].func;
+  for (i = 0; i < sizeof(ubqt_func) / sizeof(ub_func[0]); i++) {
+    if(!strcmp(ubqt_func[i].t, ctx) && !strcmp(ub_func[i].k, toml_name(node))) {
+      ubqt_function = ub_func[i].func;
     }
   }
   enum toml_type t = toml_type(node);
   switch(t) {
   case TOML_STRING:  {
-    ub_function(toml_value_as_string(node));
+    ubqt_function(toml_value_as_string(node));
     break;
                     }
   }
 }
 
 void
-ub_find_tables(struct toml_node *node, void *ctx) {
+ubqt_find_tables(struct toml_node *node, void *ctx) {
   (void) ctx;
   if(toml_type(node) == TOML_TABLE) {
-    toml_node_walker fn = &ub_setup;
+    toml_node_walker fn = &ubqt_setup;
 
     char *name = toml_name(node);
     toml_walk(node, fn, name);
@@ -70,7 +70,7 @@ main(int argc, char* argv[])
 
   toml_init(&root);
   toml_parse(root, buf, strlen(buf));
-  toml_node_walker fn = &ub_find_tables;
+  toml_node_walker fn = &ubqt_find_tables;
   
   toml_walk(root, fn, NULL);
 
@@ -78,12 +78,12 @@ main(int argc, char* argv[])
   free(buf);
   
   /* Set up windows */
-  ub_initialize(argv[0]);
+  ubqt_initialize(argv[0]);
   
   /* Interactive loop */
-  ub_run_loop();
+  ubqt_run_loop();
 
-  ub_destroy();
+  ubqt_destroy();
 
   return 0;
 }

@@ -12,9 +12,9 @@ ubqt_setup(struct toml_node *node, void *ctx) {
   void (*ubqt_function) ();
   
   unsigned long i;
-  for (i = 0; i < sizeof(ubqt_func) / sizeof(ub_func[0]); i++) {
-    if(!strcmp(ubqt_func[i].t, ctx) && !strcmp(ub_func[i].k, toml_name(node))) {
-      ubqt_function = ub_func[i].func;
+  for (i = 0; i < sizeof(ubqt_func) / sizeof(ubqt_func[0]); i++) {
+    if(!strcmp(ubqt_func[i].t, ctx) && !strcmp(ubqt_func[i].k, toml_name(node))) {
+      ubqt_function = ubqt_func[i].func;
     }
   }
   enum toml_type t = toml_type(node);

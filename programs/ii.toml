@@ -3,13 +3,13 @@
 title = "ii config"
 
 [menu]
-save = "$XDG_RUNTIME_HOME/ii/in"
-quit = "$XDG_RUNTIME_HOME/ii/in"
+save = ":save"
+quit = ":quit"
 
 # Location of buffers, in/out
 [buffers]
-main_out  = "$XDG_RUNTIME_HOME/ii/irc.*/out"
-main_in   = "$XDG_RUNTIME_HOME/ii/irc.*/in"
+main_out  = "~/local/run/ii/irc.freenode.net/#ubqt/out"
+main_in   = "~/local/run/ii/irc.freenode.net/in"
 other_out = "$XDG_RUNTIME_HOME/ii/.irc.*/*/out"
 other_in  = "$XDG_RUNTIME_HOME/ii/irc.*/*/in"
 

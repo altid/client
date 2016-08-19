@@ -5,6 +5,8 @@
 
 #include "../ubqt.h"
 
+/* Set up many windows, compose together in a decent UI */
+
 void
 ubqt_initialize(char *title)
 {
@@ -12,28 +14,28 @@ ubqt_initialize(char *title)
   initscr();
   raw();
   keypad(stdscr, TRUE);
- }
+}
 
 void
 ubqt_run_loop()
 {
+  /* This should simply be listening for keystrokes, and firing commands */ 
   char input[80] = "";
+    
   int row, col;
   getmaxyx(stdscr, row, col);
-  mvprintw(row - 1, 0, "> "); 
-  while(1) {
-    getstr(input);
+  while(strcmp(input, ":quit")) {
     clear();
     mvprintw(row - 1, 0, "> %s", input); 
-    if(!strcmp(input, "/quit")) {
-      break;
-    }
+    getstr(input);
+    refresh();
   }
 }
 
 void
 ubqt_destroy()
 {
+  /* This should free any structures */
   endwin();
 }
 
@@ -43,11 +45,10 @@ ubqt_navigation(char *t) {
 }
 
 void ubqt_buffer_in(char *t) { 
-  //FILE *f;
+  /* Build paths into path array*/
+  win.buffer_in = t;
 }
-void ubqt_menu_quit(char *t) { 
-  win.menu[QUIT] = t;
+
+void ubqt_menu(char *t) { 
+  /* Build menu items into menu array */
 }
-void ubqt_menu_save(char *t) { 
-  win.menu[SAVE] = t;
-} 

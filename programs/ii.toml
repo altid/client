@@ -12,8 +12,3 @@ main_out  = "~/local/run/ii/irc.freenode.net/#ubqt/out"
 main_in   = "~/local/run/ii/irc.freenode.net/in"
 other_out = "$XDG_RUNTIME_HOME/ii/.irc.*/*/out"
 other_in  = "$XDG_RUNTIME_HOME/ii/irc.*/*/in"
-
-# Have yet to decide how buffer swaps will occur
-[navigation]
-next = true
-prev = false

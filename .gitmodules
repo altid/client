@@ -1,9 +1,0 @@
-[submodule "programs/ii"]
-	path = programs/ii
-	url = http://git.suckless.org/ii
-[submodule "ui/nuklear"]
-	path = ui/nuklear
-	url = https://github.com/vurtun/nuklear
-[submodule "ui/termbox"]
-	path = ui/termbox
-	url = https://github.com/nsf/termbox

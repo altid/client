@@ -5,12 +5,14 @@
 
 #include "../ubqt.h"
 
+//TODO: Use noecho() and handle input character by character
+
 /* Set up many windows, compose together in a decent UI */
 
 void
 ubqt_initialize(char *title)
 {
-  win.title = title;
+  ubqt_win.title = title;
   initscr();
   raw();
   keypad(stdscr, TRUE);
@@ -24,6 +26,7 @@ ubqt_run_loop()
     
   int row, col;
   getmaxyx(stdscr, row, col);
+  
   while(strcmp(input, ":quit")) {
     clear();
     mvprintw(row - 1, 0, "> %s", input); 
@@ -39,16 +42,3 @@ ubqt_destroy()
   endwin();
 }
 
-void
-ubqt_navigation(char *t) {
-  // This will be like buffers.pl, tabs, etc. If there's multiple files to iterate over, we will check them.
-}
-
-void ubqt_buffer_in(char *t) { 
-  /* Build paths into path array*/
-  win.buffer_in = t;
-}
-
-void ubqt_menu(char *t) { 
-  /* Build menu items into menu array */
-}

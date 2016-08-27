@@ -5,31 +5,40 @@ void ubqt_initialize(char *);
 void ubqt_run_loop();
 void ubqt_destroy();
 
-/* Optional functions */
-void ubqt_menu_save(char *t);
-void ubqt_menu_quit(char *t);
-void ubqt_buffer_in(char *t);
-void ubqt_navigation(char *t);
+/* TODO: Add your function definition here */
+void ubqt_build_menu(char *t, char *c);
+void ubqt_build_buff(char *t, char *c);
+void ubqt_build_nav(char *t, char *c);
 
+
+
+/* Main structure */
 struct {
-  char *buffer_in;
-  char *buffer_out;
+  char *curr_buff;
   char *title;
   char *input;
-  char **navi;
-  char *menu[] ;
-} win;
+  char **menu;
+  size_t menu_size;
+  size_t menu_max;
+  char **buff;
+  size_t buff_size;
+  size_t buff_max;
+  char **nav;
+  size_t nav_size;
+  size_t nav_max;
+} ubqt_win;
 
 struct Ubqt_func {
   const char *t;
   const char *k;
-  void (*func)(char *v);
+  void (*func)(char *k, char *v);
 };
 
+/* TODO: Add your struct entries here */
 static struct Ubqt_func ubqt_func[] = {
-  /* Key  token function  */
-  { "menu",       "save",    ubqt_menu }, 
-  { "menu",       "quit",    ubqt_menu },
-  { "buffers",    "main",    ubqt_buffer_in }, 
-  { "navigation", "next",    ubqt_navigation},
+ /* Item          Action     Function */
+  { "menu",       "save",    ubqt_build_menu }, 
+  { "menu",       "quit",    ubqt_build_menu },
+  { "buffers",    "main",    ubqt_build_buff }, 
+  { "navigation", "next",    ubqt_build_nav  },
 };

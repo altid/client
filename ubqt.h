@@ -4,33 +4,35 @@
 void ubqt_initialize(char *);
 void ubqt_run_loop();
 void ubqt_destroy();
+void ubqt_write_buffer(char *);
+char *ubqt_read_buffer();
 
 /* TODO: Add your function definition here */
 void ubqt_build_menu(char *t, char *c);
 void ubqt_build_buff(char *t, char *c);
 void ubqt_build_nav(char *t, char *c);
 
-
+struct Ubqt_Item {
+  char *item_name;
+  char *item_value;
+};
 
 /* Main structure */
 struct {
-  char *curr_buff;
-  char *title;
+  char *current;
   char *input;
-  char **menu;
-  size_t menu_size;
-  size_t menu_max;
-  char **buff;
-  size_t buff_size;
-  size_t buff_max;
-  char **nav;
-  size_t nav_size;
-  size_t nav_max;
+  char *title;
+  struct Ubqt_Item *menu;
+  struct Ubqt_Item *navi;
+  struct Ubqt_Item *buff; 
+  int menu_size;
+  int navi_size;
+  int buff_size;
 } ubqt_win;
 
 struct Ubqt_func {
-  const char *t;
-  const char *k;
+  char *t;
+  char *k;
   void (*func)(char *k, char *v);
 };
 

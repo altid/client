@@ -9,14 +9,11 @@
 void
 ubqt_setup(struct toml_node *node, void *ctx) {
  
-  //TODO: Case match for non-string elements
-  void (*ubqt_function) ();
-  
+  //TODO: Handle in seperate source file  
   unsigned long i;
   for (i = 0; i < sizeof(ubqt_func) / sizeof(ubqt_func[0]); i++) {
-    if(!strcmp(ubqt_func[i].t, ctx) && !strcmp(ubqt_func[i].k, toml_name(node))) {
-      ubqt_function = ubqt_func[i].func;
-      ubqt_function(ubqt_func[i].k, toml_value_as_string(node));
+    if(!strcmp(ubqt_func[i].t, (char *)ctx) && !strcmp(ubqt_func[i].k, toml_name(node))) {
+      ubqt_func[i].func(ubqt_func[i].k, toml_value_as_string(node));
     } 
   }
 }
@@ -41,6 +38,12 @@ main(int argc, char* argv[])
     fprintf(stderr, "usage: %s %s.toml\n", argv[0], argv[0]);
     return 2;
   }
+
+  ubqt_win.menu_size = 0;
+  ubqt_win.buff_size = 0;
+  ubqt_win.navi_size = 0;
+  ubqt_win.current = "/home/halfwit/irc/irc.freenode.net/#teamcool/out";
+  ubqt_win.input = "/home/halfwit/irc/irc.freenode.net/#teamcool/in";
 
   char *buf = NULL;
   FILE *fp;

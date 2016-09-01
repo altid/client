@@ -1,4 +1,4 @@
-#include <GL/glx.h>
+#include <epoxy/glx.h>
 
 #include <GLFW/glfw3.h>
 // We have to do this for glfw-cairo interop :(
@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "../ubqt.h"
 
 void ubqt_initialize(char *title) {
 
@@ -51,6 +52,24 @@ void do_exit(int code) {
 
 
 static void draw_text(cairo_t* cr, char* font) {
+  char *buf = NULL;
+  FILE *fp;
+  int str_sz;
+  fp = fopen(ubqt_win.current, "r");
+
+  if(fp)
+  {
+    fseek(fp, 0, SEEK_END);
+    str_sz = ftell(fp);
+    rewind(fp);
+    
+    buf = (char*) malloc(sizeof(char) * (str_sz + 1));
+
+    fread(buf, sizeof(char), str_sz, fp);
+
+    buf[str_sz] = '\0';
+    fclose(fp);
+  } 
 
   PangoLayout *layout;
   PangoFontDescription *desc;
@@ -58,7 +77,7 @@ static void draw_text(cairo_t* cr, char* font) {
   /* Create a PangoLayout, set the font and text */
   layout = pango_cairo_create_layout (cr);
 
-  pango_layout_set_text(layout, "This is some text\nFor us to love", -1);
+  pango_layout_set_text(layout, buf, -1);
   desc = pango_font_description_from_string(font);
   pango_layout_set_font_description(layout, desc);
   pango_font_description_free(desc);
@@ -102,6 +121,7 @@ void ubqt_run_loop() {
 
   /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window)) {
+
     cairo_t* cr = cairo_create(surface);
 
     // bg #262626
@@ -109,17 +129,19 @@ void ubqt_run_loop() {
     cairo_rectangle(cr, 0, 0, width, height);
     cairo_fill(cr);
 
-    // fg %bcbcbc
+    // fg #bcbcbc
     cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
     cairo_move_to(cr, 3, 3);
     draw_text(cr,"DejaVu Sans Mono 8");
     cairo_surface_flush(surface);
 
+    
     cairo_gl_surface_swapbuffers(surface);
+    
     glfwSwapBuffers(window);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     cairo_destroy(cr);
-    printf("Render!\n");
 
     /* Sleep until new events */
     glfwPollEvents();

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "ubqt.h"
+#include "../ubqt.h"
 
 /* ubqt_win.menu --> allocate more if needed */
 

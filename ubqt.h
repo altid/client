@@ -4,6 +4,7 @@
 void ubqt_initialize(char *);
 void ubqt_run_loop();
 void ubqt_destroy();
+int ubqt_check_input();
 void ubqt_write_buffer(char *);
 char *ubqt_read_buffer();
 

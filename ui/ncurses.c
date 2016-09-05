@@ -68,7 +68,9 @@ ubqt_run_loop()
   /* Sane default for now, will change to dynamic eventually */
   char buf_in[1024];
   unsigned index = 0;
+  
   /* last time mtime */
+  
   getmaxyx(stdscr, row, col);
   
   /* Temporary test to exit cleanly */
@@ -77,25 +79,14 @@ ubqt_run_loop()
     /* Use stat here to test if buffer has new mtime*/
     //fdstat as well. Will have to just pass buff around
     char *data = ubqt_read_buffer();
+
     /* Then if it does, grab chunk twice the size of row * col */
-    printw("%s", data);
+    mvprintw(0, 0, "%s", data);
+    clrtobot();
     mvprintw(row - 1, 0, "%s %s", ubqt_vi_mode_get(), buf_in); 
     refresh();
     
-    fd_set fds;
-    FD_ZERO(&fds);
-    FD_SET(STDIN_FILENO, &fds);
-
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 700000;
-
-    int status = select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv);
-   
-    /* If we have any input */
-    if ( status == -1 && errno != EINTR ) { 
-      ubqt_destroy();
-    } else if (FD_ISSET(STDIN_FILENO, &fds)) {
+    if(ubqt_check_input() == 0) {
       index = ubqt_ncurses_handle_keypress(getch(), index, &buf_in[0]);
     }
     

@@ -1,12 +1,21 @@
 #include <stdio.h>
 
 /* Main functions */
-void ubqt_initialize(char *);
+void ubqt_initialize(char *title);
 void ubqt_run_loop();
 void ubqt_destroy();
+void ubqt_update_buffer();
+void ubqt_update_input(char *buf);
+unsigned ubqt_handle_keypress(int ch, unsigned index);
+
+/* Shared functions */
 int ubqt_check_input();
-void ubqt_write_buffer(char *);
+int ubqt_check_file(int);
+
+void ubqt_write_buffer(char *input);
 char *ubqt_read_buffer();
+
+
 
 /* TODO: Add your function definition here */
 void ubqt_build_menu(char *t, char *c);
@@ -23,6 +32,7 @@ struct {
   char *current;
   char *input;
   char *title;
+  char *path;
   struct Ubqt_Item *menu;
   struct Ubqt_Item *navi;
   struct Ubqt_Item *buff; 

@@ -10,7 +10,7 @@
 #include "../ubqt.h"
 #include "../shared/vi.h"
 
-
+char buf_in[1024];
 int row, col; 
 /* Set up many windows, compose together in a decent UI */
 
@@ -32,8 +32,9 @@ ubqt_initialize(char *title)
 }
 
 unsigned
-ubqt_ncurses_handle_keypress(int ch, unsigned index, char *buf_in) {
+ubqt_handle_keypress(int ch, unsigned index) {
 
+  //ubqt_win.input.buf && ubqt_win.input.index
   switch(ch) {
   case '\n':
     /* Null terminate string, send to FIFO */
@@ -61,37 +62,25 @@ ubqt_ncurses_handle_keypress(int ch, unsigned index, char *buf_in) {
   return (index > 0) ? index : 0;
 }
 
+/* on data write, resize */
 void
-ubqt_run_loop()
-{
- 
-  /* Sane default for now, will change to dynamic eventually */
-  char buf_in[1024];
-  unsigned index = 0;
-  
-  /* last time mtime */
-  
+ubqt_update_buffer() {
   getmaxyx(stdscr, row, col);
-  
-  /* Temporary test to exit cleanly */
-  while(strcmp(buf_in, ":quit")) {
-    
-    /* Use stat here to test if buffer has new mtime*/
-    //fdstat as well. Will have to just pass buff around
-    char *data = ubqt_read_buffer();
+  mvprintw(0, 0, "%s", ubqt_read_buffer());
+  /* refresh what is needed to be refreshed with panels lib */
 
-    /* Then if it does, grab chunk twice the size of row * col */
-    mvprintw(0, 0, "%s", data);
-    clrtobot();
-    mvprintw(row - 1, 0, "%s %s", ubqt_vi_mode_get(), buf_in); 
-    refresh();
-    
-    if(ubqt_check_input() == 0) {
-      index = ubqt_ncurses_handle_keypress(getch(), index, &buf_in[0]);
-    }
-    
-    free(data);
+}
+
+void
+ubqt_update_input(char *buf) {
+
+  if(strcmp(buf, ":quit")) {
+    ubqt_destroy();
   }
+
+  getmaxyx(stdscr, row, col);
+  mvprintw(row - 1, 0, "%s %s", ubqt_vi_mode_get(), buf);
+  refresh();
 }
 
 void
@@ -100,5 +89,6 @@ ubqt_destroy()
   /* This should free any structures */
   echo();
   endwin();
+  exit(0);
 }
 

@@ -44,6 +44,7 @@ main(int argc, char* argv[])
   ubqt_win.navi_size = 0;
   ubqt_win.current = "/home/halfwit/irc/irc.freenode.net/#teamcool/out";
   ubqt_win.input = "/home/halfwit/irc/irc.freenode.net/#teamcool/in";
+  ubqt_win.path = "/home/halfwit/irc/";
 
   char *buf = NULL;
   FILE *fp;

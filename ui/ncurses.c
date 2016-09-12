@@ -35,7 +35,6 @@ ubqt_initialize(char *title)
   /* main buffer */
   win[0] = newwin(row, col, 0, 0);
   scrollok(win[0], TRUE);
-
   /* input */
   win[1] = newwin(1, col, row - 1, 0);
 
@@ -89,7 +88,6 @@ void
 ubqt_update_buffer() {
   wprintw(win[0], "%s", ubqt_read_buffer());
   wclrtobot(win[0]);
-  //wnoutrefresh(win[0]);
 }
 
 void
@@ -99,13 +97,11 @@ ubqt_update_input() {
     ubqt_destroy();
   }
   wclear(win[1]);
-  wprintw(win[1], "%s %s", ubqt_vi_mode_get(), ubqt_win.input);
-  //wnoutrefresh(win[1]);
+  mvwprintw(win[1], 0, 0, "%s %s", ubqt_vi_mode_get(), ubqt_win.input);
 }
 
 void
 ubqt_refresh() {
-  wnoutrefresh(stdscr);
   wnoutrefresh(win[0]);
   wnoutrefresh(win[1]);
   doupdate();

@@ -7,11 +7,11 @@
 /* ubqt_win.menu --> allocate more if needed */
 
 /* Eventually get file chunks instead of one-shots */
-char *ubqt_read_buffer(int buf_size) {
+char *ubqt_read_buffer() {
   char *buf = NULL;
   FILE *fp;
   int str_sz;
-  fp = fopen(ubqt_win.current, "r");
+  fp = fopen(ubqt_win.current_out, "r");
 
   if(fp)
   {
@@ -28,10 +28,10 @@ char *ubqt_read_buffer(int buf_size) {
   return strdup(buf);
 }
 
-void ubqt_write_buffer(char *input) {
+void ubqt_write_buffer() {
   FILE *fp;
-  fp = fopen(ubqt_win.input, "w");
-  fprintf(fp, "%s\n", input);
+  fp = fopen(ubqt_win.current_in, "w");
+  fprintf(fp, "%s\n", ubqt_win.input);
   fclose(fp);
 }
 

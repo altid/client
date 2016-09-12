@@ -5,14 +5,15 @@ void ubqt_initialize(char *title);
 void ubqt_run_loop();
 void ubqt_destroy();
 void ubqt_update_buffer();
-void ubqt_update_input(char *buf);
-unsigned ubqt_handle_keypress(int ch, unsigned index);
+void ubqt_update_input();
+void ubqt_handle_keypress();
+void ubqt_refresh();
 
 /* Shared functions */
 int ubqt_check_input();
 int ubqt_check_file(int);
 
-void ubqt_write_buffer(char *input);
+void ubqt_write_buffer();
 char *ubqt_read_buffer();
 
 
@@ -25,14 +26,16 @@ void ubqt_build_nav(char *t, char *c);
 struct Ubqt_Item {
   char *item_name;
   char *item_value;
-};
+} Ubqt_Item;
 
 /* Main structure */
 struct {
-  char *current;
-  char *input;
+  char *current_out;
+  char *current_in;
   char *title;
   char *path;
+  char input[1000];
+  int index;
   struct Ubqt_Item *menu;
   struct Ubqt_Item *navi;
   struct Ubqt_Item *buff; 

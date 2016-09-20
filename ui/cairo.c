@@ -14,16 +14,10 @@
 #include <stdbool.h>
 #include "../ubqt.h"
 
-void ubqt_initialize(char *title) {
-
-}
-
-void ubqt_destroy() {
-
-}
-
 // Global variables :(
+GLFWwindow *window;
 cairo_surface_t* surface = NULL;
+cairo_t *cr;
 int width = 1000;
 int height = 1000;
 
@@ -50,12 +44,43 @@ void do_exit(int code) {
   //exit(code);
 }
 
+void 
+ubqt_initialize(char *title) {
+  glfwSetErrorCallback(error_callback);
+
+  /* Initialize the library */
+  //if (!glfwInit()) return -1;
+  glfwInit();
+
+  /* Create a windowed mode window and its OpenGL context */
+  window = glfwCreateWindow(1000, 1000, "Hello", NULL, NULL);
+  if (!window) { do_exit(-1); }
+
+  glfwMakeContextCurrent(window);
+  glfwSwapInterval(1);
+
+  cairo_device_t* device = cairo_glx_device_create(glfwGetX11Display(),glfwGetGLXContext(window));
+
+  glfwSetKeyCallback(window, key_callback);
+
+  glfwSetFramebufferSizeCallback(window,resize_callback);
+  glfwGetFramebufferSize(window, &width, &height);
+  surface = cairo_gl_surface_create_for_window(device, glfwGetX11Window(window), width, height);
+
+}
+
+void ubqt_destroy() {
+  glfwDestroyWindow(window);
+  printf("Bye!\n");
+  glfwTerminate();
+}
+
 
 static void draw_text(cairo_t* cr, char* font) {
   char *buf = NULL;
   FILE *fp;
   int str_sz;
-  fp = fopen(ubqt_win.current, "r");
+  fp = fopen(ubqt_win.current_out, "r");
 
   if(fp)
   {
@@ -97,58 +122,41 @@ static void draw_text(cairo_t* cr, char* font) {
   g_object_unref (layout);
 }
 
-void ubqt_run_loop() {
-  glfwSetErrorCallback(error_callback);
+void
+ubqt_handle_keypress() {
 
-  /* Initialize the library */
-  //if (!glfwInit()) return -1;
-  glfwInit();
+}
 
-  /* Create a windowed mode window and its OpenGL context */
-  GLFWwindow* window = glfwCreateWindow(1000, 1000, "Hello", NULL, NULL);
-  if (!window) { do_exit(-1); }
-
-  glfwMakeContextCurrent(window);
-  glfwSwapInterval(1);
-
-  cairo_device_t* device = cairo_glx_device_create(glfwGetX11Display(),glfwGetGLXContext(window));
-
-  glfwSetKeyCallback(window, key_callback);
-
-  glfwSetFramebufferSizeCallback(window,resize_callback);
-  glfwGetFramebufferSize(window, &width, &height);
-  surface = cairo_gl_surface_create_for_window(device, glfwGetX11Window(window), width, height);
-
-  /* Loop until the user closes the window */
-  while (!glfwWindowShouldClose(window)) {
-
-    cairo_t* cr = cairo_create(surface);
-
-    // bg #262626
-    cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
-    cairo_rectangle(cr, 0, 0, width, height);
-    cairo_fill(cr);
-
-    // fg #bcbcbc
-    cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
-    cairo_move_to(cr, 3, 3);
-    draw_text(cr,"DejaVu Sans Mono 8");
-    cairo_surface_flush(surface);
-
-    
-    cairo_gl_surface_swapbuffers(surface);
-    
-    glfwSwapBuffers(window);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    cairo_destroy(cr);
-
-    /* Sleep until new events */
-    glfwPollEvents();
-    
-  }
+void
+ubqt_update_buffer() {
   
-  glfwDestroyWindow(window);
-  printf("Bye!\n");
-  do_exit(0);
+  cr = cairo_create(surface);
+  // bg #262626
+  cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
+  cairo_rectangle(cr, 0, 0, width, height);
+  cairo_fill(cr);
+
+  // fg #bcbcbc
+  cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
+  cairo_move_to(cr, 3, 3);
+  draw_text(cr,"DejaVu Sans Mono 8");
+
+}
+
+void
+ubqt_update_input() {
+
+}
+
+void
+ubqt_refresh() {
+  cairo_surface_flush(surface);
+
+  cairo_gl_surface_swapbuffers(surface);
+
+  glfwSwapBuffers(window);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  cairo_destroy(cr);
+
 }

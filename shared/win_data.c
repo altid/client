@@ -7,17 +7,25 @@
 /* ubqt_win.menu --> allocate more if needed */
 
 /* Eventually get file chunks instead of one-shots */
-char *ubqt_read_buffer() {
+char *ubqt_read_buffer(char *path, int start_offset, int end_offset) {
   char *buf = NULL;
   FILE *fp;
   int str_sz;
-  fp = fopen(ubqt_win.current_out, "r");
+  fp = fopen(path, "r");
+  
+  if (start_offset < 0)
+    return 0; 
+
+  if (end_offset == 0)
+    end_offset = SEEK_END;
 
   if(fp)
   {
-    fseek(fp, 0, SEEK_END);
+    fseek(fp, 0, end_offset);
     str_sz = ftell(fp);
     rewind(fp);
+  
+    fseek(fp, 0, start_offset);
 
     buf = (char*) malloc(sizeof(char) * (str_sz + 1));
 

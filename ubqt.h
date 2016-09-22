@@ -14,7 +14,7 @@ int ubqt_check_input();
 int ubqt_check_file(int);
 
 void ubqt_write_buffer();
-char *ubqt_read_buffer();
+char *ubqt_read_buffer(char *, int, int);
 
 
 

@@ -38,7 +38,7 @@ ubqt_initialize(char *title)
   /* input */
   win[1] = newwin(1, col, row - 1, 0);
 
-  wprintw(win[0], "%s", ubqt_read_buffer());
+  wprintw(win[0], "%s", ubqt_read_buffer(ubqt_win.current_out, 0, 0));
   mvwprintw(win[1], 0, 0, "%s ", ubqt_vi_mode_get());
   wnoutrefresh(win[0]);
   wnoutrefresh(win[1]);
@@ -86,7 +86,7 @@ ubqt_handle_keypress() {
 /* on data write, resize */
 void
 ubqt_update_buffer() {
-  wprintw(win[0], "%s", ubqt_read_buffer());
+  wprintw(win[0], "%s", ubqt_read_buffer(ubqt_win.current_out, 0, 0));
   wclrtobot(win[0]);
 }
 

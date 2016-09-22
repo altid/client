@@ -12,7 +12,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "../ubqt.h"
+#include "../src/ubqt.h"
+#include "../shared/vi.h"
 
 // Global variables :(
 GLFWwindow *window;

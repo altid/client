@@ -8,7 +8,7 @@
 #include <sys/select.h>
 #include <ncurses.h>
 #include <panel.h>
-#include "../ubqt.h"
+#include "../src/ubqt.h"
 #include "../shared/vi.h"
 
 int row, col; 

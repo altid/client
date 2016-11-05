@@ -58,3 +58,5 @@ static struct Ubqt_func ubqt_func[] = {
   { "buffers",    "main",    ubqt_build_buff }, 
   { "navigation", "next",    ubqt_build_nav  },
 };
+
+// I rock

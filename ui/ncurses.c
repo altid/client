@@ -88,6 +88,7 @@ void
 ubqt_update_buffer() {
   wprintw(win[0], "%s", ubqt_read_buffer(ubqt_win.current_out, 0, 0));
   wclrtobot(win[0]);
+  wprintw(win[1], "%s", ubqt_win.input);
 }
 
 void
@@ -97,6 +98,7 @@ ubqt_update_input() {
     ubqt_destroy();
   }
   wclear(win[1]);
+  wprintw(win[0], "%s", ubqt_read_buffer(ubqt_win.current_out, 0, 0));
   mvwprintw(win[1], 0, 0, "%s %s", ubqt_vi_mode_get(), ubqt_win.input);
 }
 

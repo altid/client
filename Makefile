@@ -29,7 +29,7 @@ $(TARGET): $(OBJ)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	$(RM) $(OBJ) *~ $(TARGET)
+	$(RM) $(OBJ) *~ $(TARGET) ui/*.o
 
 depend: $(SRC)
 	makedepend $(INCLUDES) $^

@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "../src/ubqt.h"
-#include "../shared/vi.h"
 
 // Global variables :(
 GLFWwindow *window;
@@ -88,7 +87,7 @@ draw_text(cairo_t* cr, char* font) {
 		char *buf = NULL;
 		FILE *fp;
 		int str_sz;
-		fp = fopen(ubqt_win.current_out, "r");
+		fp = fopen(path, "r");
 
 		if(fp) {
 				fseek(fp, 0, SEEK_END);

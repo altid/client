@@ -12,9 +12,6 @@ main(int argc, char* argv[])
 		return 2;
 	}
 
-	/* If plan9, query for CPU + auth + password
-	* If on regular filesystem we don't need this
-	*/
 	ubqt_connection_init(argv[1]);
 
 	ubqt_window_init();

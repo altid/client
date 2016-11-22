@@ -1,11 +1,12 @@
-CC = clang
+CC = clang -v
 CFLAGS =
 INCLUDES =
 DEPS = src/ubqt.h
-LIBS=
+LIBS =
 TARGET = ubqt
 SRC = src/ubqt.c src/notify.c src/data.c src/connection.c
 OBJ = src/ubqt.o src/notify.o src/data.o src/connection.o
+
 
 ifeq (ncurses,${BACKEND})
 		LIBS += -lncurses -lpanel

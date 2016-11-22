@@ -1,4 +1,7 @@
 /* Wherein we run the main loop */
+
+/* TODO: Streams will have to be ignored after the initial creation */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -58,17 +61,20 @@ ubqt_run_loop() {
 								if(d.wd == link_watch) {
 										inotify_rm_watch(in, link_watch);
 										link_watch = inotify_add_watch(in, path, IN_ALL_EVENTS|IN_DONT_FOLLOW);
+										/* Toggle a UI element off */
+										ubqt_remove_data();
 								} else {
 										/* We have a good fd, act on it */
+										// send fd in call
 										ubqt_update_data();
+										ubqt_redraw();
 								}
 
 						} else {
-								/* stdin event */
-								ubqt_handle_input();
+								// send fd in call
+								ubqt_update_input();
+								ubqt_redraw();
 						}
-
-						ubqt_refresh();
 				}
 		}
 }

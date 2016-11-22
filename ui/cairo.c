@@ -1,3 +1,7 @@
+// Have a bunch of surfaces that we hold on to, then stitch together as we need them; should save a bunch of resources
+// Surface holds everything that we eventually draw to the screen
+
+
 #include <epoxy/glx.h>
 
 #include <GLFW/glfw3.h>
@@ -16,7 +20,7 @@
 
 // Global variables :(
 GLFWwindow *window;
-cairo_surface_t* surface = NULL;
+cairo_surface_t *surface = NULL;
 cairo_t *cr;
 int width = 1000;
 int height = 1000;
@@ -45,7 +49,6 @@ resize_callback(GLFWwindow* window, int nwidth, int nheight) {
 void 
 do_exit(int code) {
 		glfwTerminate();
-		//exit(code);
 }
 
 void 
@@ -53,7 +56,6 @@ ubqt_window_init() {
 		glfwSetErrorCallback(error_callback);
 
 		/* Initialize the library */
-		//if (!glfwInit()) return -1;
 		glfwInit();
 
 		/* Create a windowed mode window and its OpenGL context */
@@ -81,24 +83,24 @@ ubqt_destroy() {
 		glfwTerminate();
 }
 
-
 void 
-draw_text(cairo_t* cr, char* font) {
-		char *buf = NULL;
-		FILE *fp;
-		int str_sz;
-		fp = fopen(path, "r");
-
-		if(fp) {
-				fseek(fp, 0, SEEK_END);
-				str_sz = ftell(fp);
-				rewind(fp);
-				buf = (char*) malloc(sizeof(char) * (str_sz + 1));
-
-				fread(buf, sizeof(char), str_sz, fp);
-				buf[str_sz] = '\0';
-				fclose(fp);
-		} 
+ubqt_draw(cairo_t* cr, char* font) {
+		
+		/* We'll need some ordering here to make sure things update well */
+		//if (win.title)
+		//	draw title
+		//if (win.status)
+		//	draw status
+		//if (win.input)
+		//	draw input
+		//if (win.sidebar)
+		//	draw sidebar
+		//if (win.slideout)
+		//	draw slideout
+		//if (win.text)
+		// 	update text
+		// 	- to include markdown, drawing images
+		char *buf = "test";
 
 		PangoLayout *layout;
 		PangoFontDescription *desc;
@@ -137,13 +139,15 @@ ubqt_update_buffer() {
 
 		// fg #bcbcbc
 		cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
+		
+		/* 3x3 margin */
 		cairo_move_to(cr, 3, 3);
-		draw_text(cr,"DejaVu Sans Mono 8");
 
+		ubqt_draw(cr,"DejaVu Sans Mono 8");
 }
 
 void
-ubqt_refresh() {
+ubqt_redraw() {
 		cairo_surface_flush(surface);
 
 		cairo_gl_surface_swapbuffers(surface);

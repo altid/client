@@ -15,13 +15,20 @@ void ubqt_redraw();
 
 const char *path;
 
-/* We need an internal representation of text elements */
+enum filename {
+		TITLE = 0,
+		INPUT,
+		STATUS,
+		TEXT,
+		SIDEBAR,
+		SLIDEOUT,
+		STREAM,
+		CTL,
+		CMPL,
+};
 
-typedef struct {
-		char *title;
-		char *input;
-		char *status;
-		char *text;
-		char *sidebar;
-		char *slideout;
-} Win;
+/* Input sent only on proper enter
+ * char *ubqt_input;
+ * When on a mutable buffer that isn't input we send chunk-by-chunk to the server TODO: Define best chunk size
+ * char *ubqt_text_chunk;
+ */

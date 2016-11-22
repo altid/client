@@ -12,8 +12,6 @@ main(int argc, char* argv[])
 		return 2;
 	}
 
-	Win *win = {NULL};
-
 	ubqt_connection_init(argv[1]);
 
 	ubqt_window_init();

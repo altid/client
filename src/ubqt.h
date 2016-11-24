@@ -3,29 +3,32 @@
 /* Main functions */
 void ubqt_connection_init(const char *);
 void ubqt_window_init();
-void ubqt_run_loop();
+void ubqt_file_loop();
+void ubqt_main_loop();
 void ubqt_destroy();
-void ubqt_update_data();
-void ubqt_remove_data();
+int ubqt_data_init();
+void ubqt_data_update(char *);
+void ubqt_data_remove(char *);
 
 /* Shared functions */
 void ubqt_update_buffer();
-void ubqt_update_input();
+void ubqt_update_input(int);
 void ubqt_redraw();
+char * ubqt_file_read(char *);
+
+void ubqt_update_element();
 
 const char *path;
 
-enum filename {
-		TITLE = 0,
-		INPUT,
-		STATUS,
-		TEXT,
-		SIDEBAR,
-		SLIDEOUT,
-		STREAM,
-		CTL,
-		CMPL,
-};
+struct Ubqt_win {
+		char *title;
+		char *status;
+		char *tabbar;
+		char *input;
+		char *sidebar;
+		char *text;
+		char *slideout;
+} ubqt_win;
 
 /* Input sent only on proper enter
  * char *ubqt_input;

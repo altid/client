@@ -13,7 +13,7 @@
 #define MAX_EVENTS 16
 
 void
-ubqt_run_loop() {
+ubqt_file_loop() {
 		int in, efd, link_watch, ret = 1;
 		struct epoll_event ev, events[MAX_EVENTS];
  
@@ -34,48 +34,40 @@ ubqt_run_loop() {
 		if (epoll_ctl(efd, EPOLL_CTL_ADD, in, &ev) == -1)
 				fprintf(stderr, "Could not configure the epoll interface\n");
 
-		link_watch = inotify_add_watch(in, path, IN_ALL_EVENTS);
+		inotify_add_watch(in, path, IN_MODIFY|IN_CREATE|IN_DELETE);
 
 		while(ret >= 0) {
 				ret = epoll_wait(efd, events, MAX_EVENTS, -1);
 
 				if(ret == EINTR)
 						continue;
+				char buf[4096]
+						__attribute ((aligned(__alignof__(struct inotify_event))));
+				const struct inotify_event *event;
+				int len;
+				char *ptr;
+				for (;;) {
+						len = read(in, buf, sizeof buf);
+						if (len == -1 && errno != EAGAIN) {
+								fprintf(stderr, "Read error\n");
+								exit(EXIT_FAILURE);
+						}
+						
+						if (len <= 0)
+								break;
 
-				int i, err;
-				for (i = 0; i < ret; i++) {
-						/* inotify event */
-						if(events[i].data.fd == in) {
-								struct inotify_event d;
-								if((err = read(in, &d, sizeof(struct inotify_event))) < 1) {
-										if (errno == EAGAIN || errno == EWOULDBLOCK) {
-												break;
-										} else {
-												fprintf(stderr, "Failed to read from directory\n");
-												exit(EXIT_FAILURE);
-										}
-								} else if (err != sizeof(struct inotify_event)) {
-										fprintf(stderr, "%d bytes, expected %lu\n", err, sizeof(struct inotify_event));
-								}
-
-								if(d.wd == link_watch) {
-										inotify_rm_watch(in, link_watch);
-										link_watch = inotify_add_watch(in, path, IN_ALL_EVENTS|IN_DONT_FOLLOW);
-										/* Toggle a UI element off */
-										ubqt_remove_data();
-								} else {
-										/* We have a good fd, act on it */
-										// send fd in call
-										ubqt_update_data();
-										ubqt_redraw();
-								}
-
-						} else {
-								// send fd in call
-								ubqt_update_input();
-								ubqt_redraw();
+						for (ptr = buf; ptr < buf + len; ptr += sizeof(struct inotify_event) + event->len) {
+								event = (const struct inotify_event *) ptr;
+								if (event->mask & IN_MODIFY)
+										ubqt_data_update((char *)event->name);
+								if (event->mask & IN_CREATE)
+										ubqt_data_update((char *)event->name);
+								if (event->mask & IN_DELETE)
+										ubqt_data_remove((char *)event->name);
+								ubqt_update_buffer();
 						}
 				}
+						
 		}
 }
 

@@ -1,8 +1,8 @@
-CC = clang -v
+CC = clang -rpath /usr/lib
 CFLAGS =
 INCLUDES =
 DEPS = src/ubqt.h
-LIBS =
+LIBS = -lpthread
 TARGET = ubqt
 SRC = src/ubqt.c src/notify.c src/data.c src/connection.c
 OBJ = src/ubqt.o src/notify.o src/data.o src/connection.o

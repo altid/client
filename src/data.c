@@ -1,65 +1,145 @@
 #include "ubqt.h"
 #include <stdlib.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <dirent.h>
+#include <errno.h>
 
 void
-ubqt_data_update(char *data) {
-		/* match name, update data */
-		if (!strcmp(data, "text"))
-				ubqt_win.text = ubqt_file_read(data);
-		else if (!strcmp(data, "tabbar"))
-				ubqt_win.tabbar = ubqt_file_read(data);
-		else if (!strcmp(data, "title"))
-				ubqt_win.title = ubqt_file_read(data);
-		else if (!strcmp(data, "status"))
-				ubqt_win.status = ubqt_file_read(data);
-		else if (!strcmp(data, "sidebar"))
-				ubqt_win.sidebar = ubqt_file_read(data);
-		else if (!strcmp(data, "slideout"))
-				ubqt_win.slideout = ubqt_file_read(data);
-		
+ubqt_data_update(char *data, char *path)
+{
+		/*
+		 * Ordered by presumed frequency
+		 * file read errors will result in NULL value assignment
+		 */
+
+		if (!strcmp(data, "text")) {
+				pthread_mutex_lock(&mutex);
+				ubqt_win.text = ubqt_file_read(data, path);
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "tabbar")) {
+				pthread_mutex_lock(&mutex);
+				ubqt_win.tabbar = ubqt_file_read(data, path);
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "title")) {
+				pthread_mutex_lock(&mutex);
+				ubqt_win.title = ubqt_file_read(data, path);
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "status")) {
+				pthread_mutex_lock(&mutex);
+				ubqt_win.status = ubqt_file_read(data, path);
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "sidebar")) {
+				pthread_mutex_lock(&mutex);
+				ubqt_win.sidebar = ubqt_file_read(data, path);
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "slideout")) {
+				pthread_mutex_lock(&mutex);
+				ubqt_win.slideout = ubqt_file_read(data, path);
+				pthread_mutex_unlock(&mutex);
+		}
+
 }
 
 void
-ubqt_data_remove(char *data) {
-		if (!strcmp(data, "title"))
+ubqt_data_remove(char *data)
+{
+
+		/* Ordered by frequency */
+		if (!strcmp(data, "title")) {
+				pthread_mutex_lock(&mutex);
 				ubqt_win.title = NULL;
-		else if (!strcmp(data, "tabbar"))
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "tabbar")) {
+				pthread_mutex_lock(&mutex);
 				ubqt_win.tabbar = NULL;
-		else if (!strcmp(data, "status"))
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "status")) {
+				pthread_mutex_lock(&mutex);
 				ubqt_win.status = NULL;
-		else if (!strcmp(data, "sidebar"))
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "sidebar")) {
+				pthread_mutex_lock(&mutex);
 				ubqt_win.sidebar = NULL;
-		else if (!strcmp(data, "slideout"))
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "slideout")) {
+				pthread_mutex_lock(&mutex);
 				ubqt_win.sidebar = NULL;
+				pthread_mutex_unlock(&mutex);
+		}
+
+		else if (!strcmp(data, "text")) {
+				pthread_mutex_lock(&mutex);
+				ubqt_win.text = NULL;
+				pthread_mutex_unlock(&mutex);
+		}
+
 }
 
 int
-ubqt_data_init(const char *path) {
+ubqt_data_init(char *path)
+{
+
 		DIR *d;
-		struct dirent *dir;
-		d = opendir(path);
-		if(!d)
-				return 0;
-		while ((dir = readdir(d)) != NULL)
-				ubqt_data_update(dir->d_name);
+		struct dirent *dp;
+
+		if ((d = opendir(path)) == NULL)
+				return errno;
+
+		while ((dp = readdir(d)) != NULL)
+				ubqt_data_update(dp->d_name, path);
+
 		closedir(d);
 
-		return 1;
+		return (errno) ? errno : 0;
+
 }
 
 char *
-ubqt_file_read(char *name) {
+ubqt_file_read(char *name, char *path)
+{
+
 		char *buf = NULL;
-		FILE *fp;
+		FILE *fp = NULL;
 		int str_sz;
-		char *fullpath = malloc(strlen(name) + strlen(path) + 2);
-		sprintf(fullpath, "%s/%s", path, name);	
-		fp = fopen(fullpath, "r");
-		free(fullpath);
-		if (fp) {
+		char *fullpath;
+
+		fullpath = malloc(strlen(name) + strlen(path) + 2);
+
+		if (!fullpath) {
+				fprintf(stderr, "Failed to read %s\n", path);
+				return NULL;
+		}
+
+		else if ((sprintf(fullpath, "%s/%s", path, name)) < 0)
+				fprintf(stderr, "Failed to build path %s/%s\n", path, name);
+
+		fullpath[strlen(fullpath)] = '\0';
+
+		if ((fp = fopen(fullpath, "r")) == NULL)
+				fprintf(stderr, "Failed to open path %s\n", fullpath);
+
+		else {
+				//TODO: Read in line by line, parse markup
 				fseek(fp, 0, SEEK_END);
 				str_sz = ftell(fp);
 				rewind(fp);
@@ -68,6 +148,7 @@ ubqt_file_read(char *name) {
 				buf[str_sz] = '\0';
 				fclose(fp);
 		}
-		
-		return (buf) ? buf : NULL;
+
+		free(fullpath);
+		return buf;
 }

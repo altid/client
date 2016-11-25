@@ -15,8 +15,9 @@ ifeq (ncurses,${BACKEND})
 else
 		CFLAGS += `pkg-config --cflags cairo-gl pangocairo glfw3 epoxy`
 		LIBS += `pkg-config --libs cairo-gl pangocairo glfw3 epoxy`
-		SRC += ui/cairo.c
-		OBJ += ui/cairo.o
+		SRC += ui/cairo.c ui/cairo.h ui/md_topango.c
+		OBJ += ui/cairo.o ui/md_topango.o
+		DEPS += ui/cairo.h
 endif
 
 all: $(TARGET)

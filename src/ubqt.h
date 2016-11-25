@@ -1,23 +1,24 @@
 #include <stdio.h>
+#include <pthread.h>
+extern pthread_mutex_t mutex;
 
 /* Main functions */
-void ubqt_connection_init(const char *);
-void ubqt_window_init();
-void ubqt_file_loop();
-void ubqt_main_loop();
-void ubqt_destroy();
-int ubqt_data_init();
-void ubqt_data_update(char *);
+int ubqt_connection_init(char *);
+int ubqt_data_init(char *);
+void ubqt_file_loop(char *);
+void ubqt_data_update(char *, char*);
 void ubqt_data_remove(char *);
-
-/* Shared functions */
-void ubqt_update_buffer();
+char * ubqt_file_read(char *, char *);
 void ubqt_update_input(int);
-void ubqt_redraw();
-char * ubqt_file_read(char *);
 
-void ubqt_update_element();
+/* Backend specific */
+char * ubqt_main_error(int); 	/* Wrap any fatal errors with useful messages */
+int ubqt_window_init(char *);
+int ubqt_main_loop();
+void ubqt_destroy();
+void ubqt_update_buffer();
 
+/* argv[1] */
 const char *path;
 
 struct Ubqt_win {
@@ -29,6 +30,8 @@ struct Ubqt_win {
 		char *text;
 		char *slideout;
 } ubqt_win;
+
+
 
 /* Input sent only on proper enter
  * char *ubqt_input;

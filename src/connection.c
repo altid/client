@@ -1,7 +1,8 @@
 #include "ubqt.h"
 
-/*   */
-void
-ubqt_connection_init(const char *here) {
-		path = here;
+int
+ubqt_connection_init(char *path)
+{
+		(void) path;
+		return 0;
 }

@@ -88,12 +88,13 @@ ubqt_window_init(char *title)
 
 }
 
-void
+int
 ubqt_destroy()
 {
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
+	return 0;
 
 }
 

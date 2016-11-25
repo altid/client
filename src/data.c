@@ -126,8 +126,8 @@ ubqt_file_read(char *name, char *path)
 	fullpath = malloc(strlen(name) + strlen(path) + 2);
 
 	if (!fullpath) {
-			fprintf(stderr, "Failed to read %s\n", path);
-			return NULL;
+		fprintf(stderr, "Failed to read %s\n", path);
+		return NULL;
 	}
 
 	else if ((sprintf(fullpath, "%s/%s", path, name)) < 0)

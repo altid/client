@@ -15,7 +15,7 @@ void ubqt_update_input(int);
 char * ubqt_main_error(int); 	/* Wrap any fatal errors with useful messages */
 int ubqt_window_init(char *);
 int ubqt_main_loop();
-void ubqt_destroy();
+int ubqt_destroy();
 void ubqt_update_buffer();
 
 /* argv[1] */

@@ -22,13 +22,13 @@ void ubqt_update_buffer();
 const char *path;
 
 struct Ubqt_win {
-		char *title;
-		char *status;
-		char *tabbar;
-		char *input;
-		char *sidebar;
-		char *text;
-		char *slideout;
+	char *title;
+	char *status;
+	char *tabbar;
+	char *input;
+	char *sidebar;
+	char *text;
+	char *slideout;
 } ubqt_win;
 
 

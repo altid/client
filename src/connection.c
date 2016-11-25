@@ -3,6 +3,6 @@
 int
 ubqt_connection_init(char *path)
 {
-		(void) path;
-		return 0;
+	(void) path;
+	return 0;
 }

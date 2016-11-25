@@ -29,7 +29,7 @@ ubqt_wait_event(int in, int efd, struct epoll_event events[MAX_EVENTS], char *pa
 		/* Ignore logging resource busy error */
 		if ((len = read(in, buf, sizeof buf)) == -1 && errno != EAGAIN) {
 			fprintf(stderr, "Error in I/O read: %s\n", strerror(errno));
-			return 1;
+			return 0;
 		}
 
 		if (len <= 0)
@@ -51,7 +51,7 @@ ubqt_wait_event(int in, int efd, struct epoll_event events[MAX_EVENTS], char *pa
 		}
 	}
 
-	return 0;
+	return 1;
 }
 
 void

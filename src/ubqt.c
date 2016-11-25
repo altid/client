@@ -40,13 +40,13 @@ main(int argc, char* argv[])
 				pthread_mutex_init(&mutex, NULL);
 				if ((err = pthread_create(&file_thread, NULL, run_file_loop, argv[1])))
 						//TODO: Attempt to reconnect on failure
-						fprintf(stderr, "%s\n", strerror(err));
+						fprintf(stderr, "I/O thread failure: %s\n", strerror(err));
 
 				ubqt_main_loop();
 				pthread_mutex_destroy(&mutex);
 
 				if ((err = pthread_cancel(file_thread)))
-						fprintf(stderr, "%s\n", strerror(err));
+						fprintf(stderr, "I/O thread cleanup failure: %s\n", strerror(err));
 
 				ubqt_destroy();
 				exit(EXIT_SUCCESS);

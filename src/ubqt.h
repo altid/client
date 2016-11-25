@@ -8,8 +8,7 @@ int ubqt_data_init(char *);
 void ubqt_notify_loop(char *);
 void ubqt_data_update(char *, char*);
 void ubqt_data_remove(char *);
-char * ubqt_file_read(char *, char *);
-void ubqt_update_input(int);
+void ubqt__input_update(int);
 
 /* Backend specific */
 char * ubqt_draw_error(int); 	/* Wrap any fatal errors with useful messages */

@@ -6,6 +6,8 @@
 #include <dirent.h>
 #include <errno.h>
 
+char *ubqt_file_read(char *, char *);
+
 void
 ubqt_data_update(char *data, char *path)
 {

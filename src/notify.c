@@ -55,7 +55,7 @@ ubqt_wait_event(int in, int efd, struct epoll_event events[MAX_EVENTS], char *pa
 }
 
 void
-ubqt_file_loop(char *path)
+ubqt_notify_loop(char *path)
 {
 
 	int in, efd;

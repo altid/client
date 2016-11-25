@@ -16,8 +16,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "markup.h"
-#include "../src/ubqt.h"
+#include "pangomarkup.h"
+#include "../../src/ubqt.h"
 
 // Global variables :(
 GLFWwindow *window;
@@ -28,7 +28,7 @@ int width = 800;
 int height = 600;
 
 char *
-ubqt_main_error(int err)
+ubqt_draw_error(int err)
 {
 
 	return "See scrollback for glfw error\n";
@@ -66,7 +66,7 @@ resize_callback(GLFWwindow* window, int nwidth, int nheight)
 }
 
 int
-ubqt_window_init(char *title)
+ubqt_draw_init(char *title)
 {
 
 	glfwSetErrorCallback(error_callback);
@@ -89,7 +89,7 @@ ubqt_window_init(char *title)
 }
 
 int
-ubqt_destroy()
+ubqt_draw_destroy()
 {
 
 	glfwDestroyWindow(window);
@@ -192,7 +192,7 @@ ubqt_update_buffer()
 }
 
 int
-ubqt_main_loop()
+ubqt_draw_loop()
 {
 
 	while (!glfwWindowShouldClose(window)) {

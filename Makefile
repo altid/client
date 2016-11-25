@@ -10,14 +10,14 @@ OBJ = src/ubqt.o src/notify.o src/data.o src/connection.o
 
 ifeq (ncurses,${BACKEND})
 	LIBS += -lncurses -lpanel
-	SRC += ui/ncurses.c
-	OBJ += ui/ncurses.o
+	SRC += draw/ncurses/ncurses.c
+	OBJ += draw/ncurses/ncurses.o
 else
 	CFLAGS += `pkg-config --cflags cairo-gl pangocairo glfw3 epoxy`
 	LIBS += `pkg-config --libs cairo-gl pangocairo glfw3 epoxy`
-	SRC += ui/cairo.c ui/cairo.h ui/md_topango.c
-	OBJ += ui/cairo.o ui/md_topango.o
-	DEPS += ui/cairo.h
+	SRC += draw/cairo/cairo.c draw/cairo/pangomarkup.c
+	OBJ += draw/cairo/cairo.o draw/cairo/pangomarkup.o
+	DEPS += draw/cairo/pangomarkup.h
 endif
 
 all: $(TARGET)

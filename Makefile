@@ -1,5 +1,5 @@
-CC = clang -rpath /usr/lib
-CFLAGS =
+CC = clang
+CFLAGS = -Wall -std=c11
 INCLUDES =
 DEPS = src/ubqt.h
 LIBS = -lpthread
@@ -13,8 +13,8 @@ ifeq (ncurses,${BACKEND})
 	SRC += draw/ncurses/ncurses.c
 	OBJ += draw/ncurses/ncurses.o
 else
-	CFLAGS += `pkg-config --cflags cairo pangocairo xcb_atom`
-	LIBS += `pkg-config --libs cairo pangocairo xcb xcb_atom`
+	CFLAGS += `pkg-config --cflags pangocairo cairo-xcb xcb-keysyms`
+	LIBS += `pkg-config --libs pangocairo cairo-xcb xkbcommon-x11`
 	SRC += draw/cairo/cairo.c draw/cairo/pangomarkup.c
 	OBJ += draw/cairo/cairo.o draw/cairo/pangomarkup.o
 endif

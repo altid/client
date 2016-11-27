@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "pangomarkup.h"
 #include "../../src/ubqt.h"
 
 // Global variables :(

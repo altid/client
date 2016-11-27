@@ -1,3 +1,4 @@
+#define __GNU_SOURCE
 #include "ubqt.h"
 #include <stdlib.h>
 #include <pthread.h>
@@ -16,7 +17,7 @@ ubqt_data_update(char *data, char *path)
 	 * file read errors will result in NULL value assignment
 	 */
 
-	if (!strcmp(data, "text")) {
+	if (!strcmp(data, "main")) {
 		pthread_mutex_lock(&mutex);
 		ubqt_win.text = ubqt_file_read(data, path);
 		pthread_mutex_unlock(&mutex);
@@ -89,7 +90,7 @@ ubqt_data_remove(char *data)
 		pthread_mutex_unlock(&mutex);
 	}
 
-	else if (!strcmp(data, "text")) {
+	else if (!strcmp(data, "main")) {
 		pthread_mutex_lock(&mutex);
 		ubqt_win.text = NULL;
 		pthread_mutex_unlock(&mutex);
@@ -97,22 +98,14 @@ ubqt_data_remove(char *data)
 
 }
 
-int
-ubqt_data_init(char *path)
+char *
+ubqt_join(char *first, char *second)
 {
 
-	DIR *d;
-	struct dirent *dp;
+	char *new_str;
+	asprintf(&new_str, "%s%s", first, second);
 
-	if ((d = opendir(path)) == NULL)
-		return errno;
-
-	while ((dp = readdir(d)) != NULL)
-		ubqt_data_update(dp->d_name, path);
-
-	closedir(d);
-
-	return (errno) ? errno : 0;
+	return new_str;
 
 }
 
@@ -120,9 +113,7 @@ char *
 ubqt_file_read(char *name, char *path)
 {
 
-	char *buf = NULL;
-	FILE *fp = NULL;
-	int str_sz;
+	FILE *fp;
 	char *fullpath;
 
 	fullpath = malloc(strlen(name) + strlen(path) + 2);
@@ -137,20 +128,68 @@ ubqt_file_read(char *name, char *path)
 
 	fullpath[strlen(fullpath)] = '\0';
 
-	if ((fp = fopen(fullpath, "r")) == NULL)
+	if ((fp = fopen(fullpath, "r")) == NULL) {
 		fprintf(stderr, "Failed to open path %s\n", fullpath);
-
-	else {
-		//TODO: Read in line by line, parse markup
-		fseek(fp, 0, SEEK_END);
-		str_sz = ftell(fp);
-		rewind(fp);
-		buf = (char*) malloc(sizeof(char) * (str_sz + 1));
-		fread(buf, sizeof(char), str_sz, fp);
-		buf[str_sz] = '\0';
-		fclose(fp);
+		free(fullpath);
+		return NULL;
 	}
 
-	free(fullpath);
-	return buf;
+	else {
+		size_t len = 0;
+		ssize_t read;
+		char *ln;
+		char *markup = "";
+		char *str;
+		char *tmp;
+
+		while((read = getline(&ln, &len, fp)) != -1) {
+			tmp = markup;
+
+			if (tag.codeblk)
+				str = ubqt_markup_code(ln);
+			else
+				str = ubqt_markup_line(ln);
+
+			if (!strcmp(str, "-codeblock-")) {
+				if (tag.codeblk)
+					tag.codeblk = false;
+				else
+					tag.codeblk = true;
+			}
+
+			else {
+				markup = ubqt_join(tmp, str);
+				markup[strlen(markup)] = '\n';
+			}
+		}
+
+		free(ln);
+		free(fullpath);
+
+		return markup;
+
+	}
+
+	return NULL;
+
+}
+
+int
+ubqt_data_init(char *path)
+{
+
+	DIR *d;
+	struct dirent *dp;
+
+	if ((d = opendir(path)) == NULL)
+		return errno;
+
+	while ((dp = readdir(d)) != NULL) {
+		ubqt_data_update(dp->d_name, path);
+	}
+
+	closedir(d);
+
+	return 0;
+
 }

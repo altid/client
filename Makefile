@@ -17,7 +17,6 @@ else
 	LIBS += `pkg-config --libs cairo-gl pangocairo glfw3 epoxy`
 	SRC += draw/cairo/cairo.c draw/cairo/pangomarkup.c
 	OBJ += draw/cairo/cairo.o draw/cairo/pangomarkup.o
-	DEPS += draw/cairo/pangomarkup.h
 endif
 
 all: $(TARGET)

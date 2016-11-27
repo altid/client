@@ -61,16 +61,21 @@ ubqt_draw_init(char *title)
 	}
 	
 	mask[0] = 1;
-	mask[1] = XCB_EVENT_MASK_EXPOSURE;
+	mask[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE;
+	
 	screen = xcb_setup_roots_iterator(xcb_get_setup(c)).data;
 	window = xcb_generate_id(c);
+
 	xcb_create_window(c, XCB_COPY_FROM_PARENT, window, screen->root, 20, 20, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, mask);
+
+	xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, WM_NAME, STRING, 8, strlen(title), title);
+
 	xcb_map_window(c, window);
 	
 	visual = find_visual(c, screen->root_visual);
 	
 	if(visual == NULL) {
-		fprintf(stderr, "Error setting up visual\n");
+		fprintf(stderr, "xcb connect error\n");
 		return 1;
 	}
 
@@ -193,7 +198,12 @@ ubqt_draw_loop()
 	
 	while((event = xcb_wait_for_event(c))) {
 		switch(event->response_type & ~0x80) {
-			case XCB_EXPOSE:
+			case XCB_KEY_PRESS: {
+				xcb_key_press_event_t *ev = (xcb_key_press_event_t *)event;
+				printf("key pressed: %c\n", ev->detail);
+				break;
+			}
+			case XCB_EXPOSE: {
 
 			// bg #262626
 			cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
@@ -207,6 +217,7 @@ ubqt_draw_loop()
 
 			cairo_surface_flush(surface);
 			break;
+			}
 		}
 
 		free(event);

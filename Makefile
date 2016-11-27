@@ -13,8 +13,8 @@ ifeq (ncurses,${BACKEND})
 	SRC += draw/ncurses/ncurses.c
 	OBJ += draw/ncurses/ncurses.o
 else
-	CFLAGS += `pkg-config --cflags cairo pangocairo`
-	LIBS += `pkg-config --libs cairo pangocairo xcb`
+	CFLAGS += `pkg-config --cflags cairo pangocairo xcb_atom`
+	LIBS += `pkg-config --libs cairo pangocairo xcb xcb_atom`
 	SRC += draw/cairo/cairo.c draw/cairo/pangomarkup.c
 	OBJ += draw/cairo/cairo.o draw/cairo/pangomarkup.o
 endif

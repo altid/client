@@ -26,7 +26,7 @@ Once you have your file-server-program up and running, the general case would be
 
 ## Cairo backend
 Eventually we'll have runtime configurations; but currently all colors in markup are hardcoded.  The files read are expected to be in markdown; and this will not change in the forseeable future.
-I'm going to be trying out [https://github.com/jtanx/libclipboard](libclipboard) in this, on top of xcb
+I'm going to be trying out [libclipboard](https://github.com/jtanx/libclipboard) in this, on top of xcb
 
 ## Ncurses backend
 To be implemented

@@ -1,4 +1,3 @@
-#define __GNU_SOURCE
 #include "ubqt.h"
 #include <stdlib.h>
 #include <pthread.h>
@@ -16,40 +15,47 @@ ubqt_data_update(char *data, char *path)
 	 * Ordered by presumed frequency
 	 * file read errors will result in NULL value assignment
 	 */
+	char *tmp;
 
 	if (!strcmp(data, "main")) {
+		tmp = ubqt_file_read(data, path);
 		pthread_mutex_lock(&mutex);
-		ubqt_win.text = ubqt_file_read(data, path);
+		ubqt_win.text = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "tabbar")) {
+		tmp = ubqt_file_read(data, path);
 		pthread_mutex_lock(&mutex);
-		ubqt_win.tabbar = ubqt_file_read(data, path);
+		ubqt_win.tabbar = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "title")) {
+		tmp = ubqt_file_read(data, path);
 		pthread_mutex_lock(&mutex);
-		ubqt_win.title = ubqt_file_read(data, path);
+		ubqt_win.title = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "status")) {
+		tmp = ubqt_file_read(data, path);
 		pthread_mutex_lock(&mutex);
-		ubqt_win.status = ubqt_file_read(data, path);
+		ubqt_win.status = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "sidebar")) {
+		tmp = ubqt_file_read(data, path);
 		pthread_mutex_lock(&mutex);
-		ubqt_win.sidebar = ubqt_file_read(data, path);
+		ubqt_win.sidebar = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "slideout")) {
+		tmp = ubqt_file_read(data, path);
 		pthread_mutex_lock(&mutex);
-		ubqt_win.slideout = ubqt_file_read(data, path);
+		ubqt_win.slideout = tmp; 
 		pthread_mutex_unlock(&mutex);
 	}
 
@@ -143,6 +149,8 @@ ubqt_file_read(char *name, char *path)
 		char *tmp;
 
 		while((read = getline(&ln, &len, fp)) != -1) {
+			
+			/* Hold previous result */
 			tmp = markup;
 
 			if (tag.codeblk)
@@ -150,20 +158,23 @@ ubqt_file_read(char *name, char *path)
 			else
 				str = ubqt_markup_line(ln);
 
+			/* set flag only */
 			if (!strcmp(str, "-codeblock-")) {
 				if (tag.codeblk)
 					tag.codeblk = false;
 				else
 					tag.codeblk = true;
+				continue;
 			}
 
-			else {
-				markup = ubqt_join(tmp, str);
-				markup[strlen(markup)] = '\n';
-			}
+
+			markup = ubqt_join(tmp, str);
+
 		}
 
-		free(ln);
+		if(read != -1)
+			free(ln);
+
 		free(fullpath);
 
 		return markup;

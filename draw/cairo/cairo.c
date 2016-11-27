@@ -1,14 +1,6 @@
 // Surface holds everything that we need
-#include <epoxy/glx.h>
-#include <GLFW/glfw3.h>
-
-// We have to do this for glfw-cairo interop :(
-#define GLFW_EXPOSE_NATIVE_X11 1
-#define GLFW_EXPOSE_NATIVE_GLX 1
-
-#include <GLFW/glfw3native.h>
-#include <cairo.h>
-#include <cairo-gl.h>
+#include <xcb/xcb.h>
+#include <cairo-xcb.h>
 #include <pango/pango.h>
 #include <pango/pangocairo.h>
 #include <math.h>
@@ -19,7 +11,9 @@
 #include "../../src/ubqt.h"
 
 // Global variables :(
-GLFWwindow *window;
+xcb_connection_t *c;
+xcb_screen_t *screen;
+xcb_window_t *window;
 cairo_t *cr;
 cairo_device_t *device = NULL;
 cairo_surface_t *surface = NULL;
@@ -34,54 +28,53 @@ ubqt_draw_error(int err)
 
 }
 
-// GLFW callbacks
-static void
-key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+static xcb_visualtype_t *
+find_visual(xcb_connection_t *c, xcb_visualid_t visual)
 {
-
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GLFW_TRUE);
-
+ 	xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(xcb_get_setup(c));
+ 	
+ 	for (; screen_iter.rem; xcb_screen_next(&screen_iter)) {
+ 		xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen_iter.data);
+ 		for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
+ 			xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+ 			for (; visual_iter.rem; xcb_visualtype_next(&visual_iter))
+ 				if (visual == visual_iter.data->visual_id)
+ 					return visual_iter.data;
+ 		}
+ 	}
+ 
+	return NULL;
 }
-
-void
-error_callback(int error, const char* description)
-{
-
-	fprintf(stderr, "Error: %s\n", description);
-
-}
-
-void
-resize_callback(GLFWwindow* window, int nwidth, int nheight)
-{
-
-	width = nwidth;
-	height = nheight;
-	cairo_gl_surface_set_size(surface, width, height);
-	glViewport(0, 0, width, height);
-	glScissor(0, 0, width, height);
-
-}
-
+	
 int
 ubqt_draw_init(char *title)
 {
 
-	glfwSetErrorCallback(error_callback);
+	xcb_visualtype_t *visual;
+	
+	c = xcb_connect(NULL, NULL);
+	uint32_t mask[2];
+	
+	if (xcb_connection_has_error(c)) { 
+		fprintf(stderr, "xcb_connect error\n");
+		return 1;
+	}
+	
+	mask[0] = 1;
+	mask[1] = XCB_EVENT_MASK_EXPOSURE;
+	screen = xcb_setup_roots_iterator(xcb_get_setup(c)).data;
+	window = xcb_generate_id(c);
+	xcb_create_window(c, XCB_COPY_FROM_PARENT, window, screen->root, 20, 20, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK, mask);
+	xcb_map_window(c, window);
+	
+	visual = find_visual(c, screen->root_visual);
+	
+	if(visual == NULL) {
+		fprintf(stderr, "Error setting up visual\n");
+		return 1;
+	}
 
-	glfwInit();
-
-	window = glfwCreateWindow(width, height, title, NULL, NULL);
-	glfwMakeContextCurrent(window);
-
-	device = cairo_glx_device_create(glfwGetX11Display(), glfwGetGLXContext(window));
-	glfwGetFramebufferSize(window, &width, &height);
-	surface = cairo_gl_surface_create_for_window(device, glfwGetX11Window(window), width, height);
-	cairo_device_destroy(device);
-
-	glfwSetFramebufferSizeCallback(window,resize_callback);
-	glfwSetKeyCallback(window, key_callback);
+	surface = cairo_xcb_surface_create(c, window, visual, width, height);
 
 	return 0;
 
@@ -91,8 +84,8 @@ int
 ubqt_draw_destroy()
 {
 
-	glfwDestroyWindow(window);
-	glfwTerminate();
+	cairo_surface_finish(surface);
+	xcb_disconnect(c);
 	return 0;
 
 }
@@ -186,7 +179,7 @@ void
 ubqt_update_buffer()
 {
 
-	glfwPostEmptyEvent();
+	
 
 }
 
@@ -194,26 +187,31 @@ int
 ubqt_draw_loop()
 {
 
-	while (!glfwWindowShouldClose(window)) {
-		glClear(GL_COLOR_BUFFER_BIT);
+	xcb_flush(c);
+	cr = cairo_create(surface);
+	xcb_generic_event_t *event;
+	
+	while((event = xcb_wait_for_event(c))) {
+		switch(event->response_type & ~0x80) {
+			case XCB_EXPOSE:
 
-		cr = cairo_create(surface);
+			// bg #262626
+			cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
+			cairo_rectangle(cr, 0, 0, width, height);
+			cairo_fill(cr);
 
-		// bg #262626
-		cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
-		cairo_rectangle(cr, 0, 0, width, height);
-		cairo_fill(cr);
+			// fg #bcbcbc
+			cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
 
-		// fg #bcbcbc
-		cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
+			ubqt_draw(cr);
 
-		ubqt_draw(cr);
+			cairo_surface_flush(surface);
+			break;
+		}
 
-		cairo_gl_surface_swapbuffers(surface);
+		free(event);
+		xcb_flush(c);
 
-		cairo_destroy(cr);
-
-		glfwWaitEvents();
 	}
 
 	return 0;

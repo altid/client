@@ -33,7 +33,6 @@ char *
 ubqt_markup_whole_line(char *md)
 {
 
-	ubqt_markup_reset_tags();
 	char *markup;
 	char *tmp = md;
 
@@ -58,7 +57,7 @@ ubqt_markup_whole_line(char *md)
 			markup = ubqt_join("<span size=\"x-small\" weight=\"bold\">", md+=6);
 
 		tmp = markup;
-		tmp[strlen(tmp)] = 0;
+		tmp[strlen(tmp) - 1] = 0;
 		markup = ubqt_join(tmp, "</span>");
 		return markup;
 	}
@@ -120,14 +119,50 @@ ubqt_markup_color(char *md) {
 }
 
 char *
+ubqt_markup_inline(char *md)
+{
+
+	int i, len = strlen(md);
+	char *tmp = md;
+	char *markup = md;
+
+	for(i = 0; i < len; i++) {
+		switch(md[i]) {	
+		case '&':
+			markup = tmp;
+			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&amp;");
+			markup = ubqt_join(tmp, md+=(i + 1));
+			tmp = markup;
+			break;
+		case '<':
+			markup = tmp;
+			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&lt;");
+			markup = ubqt_join(tmp, md+=(i + 1));
+			tmp = markup;
+			break;
+		case '>':
+			markup = tmp;
+			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&gt;");
+			markup = ubqt_join(tmp, md+=(i + 1));
+			tmp = markup;
+			break;
+		}
+
+	}
+	return markup;
+
+}
+
+char *
 ubqt_markup_line(char *md)
 {
 
 	char *markup;
 	char *tmp;
 
-	tmp = ubqt_markup_color(md);
-	printf("%s\n", tmp);
+	markup = ubqt_markup_inline(md);
+
+	tmp = ubqt_markup_color(markup);
 
 	markup = ubqt_markup_whole_line(tmp);
 

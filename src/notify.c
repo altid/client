@@ -38,16 +38,22 @@ ubqt_wait_event(int in, int efd, struct epoll_event events[MAX_EVENTS], char *pa
 		for (ptr = buf; ptr < buf + len; ptr += sizeof(struct inotify_event) + event->len) {
 			event = (const struct inotify_event *) ptr;
 
-			if (event->mask & IN_MODIFY)
+			if (event->mask & IN_MODIFY) {
 				ubqt_data_update((char *)event->name, path);
+				ubqt_update_buffer();
+			}
 
-			else if (event->mask & IN_CREATE)
+			else if (event->mask & IN_CREATE) {
 				ubqt_data_update((char *)event->name, path);
+				ubqt_update_buffer();
+			}
 
-			else if (event->mask & IN_DELETE)
+
+			else if (event->mask & IN_DELETE) {
 				ubqt_data_remove((char *)event->name);
+				ubqt_update_buffer();
+			}
 
-			ubqt_update_buffer();
 		}
 	}
 

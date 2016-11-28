@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "../../../src/ubqt.h"
+#include "../../src/ubqt.h"
 
 void
 ubqt_markup_reset_tags()

@@ -1,10 +1,6 @@
 # ubqt - simple frontend for file server-based programs
 # See LICENSE for copyright and license details.
 
-# := defines as immediately assigned, for += assignments done later
-SRC := src/ubqt.c src/data.c src/connection.c src/notify.c
-OBJ := src/ubqt.o src/data.o src/connection.o src/notify.o
-
 # Have make output usage with no args
 options:
 	@echo "Usage: make <backend> [<input>]"
@@ -14,9 +10,12 @@ options:
 	@echo "(input)  = vi"
 	@echo "         = game"
 
+include draw/*/*.mk
 include config.mk
-include src/draw/*/*.mk
-include src/input/*/*.mk
+
+# := defines as immediately assigned, for += assignments done later
+SRC += src/ubqt.c src/data.c src/connection.c src/notify.c
+OBJ += src/ubqt.o src/data.o src/connection.o src/notify.o
 
 include $(SRC:.c=.d)
 
@@ -52,7 +51,7 @@ dist: clean
 
 clean:
 	@echo cleaning
-	@rm -rf $(OBJ) $(OBJ:.o=.d) *~ ubqt
+	@rm -rf $(OBJ) $(OBJ:.o=.d) */*/*.o */*/*.d *~ ubqt
 
 install: all
 	@echo installing executable file to $(DESTDIR)$(PREFIX)/bin

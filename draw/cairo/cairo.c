@@ -1,7 +1,6 @@
 // Surface holds everything that we need
-#include <xcb/xcb.h>
-#include <xkbcommon/xkbcommon.h>
-#include <xkbcommon/xkbcommon-x11.h>
+//#include <xcb/xcb.h>
+//#include <xcb/xkb.h>
 #include <cairo-xcb.h>
 #include <pango/pango.h>
 #include <pango/pangocairo.h>
@@ -10,16 +9,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "../../../src/ubqt.h"
+#include "../../src/ubqt.h"
 
 // Global variables :(
-
 xcb_connection_t *c;
+xcb_screen_t *screen;
+xcb_window_t window;
+
 cairo_t *cr;
 cairo_surface_t *surface = NULL;
+
 struct xkb_state *state;
-int width = 800;
-int height = 600;
+int width = 500;
+int height = 500;
 
 char *
 ubqt_draw_error(int err)
@@ -47,15 +49,54 @@ find_visual(xcb_connection_t *c, xcb_visualid_t visual)
 	return NULL;
 }
 
+/*
+static struct xkb_keymap *
+get_keymap() {
+
+	xcb_get_property_cookie_t cookie;
+	xcb_get_property_reply_t *reply;
+	struct xkb_rule_names names;
+	struck xkb_keymap *ret;
+	const char *value_all, *value_part;
+	int length_all, length_part;
+
+	memset(&names, 0, sizeof(names));
+	//TODO: Get xkb_names atom and string
+	cookie = xcb_get_property(c, 0, screen->root, XCB_ATOM_XKB_NAMES, atom_string, 0, 1024);
+	reply = xcb_get_property_reply(c, cookie, NULL);
+	if (reply == NULL)
+		return NULL;
+
+	value_all = xcb_get_property_value(reply);
+	length_all = xcb_get_property_value_length(reply);
+	value_part = value_all;
+
+#define copy_prop_value(to) \
+  	length_part = strlen(value_part); \
+if (value_part + length_part < (value_all + length_all) && \
+		length_part > names.to = value_part; \
+		value_part += length_part + 1;
+	
+  	copy_prop_value(rules);
+	copy_prop_value(model);
+	copy_prop_value(layout);
+	copy_prop_value(variant);
+	copy_prop_value(options);
+#undef copy_prop_value
+	
+	//TODO: Fix for us ret = xkb_keymap_new_from_names(b->compositor->xkb_context, &names, 0);
+	free(reply);
+	return ret;
+
+}*/
+
 int
 ubqt_draw_init(char *title)
 {
 
 	xcb_visualtype_t *visual;
-	xcb_window_t *window;
-	xcb_screen_t *screen;
-	struct xkb_context *ctx;
-	struct xkb_keymap *keymap;
+	//struct xkb_context *ctx;
+	//struct xkb_keymap *keymap;
 
 	c = xcb_connect(NULL, NULL);
 	uint32_t mask[2];
@@ -70,20 +111,23 @@ ubqt_draw_init(char *title)
 
 	int32_t dev_id;
 	dev_id = xkb_x11_get_core_keyboard_device_id(c);
+	
+	keymap = get_keymap(); 
 
-	keymap = xkb_x11_keymap_new_from_device(ctx, c, dev_id, XKB_KEYMAP_COMPILE_NO_FLAGS);
-
-	state = xkb_x11_state_new_from_device(keymap, c, dev_id);
+	
+	xcb_xkd_get_state_reply_t *state;
+	state = xcb_xkb_get_state_reply(xcb_xkb_get_state(c, device));
 	*/
 	mask[0] = 1;
-	mask[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
+	mask[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_PROPERTY_CHANGE;
 
 	screen = xcb_setup_roots_iterator(xcb_get_setup(c)).data;
 	window = xcb_generate_id(c);
 
 	xcb_create_window(c, XCB_COPY_FROM_PARENT, window, screen->root, 20, 20, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_EVENT_MASK, mask);
 
-	//TODO: xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, WM_NAME, STRING, 8, strlen(title), title);
+	xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, strlen(title), title);
+	
 	//TODO: Get user mapping to generate key
 
 	xcb_map_window(c, window);
@@ -96,7 +140,7 @@ ubqt_draw_init(char *title)
 	}
 
 	surface = cairo_xcb_surface_create(c, window, visual, width, height);
-
+	
 	return 0;
 
 }
@@ -115,8 +159,18 @@ void
 ubqt_draw(cairo_t *cr)
 {
 
+	// bg #262626
+	cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
+	cairo_rectangle(cr, 0, 0, width, height);
+	cairo_fill(cr);
+
+	// fg #bcbcbc
+	cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
+
 	/* We need a local representation of the remaining surface */
-	int x = 3, y = 3, w = width - 3, h = height - 3;
+	int x = 3, y = 3,  w = width - 3, h = height - 3;
+	(void) w;
+
 	PangoLayout *layout = pango_cairo_create_layout(cr);
 
 	PangoFontDescription *desc;
@@ -192,6 +246,7 @@ ubqt_draw(cairo_t *cr)
 		cairo_restore(cr);
 	}
 
+	cairo_surface_flush(surface);
 	g_object_unref(layout);
 
 }
@@ -200,16 +255,33 @@ void
 ubqt_update_buffer()
 {
 
+	xcb_client_message_event_t ev;
+	memset(&ev, 0, sizeof(xcb_client_message_event_t));
 
+	ev.response_type = XCB_CLIENT_MESSAGE;
+	ev.format = 32;
+
+	xcb_send_event(c, 0, window, (XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY), (const char *)&ev);
+
+}
+
+void
+ubqt_event_expose(xcb_generic_event_t *e)
+{
+
+	xcb_expose_event_t *ev;
+	ev = (xcb_expose_event_t *)e;
+	height = ev->height;
+	width  = ev->width;
 
 }
 
 void
 ubqt_event_keypress(xcb_generic_event_t *e)
 {
-
-	char *buffer;
-	int size;
+	
+	//char *buffer;
+	//int size;
 /*
 	xcb_key_press_event_t *ev;
 	ev = (xcb_key_press_event_t *)e;
@@ -234,28 +306,23 @@ ubqt_draw_loop()
 	cr = cairo_create(surface);
 	xcb_generic_event_t *e;
 
+	ubqt_update_buffer();
+
 	while((e = xcb_wait_for_event(c))) {
+		
 		switch(e->response_type & ~0x80) {
 
+			case XCB_KEY_RELEASE:
 			case XCB_KEY_PRESS:
 				ubqt_event_keypress(e);
-			case XCB_KEY_RELEASE:
-			case XCB_EXPOSE:
-
-				// bg #262626
-				cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
-				cairo_rectangle(cr, 0, 0, width, height);
-				cairo_fill(cr);
-
-				// fg #bcbcbc
-				cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
-
-				ubqt_draw(cr);
-
-				cairo_surface_flush(surface);
 				break;
 
-			default:
+			case XCB_EXPOSE:
+				ubqt_event_expose(e);
+				break;
+
+			case XCB_CLIENT_MESSAGE:
+				ubqt_draw(cr);
 				break;
 
 		}

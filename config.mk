@@ -12,10 +12,10 @@ X11LIB = /usr/X11R6/lib
 
 # includes and libs
 INCS = -I/usr/local/include
-LIBS = -L/usr/lib -lc -lpthread
+LIBS = -L/usr/lib -lpthread
 
 # flags
-CFLAGS = -std=c99 -pedantic -Wall -Os ${INCS}
-LDFLAGS = -s ${LIBS}
+CFLAGS := -std=c99 -pedantic -Wall -Os ${INCS}
+LDFLAGS := -s ${LIBS}
 
-CC = clang
+CC = clang -rpath /usr/lib

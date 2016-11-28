@@ -1,8 +1,9 @@
 # ubqt - simple frontend for file server-based programs
 # See LICENSE for copyright and license details.
 
-SRC = src/ubqt.c src/data.c src/connection.c src/notify.c
-OBJ = src/ubqt.o src/data.o src/connection.o src/notify.o
+# := defines as immediately assigned, for += assignments done later
+SRC := src/ubqt.c src/data.c src/connection.c src/notify.c
+OBJ := src/ubqt.o src/data.o src/connection.o src/notify.o
 
 # Have make output usage with no args
 options:
@@ -18,19 +19,25 @@ include */*/*.mk
 
 include $(SRC:.c=.d)
 
-%d: %.c
+# dep files
+# create temp file with output of -M (deplist)
+# insert .d, so they depend on the same things as .o
+%.d: %.c
 	@set -e; rm -f $@; \
-		$(CC) -MM $(CPPFLAGS) $< > $@.$$$$; \
+		$(CC) -M $< > $@.$$$$; \
 		sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-		rm -f $@.$$$$
+		rm -rf $@.$$$$
 
-%.o: ${LDFLAGS}
-	@echo CC $<
-	$(CC) -c ${CFLAGS} $<
+# cc -c -l %.c -o %.o
+%.o: %.c %.d
+	@echo LD $@
+	@$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
-$(OBJ): src/ubqt.h
+# if ubqt.h changes, update all objects
+$(OBJ) : src/ubqt.h config.mk
 
-ubqt: ${OBJ} ./src/ubqt.h
+# if any objects change, update ubqt
+ubqt: $(OBJ)
 	@echo CC -o $@
 	@$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
@@ -44,7 +51,7 @@ dist: clean
 
 clean:
 	@echo cleaning
-	@rm -rf $(OBJ) *~ ubqt draw/*/*.o
+	@rm -rf $(OBJ) $(OBJ:.o=.d) *~ ubqt
 
 install: all
 	@echo installing executable file to $(DESTDIR)$(PREFIX)/bin

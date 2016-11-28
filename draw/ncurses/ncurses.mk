@@ -6,3 +6,5 @@ ncurses-mk:
 	$(eval SRC += draw/ncurses/ncurses.c)
 
 ncurses: ncurses-mk ubqt
+
+.PHONY: ncurses ncurses-mk

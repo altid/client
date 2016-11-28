@@ -15,7 +15,8 @@ options:
 	@echo "         = game"
 
 include config.mk
-include */*/*.mk
+include src/draw/*/*.mk
+include src/input/*/*.mk
 
 include $(SRC:.c=.d)
 

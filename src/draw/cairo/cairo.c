@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "../../src/ubqt.h"
+#include "../../../src/ubqt.h"
 
 // Global variables :(
 

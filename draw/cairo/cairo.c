@@ -65,7 +65,7 @@ ubqt_draw_init(char *title)
 		return 1;
 	}
 
-	//TODO: Find out xcb bindings for this
+	/*TODO: Find out xcb bindings for this
 	ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
 
 	int32_t dev_id;
@@ -74,7 +74,7 @@ ubqt_draw_init(char *title)
 	keymap = xkb_x11_keymap_new_from_device(ctx, c, dev_id, XKB_KEYMAP_COMPILE_NO_FLAGS);
 
 	state = xkb_x11_state_new_from_device(keymap, c, dev_id);
-
+	*/
 	mask[0] = 1;
 	mask[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_STRUCTURE_NOTIFY;
 
@@ -210,7 +210,7 @@ ubqt_event_keypress(xcb_generic_event_t *e)
 
 	char *buffer;
 	int size;
-
+/*
 	xcb_key_press_event_t *ev;
 	ev = (xcb_key_press_event_t *)e;
 
@@ -223,7 +223,7 @@ ubqt_event_keypress(xcb_generic_event_t *e)
 		xkb_state_key_get_utf8(state, keycode, buffer, size);
 		printf("got: %s\n", buffer);
 	}
-
+*/
 }
 
 int

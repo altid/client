@@ -19,6 +19,9 @@ xcb_window_t window;
 cairo_t *cr;
 cairo_surface_t *surface = NULL;
 
+PangoLayout *layout;
+PangoFontDescription *desc;
+
 struct xkb_state *state;
 int width = 500;
 int height = 500;
@@ -99,7 +102,8 @@ ubqt_draw_init(char *title)
 	//struct xkb_keymap *keymap;
 
 	c = xcb_connect(NULL, NULL);
-	uint32_t mask[2];
+	uint32_t mask;
+	uint32_t values[2];
 
 	if (xcb_connection_has_error(c)) {
 		fprintf(stderr, "xcb_connect error\n");
@@ -118,13 +122,14 @@ ubqt_draw_init(char *title)
 	xcb_xkd_get_state_reply_t *state;
 	state = xcb_xkb_get_state_reply(xcb_xkb_get_state(c, device));
 	*/
-	mask[0] = 1;
-	mask[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_PROPERTY_CHANGE;
+	mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+	values[0] = 1;
+	values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE;
 
 	screen = xcb_setup_roots_iterator(xcb_get_setup(c)).data;
 	window = xcb_generate_id(c);
 
-	xcb_create_window(c, XCB_COPY_FROM_PARENT, window, screen->root, 20, 20, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, XCB_CW_EVENT_MASK, mask);
+	xcb_create_window(c, XCB_COPY_FROM_PARENT, window, screen->root, 20, 20, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, mask, values);
 
 	xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, strlen(title), title);
 	
@@ -140,7 +145,17 @@ ubqt_draw_init(char *title)
 	}
 
 	surface = cairo_xcb_surface_create(c, window, visual, width, height);
+	cr = cairo_create(surface);
 	
+	layout = pango_cairo_create_layout(cr);
+	desc = pango_font_description_from_string("DejaVu Sans Mono 8");
+	pango_layout_set_font_description(layout, desc);
+	pango_font_description_free(desc);
+
+	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
+	pango_layout_set_width(layout, width * PANGO_SCALE);
+	pango_layout_set_height(layout, height * PANGO_SCALE);
+
 	return 0;
 
 }
@@ -149,6 +164,8 @@ int
 ubqt_draw_destroy()
 {
 
+	g_object_unref(layout);
+	cairo_destroy(cr);
 	cairo_surface_finish(surface);
 	xcb_disconnect(c);
 	return 0;
@@ -156,9 +173,9 @@ ubqt_draw_destroy()
 }
 
 void
-ubqt_draw(cairo_t *cr)
+ubqt_draw()
 {
-
+	
 	// bg #262626
 	cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
 	cairo_rectangle(cr, 0, 0, width, height);
@@ -169,18 +186,6 @@ ubqt_draw(cairo_t *cr)
 
 	/* We need a local representation of the remaining surface */
 	int x = 3, y = 3,  w = width - 3, h = height - 3;
-	(void) w;
-
-	PangoLayout *layout = pango_cairo_create_layout(cr);
-
-	PangoFontDescription *desc;
-	desc = pango_font_description_from_string("DejaVu Sans Mono 8");
-	pango_layout_set_font_description(layout, desc);
-	pango_font_description_free(desc);
-
-	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
-	pango_layout_set_width(layout, width * PANGO_SCALE);
-	pango_layout_set_height(layout, height * PANGO_SCALE);
 
 	//TODO: Push this to a seperate function
 	if (ubqt_win.title != NULL) {
@@ -247,7 +252,7 @@ ubqt_draw(cairo_t *cr)
 	}
 
 	cairo_surface_flush(surface);
-	g_object_unref(layout);
+	xcb_flush(c);
 
 }
 
@@ -261,22 +266,12 @@ ubqt_update_buffer()
 	ev.response_type = XCB_CLIENT_MESSAGE;
 	ev.format = 32;
 
-	xcb_send_event(c, 0, window, (XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY), (const char *)&ev);
+	xcb_send_event(c, 0, window, XCB_EVENT_MASK_NO_EVENT, (const char *)&ev);
+	xcb_flush(c);
 
 }
 
-void
-ubqt_event_expose(xcb_generic_event_t *e)
-{
-
-	xcb_expose_event_t *ev;
-	ev = (xcb_expose_event_t *)e;
-	height = ev->height;
-	width  = ev->width;
-
-}
-
-void
+int
 ubqt_event_keypress(xcb_generic_event_t *e)
 {
 	
@@ -296,39 +291,54 @@ ubqt_event_keypress(xcb_generic_event_t *e)
 		printf("got: %s\n", buffer);
 	}
 */
+	return 0;
 }
+
+void
+ubqt_resize_event(xcb_generic_event_t *e)
+{
+
+	xcb_expose_event_t *ev;
+	ev = (xcb_expose_event_t *)e;
+	width = ev->width;
+	height = ev->height;
+	cairo_xcb_surface_set_size(surface, width, height);
+
+}
+
+
+
 
 int
 ubqt_draw_loop()
 {
 
-	xcb_flush(c);
-	cr = cairo_create(surface);
+	ubqt_draw();
+
+	int done = 0;
+
 	xcb_generic_event_t *e;
 
-	ubqt_update_buffer();
+	while(!done) {
 
-	while((e = xcb_wait_for_event(c))) {
-		
+		e = xcb_wait_for_event(c);
+
 		switch(e->response_type & ~0x80) {
+			case XCB_EXPOSE:
+				ubqt_resize_event(e);
+				ubqt_draw();
+				break;
 
 			case XCB_KEY_RELEASE:
 			case XCB_KEY_PRESS:
-				ubqt_event_keypress(e);
-				break;
-
-			case XCB_EXPOSE:
-				ubqt_event_expose(e);
+				done = ubqt_event_keypress(e);
+				ubqt_draw();
 				break;
 
 			case XCB_CLIENT_MESSAGE:
-				ubqt_draw(cr);
+				ubqt_draw();
 				break;
-
 		}
-
-		free(e);
-		xcb_flush(c);
 
 	}
 

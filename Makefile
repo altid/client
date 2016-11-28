@@ -10,7 +10,7 @@ options:
 	@echo "(input)  = vi"
 	@echo "         = game"
 
-include draw/*/*.mk
+include */*/*.mk
 include config.mk
 
 # := defines as immediately assigned, for += assignments done later

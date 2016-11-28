@@ -130,19 +130,19 @@ ubqt_markup_inline(char *md)
 		switch(md[i]) {	
 		case '&':
 			markup = tmp;
-			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&amp;");
+			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&amp; ");
 			markup = ubqt_join(tmp, md+=(i + 1));
 			tmp = markup;
 			break;
 		case '<':
 			markup = tmp;
-			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&lt;");
+			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&lt; ");
 			markup = ubqt_join(tmp, md+=(i + 1));
 			tmp = markup;
 			break;
 		case '>':
 			markup = tmp;
-			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&gt;");
+			tmp = ubqt_join(ubqt_substr(markup, 0, i), "&gt; ");
 			markup = ubqt_join(tmp, md+=(i + 1));
 			tmp = markup;
 			break;

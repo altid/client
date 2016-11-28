@@ -16,7 +16,7 @@ LIBS = -lpthread -L/usr/lib -L/usr/local/lib
 
 # flags
 CPPFLAGS += -D_FORTIFY_SOURCE=2
-CFLAGS += -std=c99 -Wall -O3 -fPIE ${INCS}
+CFLAGS += -std=c99 -Wall -O3 ${INCS}
 LDFLAGS += -s ${LIBS}
 
 CC = clang -rpath /usr/lib

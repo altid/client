@@ -241,9 +241,9 @@ ubqt_draw()
 		h -= 14;
 	}
 
-	if (ubqt_win.text != NULL) {
+	if (ubqt_win.main != NULL) {
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.text, strlen(ubqt_win.text));
+		pango_layout_set_markup(layout, ubqt_win.main, strlen(ubqt_win.main));
 		pthread_mutex_unlock(&mutex);
 		cairo_save(cr);
 		cairo_move_to(cr, x, y);

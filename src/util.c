@@ -17,7 +17,7 @@ ubqt_data_update(char *data, char *path)
 	if (!strcmp(data, "main")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		ubqt_win.text = tmp;
+		ubqt_win.main = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 

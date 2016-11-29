@@ -14,12 +14,12 @@ X11INC = /usr/X11R6/include
 X11LIB = /usr/X11R6/lib
 
 # includes and libs
-INCS = -I/usr/lib -I/usr/local/lib64
-LIBS = -lpthread -L/usr/lib -L/usr/local/lib
+INCS =
+LIBS = -lpthread
 
 # flags
 CPPFLAGS := -D_FORTIFY_SOURCE=2
-CFLAGS := -std=c99 -Wall -O3 ${INCS}
+CFLAGS := -std=c99 -Wall ${INCS}
 LDFLAGS := -s ${LIBS}
 
-CC = clang
+CC = clang -rpath /usr/lib

@@ -1,5 +1,5 @@
 // Surface holds everything that we need
-//#include <xcb/xcb.h>
+#include <xcb/xcb.h>
 //#include <xcb/xkb.h>
 #include <cairo-xcb.h>
 #include <pango/pango.h>
@@ -152,10 +152,6 @@ ubqt_draw_init(char *title)
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 
-	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
-	pango_layout_set_width(layout, width * PANGO_SCALE);
-	pango_layout_set_height(layout, height * PANGO_SCALE);
-
 	return 0;
 
 }
@@ -176,6 +172,10 @@ void
 ubqt_draw()
 {
 	
+	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
+	pango_layout_set_width(layout, width * PANGO_SCALE);
+	pango_layout_set_height(layout, height * PANGO_SCALE);
+
 	// bg #262626
 	cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
 	cairo_rectangle(cr, 0, 0, width, height);
@@ -336,7 +336,6 @@ ubqt_draw_loop()
 				ubqt_draw();
 				break;
 		}
-
 	}
 
 	return 0;

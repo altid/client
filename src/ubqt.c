@@ -22,14 +22,9 @@ main(int argc, char* argv[])
 
 	int err;
 	pthread_t file_thread;
-
+	
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s <path>\n", argv[0]);
-		exit(EXIT_FAILURE);
-	}
-
-	if ((err = ubqt_connection_init(argv[1]))) {
-		fprintf(stderr, "Connection error: %s\n", strerror(err));
 		exit(EXIT_FAILURE);
 	}
 
@@ -45,6 +40,7 @@ main(int argc, char* argv[])
 		ubqt_draw_destroy();
 		exit(EXIT_FAILURE);
 	}
+	printf("Draw init\n");
 
 	if ((err = pthread_mutex_init(&mutex, NULL))) {
 		fprintf(stderr, "Unable to create mutex: %s\n", strerror(err));
@@ -53,6 +49,7 @@ main(int argc, char* argv[])
 		ubqt_draw_destroy();
 		exit(EXIT_FAILURE);
 	}
+	printf("Pthread init\n");
 
 	if ((err = pthread_create(&file_thread, NULL, run_data_loop, argv[1]))) {
 		//TODO: Attempt to reconnect on failure
@@ -63,6 +60,7 @@ main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	printf("Loop enter\n");
 	ubqt_draw_loop();
 
 	/* Clean up */

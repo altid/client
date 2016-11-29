@@ -11,6 +11,7 @@
 /*                                                      */
 /********************************************************/
 extern pthread_mutex_t mutex;
+
 struct Ubqt_win {
 	char *main;
 	char *input;
@@ -27,6 +28,9 @@ struct Ubqt_win {
 /* These functions are provided                         */
 /* watch this line for changes                          */
 /*                                                      */
+/* ubqt_substr(char start end)                          */
+/*     return sub string                                */
+/*                                                      */
 /* ubqt_join                                            */
 /*     appends a to b, returning result                 */
 /*                                                      */
@@ -40,10 +44,11 @@ struct Ubqt_win {
 /*     threadsafe setter for ubqt_win.path              */
 /*                                                      */
 /********************************************************/
+char *ubqt_substr(char *, int, int);
 char *ubqt_join(char *, char *);
-void  ubqt_input_update(char *, char*);
+void  ubqt_input_update(char *, char *);
 void  ubqt_data_remove(char *);
-void  ubqt_data_update(char *, char*);
+void  ubqt_data_update(char *, char *);
 
 
 
@@ -63,7 +68,7 @@ void  ubqt_data_update(char *, char*);
 /********************************************************/
 int   ubqt_data_init(char *);
 void  ubqt_data_loop(char *);
-char *ubqt_data_read(char *, char *path);
+char *ubqt_data_read(char *, char *);
 
 
 /**cairo, nuklear, ncurses*******************************/

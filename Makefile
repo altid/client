@@ -3,6 +3,17 @@
 
 
 # Have make output usage with no args
+# := defines as immediately assigned, for += assignments done later
+SRC := src/ubqt.c src/util.c
+OBJ := src/ubqt.o src/util.o
+
+include config.mk
+include plugins/$(BACK)/$(BACK).mk
+include plugins/$(SEAT)/$(SEAT).mk
+include plugins/$(TRAN)/$(TRAN).mk
+
+all: ubqt
+
 options:
 	@echo "Usage: make <backend> <input> <data>"
 	@echo "backends = cairo"
@@ -14,35 +25,13 @@ options:
 	@echo "         = socket"
 	@echo "         = 9p"
 
-# := defines as immediately assigned, for += assignments done later
-SRC := src/ubqt.c src/util.c
-OBJ := src/ubqt.o src/util.o
-
-include config.mk
-include plugins/$(BACK)/$(BACK).mk
-include plugins/$(SEAT)/$(SEAT).mk
-include plugins/$(TRAN)/$(TRAN).mk
-
-include $(SRC:.c=.d)
-
-all: options ubqt
-
-# dep files
-# create temp file with output of -M (deplist)
-# insert .d, so they depend on the same things as .o
-%.d: %.c
-	@set -e; rm -f $@; \
-		$(CC) -M $< > $@.$$$$; \
-		sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
-		rm -rf $@.$$$$
-
 # cc -c -l %.c -o %.o
-%.o: %.c %.d
+%.o: %.c
 	@echo LD $@
 	@$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 # if ubqt.h changes, update all objects
-$(OBJ) : src/ubqt.h config.mk
+$(OBJ) : src/ubqt.h
 
 # if any objects change, update ubqt
 ubqt: $(OBJ)
@@ -59,7 +48,7 @@ dist: clean
 
 clean:
 	@echo cleaning
-	@rm -rf $(OBJ) $(OBJ:.o=d) *~ ubqt
+	@rm -rf $(OBJ) *~ ubqt
 
 install: ubqt
 	@echo installing executable file to $(DESTDIR)$(PREFIX)/bin
@@ -77,4 +66,4 @@ uninstall:
 	@echo removing manual page from $(DESTDIR)$(MANPREFIX)/man1
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 
-.PHONY: options clean dist install uninstall
+.PHONY: all options clean dist install uninstall

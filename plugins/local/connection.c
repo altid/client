@@ -1,8 +1,10 @@
-#include <stdio.h>
+#define _GNU_SOURCE
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <stdio.h>
 #include <errno.h>
 #include "../../src/ubqt.h"
 
@@ -51,7 +53,10 @@ ubqt_data_read(char *name, char *path)
 	else {
 		size_t len = 0;
 		ssize_t read;
-		char *ln, *str, *tmp, *markup = "";
+		char *ln;
+		char *markup = "";
+		char *str;
+		char *tmp;
 		bool codeblock = false;
 
 		while((read = getline(&ln, &len, fp)) != 1) {
@@ -61,7 +66,7 @@ ubqt_data_read(char *name, char *path)
 
 			if (codeblock)
 				str = ubqt_markup_code(ln);
-			
+
 			else
 				str = ubqt_markup_line(ln);
 
@@ -77,6 +82,7 @@ ubqt_data_read(char *name, char *path)
 			markup = ubqt_join(tmp, str);
 
 		}
+		printf("Here after loop\n");
 
 		if (read != -1)
 			free(ln);

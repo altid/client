@@ -1,9 +1,10 @@
 #define _GNU_SOURCE
-#include "ubqt.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
 #include <errno.h>
+#include "ubqt.h"
 
 void
 ubqt_data_update(char *data, char *path)
@@ -109,5 +110,24 @@ ubqt_join(char *first, char *second)
 	asprintf(&new_str, "%s%s", first, second);
 
 	return new_str;
+
+}
+
+char *
+ubqt_substr(char *md, int start, int end)
+{
+
+	if (end <= start)
+		return NULL;
+
+	int i;
+	char *str = malloc(end - start);
+
+	for(i = start; i < end; i++)
+		str[i - start] = md[i];
+
+	str[end] = 0;
+
+	return str;
 
 }

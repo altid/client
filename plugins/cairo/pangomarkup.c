@@ -5,25 +5,6 @@
 #include "../../src/ubqt.h"
 
 
-/* Unsafe substring match */
-char *
-ubqt_substr(char *md, int start, int end)
-{
-
-	if( end <= start)
-		return NULL;
-	char *str = malloc(end - start);
-	int i;
-
-	for(i = start; i < end; i++) {
-		str[i - start] = md[i];
-	}
-
-	str[end] = 0;
-
-	return str;
-}
-
 char *
 ubqt_markup_whole_line(char *md)
 {

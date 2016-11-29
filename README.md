@@ -42,4 +42,4 @@ I plan on a full vi-like stack where possible, including visual selection (save 
 A leanback-friendly (gamepad, optional keyboard) will likely accompany the Nuklear backend
 
 ## -YOUR BACKEND HERE-
-include [src/ubqt.h](https://github.com/halfwit/ubqt/blob/master/src/ubqt.h), drop your functions in to input/foo/ or draw/foo/, and define a input/foo/foo.mk; and you should be able to build your target backend with a simple `make foo` 
+include [src/ubqt.h](https://github.com/halfwit/ubqt/blob/master/src/ubqt.h), drop your functions in to plugin/foo, add a plugin/foo/foo.mk; and you should be able to build your target backend with a simple `make foo` 

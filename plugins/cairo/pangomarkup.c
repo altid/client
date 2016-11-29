@@ -4,11 +4,6 @@
 #include <stdbool.h>
 #include "../../src/ubqt.h"
 
-void
-ubqt_markup_reset_tags()
-{
-	tag = (struct Tags){ false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-}
 
 /* Unsafe substring match */
 char *

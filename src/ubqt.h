@@ -4,9 +4,11 @@
 
 
 /********************************************************/
+/*                                                      */
 /* These files represent the full state of the program  */
 /* at any given time. Your UI should draw them whenever */
 /* they are not-null; using this mutex to lock them.    */
+/*                                                      */
 /********************************************************/
 extern pthread_mutex_t mutex;
 struct Ubqt_win {

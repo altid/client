@@ -2,6 +2,9 @@
 VERSION = 0.0
 
 # Customize below to fit your system
+BACK = cairo
+SEAT = vi
+TRAN = local
 
 # paths
 PREFIX = /usr/local
@@ -15,8 +18,8 @@ INCS = -I/usr/lib -I/usr/local/lib64
 LIBS = -lpthread -L/usr/lib -L/usr/local/lib
 
 # flags
-CPPFLAGS += -D_FORTIFY_SOURCE=2
-CFLAGS += -std=c99 -Wall -O3 ${INCS}
-LDFLAGS += -s ${LIBS}
+CPPFLAGS := -D_FORTIFY_SOURCE=2
+CFLAGS := -std=c99 -Wall -O3 ${INCS}
+LDFLAGS := -s ${LIBS}
 
-CC = clang -rpath /usr/lib
+CC = clang

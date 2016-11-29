@@ -1,0 +1,5 @@
+CFLAGS +=
+LDFLAGS +=
+
+SRC +=
+OBJ +=

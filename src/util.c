@@ -95,7 +95,7 @@ ubqt_data_remove(char *data)
 
 	else if (!strcmp(data, "main")) {
 		pthread_mutex_lock(&mutex);
-		ubqt_win.text = NULL;
+		ubqt_win.main = NULL;
 		pthread_mutex_unlock(&mutex);
 	}
 

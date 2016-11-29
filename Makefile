@@ -1,9 +1,10 @@
 # ubqt - simple frontend for file server-based programs
 # See LICENSE for copyright and license details.
 
+
 # Have make output usage with no args
 options:
-	@echo "Usage: make <backend> [<input>]"
+	@echo "Usage: make <backend> <input> <data>"
 	@echo "backends = cairo"
 	@echo "         = ncurses"
 	@echo "         = nuklear"
@@ -17,10 +18,14 @@ options:
 SRC := src/ubqt.c src/util.c
 OBJ := src/ubqt.o src/util.o
 
-include plugin/*/*.mk
 include config.mk
+include plugins/$(BACK)/$(BACK).mk
+include plugins/$(SEAT)/$(SEAT).mk
+include plugins/$(TRAN)/$(TRAN).mk
 
 include $(SRC:.c=.d)
+
+all: options ubqt
 
 # dep files
 # create temp file with output of -M (deplist)
@@ -54,7 +59,7 @@ dist: clean
 
 clean:
 	@echo cleaning
-	@rm -rf $(OBJ) $(OBJ:.o=.d) */*/*.o */*/*.d *~ ubqt
+	@rm -rf $(OBJ) $(OBJ:.o=d) *~ ubqt
 
 install: ubqt
 	@echo installing executable file to $(DESTDIR)$(PREFIX)/bin

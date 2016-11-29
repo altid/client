@@ -9,13 +9,16 @@ options:
 	@echo "         = nuklear"
 	@echo "(input)  = vi"
 	@echo "         = game"
-
-include */*/*.mk
-include config.mk
+	@echo "(data)	= local"
+	@echo "         = socket"
+	@echo "         = 9p"
 
 # := defines as immediately assigned, for += assignments done later
-SRC += src/ubqt.c src/data.c src/connection.c src/notify.c
-OBJ += src/ubqt.o src/data.o src/connection.o src/notify.o
+SRC := src/ubqt.c src/util.c
+OBJ := src/ubqt.o src/util.o
+
+include plugin/*/*.mk
+include config.mk
 
 include $(SRC:.c=.d)
 
@@ -53,14 +56,14 @@ clean:
 	@echo cleaning
 	@rm -rf $(OBJ) $(OBJ:.o=.d) */*/*.o */*/*.d *~ ubqt
 
-install: all
+install: ubqt
 	@echo installing executable file to $(DESTDIR)$(PREFIX)/bin
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
 	@cp -f ubqt $(DESTDIR)$(PREFIX)/bin/ubqt
 	@chmod 755 $(DESTDIR)$(PREFIX)/bin/ubqt
 	@echo installing manual page to $(DESTDIR)$(MANPREFIX)/man1
 	@mkdir -p $(DESTDIR)$(MANPREFIX)/man1
-	@sed "s/VERSION/$(VERSION)/c" < ubqt.1 > $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
+	@sed "s/VERSION/${VERSION}/g" < ubqt.1 > $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 	@chmod 644 $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 
 uninstall:

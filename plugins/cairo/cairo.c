@@ -257,7 +257,7 @@ ubqt_draw()
 }
 
 void
-ubqt_update_buffer()
+ubqt_draw_new_data_callback()
 {
 
 	xcb_client_message_event_t ev;
@@ -305,9 +305,6 @@ ubqt_resize_event(xcb_generic_event_t *e)
 	cairo_xcb_surface_set_size(surface, width, height);
 
 }
-
-
-
 
 int
 ubqt_draw_loop()

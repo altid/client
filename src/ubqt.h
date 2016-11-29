@@ -4,27 +4,41 @@
 extern pthread_mutex_t mutex;
 
 /* Main functions */
-int ubqt_connection_init(char *);
-int ubqt_data_init(char *);
-void ubqt_notify_loop(char *);
-void ubqt_data_update(char *, char*);
-void ubqt_data_remove(char *);
-void ubqt__input_update(int);
+
+/* util.c */
 char *ubqt_join(char *, char *);
 
+/* Inotify, Plan9 may be different */
+int ubqt_data_init(char *);
+void ubqt_data_loop(char *);
+char *ubqt_data_read(char *, char *path);
+
+void ubqt_draw_new_data_callback();
+
+
+/* Provided functions */
+void ubqt_data_remove(char *);
+void ubqt_data_update(char *, char*);
+
+
 /* Backend specific */
-char *ubqt_draw_error(int); 	/* Wrap any fatal errors with useful messages */
 int ubqt_draw_init(char *);
 int ubqt_draw_loop();
 int ubqt_draw_destroy();
-void ubqt_update_buffer();
+
+/* Fire and forget key handle from UI land */
+int ubqt_input_init();
+int ubqt_input_loop();
+int ubqt_input_destroy();
+
+/* Write chunk of input to file */
+void ubqt_input_update();
 
 /* Convert markup per draw backend */
 char *ubqt_markup_line(char *);
 char *ubqt_markup_code(char *);
 
 /* argv[1] */
-const char *path;
 
 struct Ubqt_win {
 	char *title;

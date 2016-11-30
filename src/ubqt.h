@@ -133,7 +133,7 @@ int ubqt_input_destroy();
 /**Convert markup for draw backend***********************/
 /*                                                      */
 /* ubqt_markup_line(line)                               */
-/*     return line with backend specific markup         */
+/*     parse line in to backend specific markup         */
 /*                                                      */
 /* ubqt_markup_code(line)                               */
 /*     mark up blockquotes, appearing as                */

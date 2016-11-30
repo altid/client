@@ -31,6 +31,7 @@ ubqt_data_read(char *name, char *path)
 
 	FILE *fp;
 	char *fullpath;
+	char *markup = NULL;
 
 	fullpath = malloc(strlen(name) + strlen(path) + 2);
 
@@ -53,37 +54,33 @@ ubqt_data_read(char *name, char *path)
 	else {
 		size_t len = 0;
 		ssize_t read;
-		char *ln;
-		char *markup = "";
+		char *ln = NULL;
 		bool codeblock = false;
 
-		while((read = getline(&ln, &len, fp)) != 1) {
+		while((read = getline(&ln, &len, fp)) != -1) {
 
 			if (codeblock)
-				ubqt_markup_code(ln);
+				ln = ubqt_markup_code(ln);
 
 			else
-				ubqt_markup_line(ln);
+				ln = ubqt_markup_line(ln);
 
 			if (!strcmp(ln, "-codeblock-")) {
 				codeblock = !codeblock;
 				continue;
 			}
 
-			ubqt_join(markup, ln);
+			if(markup == NULL)
+				asprintf(&markup, "%s", ln);
+
+			else
+				asprintf(&markup, "%s%s", markup, ln);
 
 		}
-		printf("Here after loop\n");
-
-		if (read != -1)
-			free(ln);
-
-		free(fullpath);
-
-		return markup;
-	
 	}
 
-	return NULL;
+	free(fullpath);
+
+	return markup;
 
 }

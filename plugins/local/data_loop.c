@@ -60,7 +60,7 @@ ubqt_wait_event(int in, int efd, struct epoll_event events[MAX_EVENTS], char *pa
 	return 1;
 }
 
-void
+int
 ubqt_data_loop(char *path)
 {
 
@@ -87,5 +87,7 @@ ubqt_data_loop(char *path)
 		while(ubqt_wait_event(in, efd, events, path));
 		fprintf(stderr, "I/O thread returning\n");
 	}
+
+	return UBQT_SUCCESS;
 }
 

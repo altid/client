@@ -22,7 +22,6 @@ struct Ubqt_win {
 	char *status;
 	char *sidebar;
 	char *slideout;
-	bool iscode;
 } ubqt_win;
 
 enum {

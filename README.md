@@ -12,7 +12,7 @@ It expects a layout such as the following:
  | title
  | status
  | main
- | tabbar
+ | tabs
  | slideout
  | input
  | ctl

@@ -23,10 +23,9 @@ ubqt_data_update(char *data, char *path)
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
 
-		//if (ubqt_win.main != NULL)
-		//	free(ubqt_win.main);
+		if (ubqt_win.main != NULL)
+			free(ubqt_win.main);
 
-		printf("We got here with %s\n", tmp);
 		ubqt_win.main = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
@@ -35,8 +34,8 @@ ubqt_data_update(char *data, char *path)
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
 
-		//if (ubqt_win.tabs != NULL)
-		//	free(ubqt_win.tabs);
+		if (ubqt_win.tabs != NULL)
+			free(ubqt_win.tabs);
 
 		ubqt_win.tabs = tmp;
 		pthread_mutex_unlock(&mutex);
@@ -46,8 +45,8 @@ ubqt_data_update(char *data, char *path)
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
 
-		//if (ubqt_win.title != NULL)
-		//	free(ubqt_win.title);
+		if (ubqt_win.title != NULL)
+			free(ubqt_win.title);
 
 		ubqt_win.title = tmp;
 		pthread_mutex_unlock(&mutex);
@@ -57,8 +56,8 @@ ubqt_data_update(char *data, char *path)
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
 
-		//if (ubqt_win.status != NULL)
-		//	free(ubqt_win.status);
+		if (ubqt_win.status != NULL)
+			free(ubqt_win.status);
 
 		ubqt_win.status = tmp;
 		pthread_mutex_unlock(&mutex);
@@ -68,8 +67,8 @@ ubqt_data_update(char *data, char *path)
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
 
-		//if (ubqt_win.sidebar != NULL)
-		//	free(ubqt_win.sidebar);
+		if (ubqt_win.sidebar != NULL)
+			free(ubqt_win.sidebar);
 
 		ubqt_win.sidebar = tmp;
 		pthread_mutex_unlock(&mutex);
@@ -79,8 +78,8 @@ ubqt_data_update(char *data, char *path)
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
 
-		//if (ubqt_win.slideout != NULL)
-		//	free(ubqt_win.slideout);
+		if (ubqt_win.slideout != NULL)
+			free(ubqt_win.slideout);
 
 		ubqt_win.slideout = tmp; 
 		pthread_mutex_unlock(&mutex);
@@ -96,43 +95,43 @@ ubqt_data_remove(char *data)
 
 	/* Ordered by frequency */
 	if (!strcmp(data, "title")) {
-		//if (ubqt_win.title != NULL)
-		//	free(ubqt_win.title);
+		if (ubqt_win.title != NULL)
+			free(ubqt_win.title);
 
 		ubqt_win.title = NULL;
 	}
 
 	else if (!strcmp(data, "tabs")) {
-		//if (ubqt_win.tabs != NULL)
-		//	free(ubqt_win.tabs);
+		if (ubqt_win.tabs != NULL)
+			free(ubqt_win.tabs);
 
 		ubqt_win.tabs = NULL;
 	}
 
 	else if (!strcmp(data, "status")) {
-		//if (ubqt_win.status != NULL)
-		//	free(ubqt_win.status);
+		if (ubqt_win.status != NULL)
+			free(ubqt_win.status);
 
 		ubqt_win.status = NULL;
 	}
 
 	else if (!strcmp(data, "sidebar")) {
-		//if (ubqt_win.sidebar != NULL)
-		//	free(ubqt_win.sidebar);
+		if (ubqt_win.sidebar != NULL)
+			free(ubqt_win.sidebar);
 
 		ubqt_win.sidebar = NULL;
 	}
 
 	else if (!strcmp(data, "slideout")) {
-		//if (ubqt_win.slideout != NULL)
-		//	free(ubqt_win.slideout);
+		if (ubqt_win.slideout != NULL)
+			free(ubqt_win.slideout);
 
 		ubqt_win.sidebar = NULL;
 	}
 
 	else if (!strcmp(data, "main")) {
-		//if (ubqt_win.main != NULL)
-		//	free(ubqt_win.main);
+		if (ubqt_win.main != NULL)
+			free(ubqt_win.main);
 
 		ubqt_win.main = NULL;
 	}
@@ -186,7 +185,7 @@ ubqt_insert(char *str, const char *token, unsigned index)
 
 	ubqt_substr(str, 0, index);
 
-	asprintf(&str, "%s%s%s", str, token, tmp+=index);
+	asprintf(&str, "%s%s%s", str, token, tmp + index);
 
 	free(tmp);
 

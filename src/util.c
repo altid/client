@@ -22,10 +22,10 @@ ubqt_data_update(char *data, char *path)
 		pthread_mutex_unlock(&mutex);
 	}
 
-	else if (!strcmp(data, "tabbar")) {
+	else if (!strcmp(data, "tabs")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		ubqt_win.tabbar = tmp;
+		ubqt_win.tabs = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 
@@ -70,9 +70,9 @@ ubqt_data_remove(char *data)
 		pthread_mutex_unlock(&mutex);
 	}
 
-	else if (!strcmp(data, "tabbar")) {
+	else if (!strcmp(data, "tabs")) {
 		pthread_mutex_lock(&mutex);
-		ubqt_win.tabbar = NULL;
+		ubqt_win.tabs = NULL;
 		pthread_mutex_unlock(&mutex);
 	}
 
@@ -102,25 +102,23 @@ ubqt_data_remove(char *data)
 
 }
 
-char *
+int
 ubqt_join(char *first, char *second)
 {
 
 	char *new_str;
 	asprintf(&new_str, "%s%s", first, second);
-
-	return new_str;
+	free(first);
+	return UBQT_SUCCESS;
 
 }
 
-char *
-ubqt_substr(char *md, int start, int end)
+int
+ubqt_substr(char *md, unsigned start, unsigned end)
 {
 
-	if (end <= start)
-		return NULL;
 
-	int i;
+	unsigned i;
 	char *str = malloc(end - start);
 
 	for(i = start; i < end; i++)
@@ -128,6 +126,6 @@ ubqt_substr(char *md, int start, int end)
 
 	str[end] = 0;
 
-	return str;
+	return UBQT_SUCCESS;
 
 }

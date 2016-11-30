@@ -8,6 +8,8 @@
 /* These files represent the full state of the program  */
 /* at any given time. Your UI should draw them whenever */
 /* they are not-null; using this mutex to lock them.    */
+/* isblock should be set for parser to know if we're in */
+/* a code block or not                                  */
 /*                                                      */
 /********************************************************/
 extern pthread_mutex_t mutex;
@@ -16,23 +18,33 @@ struct Ubqt_win {
 	char *main;
 	char *input;
 	char *title;
-	char *tabbar;
+	char *tabs;
 	char *status;
 	char *sidebar;
 	char *slideout;
+	bool iscode;
 } ubqt_win;
 
+enum {
+	UBQT_SUCCESS = 0,
+	UBQT_FAILURE = 1,
+};
 
 /**util.h************************************************/
 /*                                                      */
 /* These functions are provided                         */
 /* watch this line for changes                          */
+/* Non-void return UBQT_SUCCESS or UBQT_FAILURE         */
 /*                                                      */
-/* ubqt_substr(char start end)                          */
-/*     return sub string                                */
+/* ubqt_substr(char startindex endcount)                */
+/*    	squash string, from 'start' to 'end' chars      */
 /*                                                      */
-/* ubqt_join                                            */
-/*     appends a to b, returning result                 */
+/* ubqt_join(allocated string other string)             */
+/*     appends second string to first, allocating       */
+/*     as necessary                                     */
+/*                                                      */
+/* ubqt_insert(allocated string other string offset)    */
+/*     insert char array at point n in string           */
 /*                                                      */
 /* ubqt_input_update(file, buffer                       */
 /*     push buffer to named file                        */
@@ -44,11 +56,13 @@ struct Ubqt_win {
 /*     threadsafe setter for ubqt_win.path              */
 /*                                                      */
 /********************************************************/
-char *ubqt_substr(char *, int, int);
-char *ubqt_join(char *, char *);
-void  ubqt_input_update(char *, char *);
-void  ubqt_data_remove(char *);
-void  ubqt_data_update(char *, char *);
+int  ubqt_substr(char *, unsigned, unsigned);
+int  ubqt_join(char *, char *);
+int  ubqt_insert(char *, const char *, unsigned);
+int  ubqt_input_update(char *, char *);
+void ubqt_data_remove(char *);
+void ubqt_data_update(char *, char *);
+void ubqt_data_destroy();
 
 
 
@@ -64,10 +78,13 @@ void  ubqt_data_update(char *, char *);
 /*                                                      */
 /* ubqt_data_read(name, path)                           */
 /*     reads data from named file in path               */
+/*     calls ubqt_markup_code ubqt_markup_line as needed*/
+/*     returns pointer to stack-allocated data          */
+/*     (data freed in ubqt_data_update, don't free it)  */
 /*                                                      */
 /********************************************************/
-int   ubqt_data_init(char *);
-void  ubqt_data_loop(char *);
+int ubqt_data_init(char *);
+int ubqt_data_loop(char *);
 char *ubqt_data_read(char *, char *);
 
 
@@ -88,10 +105,10 @@ char *ubqt_data_read(char *, char *);
 /*     the new data.                                    */
 /*                                                      */
 /********************************************************/
-int  ubqt_draw_init(char *);
-int  ubqt_draw_loop();
-int  ubqt_draw_destroy();
-void ubqt_draw_new_data_callback();
+int ubqt_draw_init(char *);
+int ubqt_draw_loop();
+int ubqt_draw_destroy();
+int ubqt_draw_new_data_callback();
 
 
 /**vi, leanback******************************************/

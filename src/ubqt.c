@@ -20,6 +20,8 @@ int
 main(int argc, char* argv[])
 {
 
+	printf("Starting up\n");
+
 	int err;
 	pthread_t file_thread;
 	
@@ -28,34 +30,35 @@ main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
+	printf("Data init\n");
+
 	if ((err = ubqt_data_init(argv[1]))) {
 		fprintf(stderr, "Data init error %s: %s\n", argv[1], strerror(err));
 		exit(EXIT_FAILURE);
 	}
 
+	printf("Draw init\n");
+
 	if ((err = ubqt_draw_init(argv[1]))) {
 		fprintf(stderr, "Window init error: %s\n", strerror(err));
-
-		/* Try to clean up what we can */
 		ubqt_draw_destroy();
 		exit(EXIT_FAILURE);
 	}
+	
 	printf("Draw init\n");
 
 	if ((err = pthread_mutex_init(&mutex, NULL))) {
 		fprintf(stderr, "Unable to create mutex: %s\n", strerror(err));
-
-		/* try to clean up what we can */
 		ubqt_draw_destroy();
 		exit(EXIT_FAILURE);
 	}
+	
 	printf("Pthread init\n");
 
 	if ((err = pthread_create(&file_thread, NULL, run_data_loop, argv[1]))) {
 		//TODO: Attempt to reconnect on failure
-
-		/* Try to clean up our mutex */
 		pthread_mutex_destroy(&mutex);
+		ubqt_draw_destroy();
 		fprintf(stderr, "I/O thread init failure: %s\n", strerror(err));
 		exit(EXIT_FAILURE);
 	}
@@ -63,7 +66,7 @@ main(int argc, char* argv[])
 	printf("Loop enter\n");
 	ubqt_draw_loop();
 
-	/* Clean up */
+	/* Clean up anything we can on exit */
 	if ((err = pthread_mutex_destroy(&mutex)))
 		fprintf(stderr, "Unable to destroy mutex: %s\n", strerror(err));
 

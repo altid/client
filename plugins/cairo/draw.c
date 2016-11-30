@@ -209,9 +209,9 @@ ubqt_draw()
 		y += 14;
 	}
 
-	if (ubqt_win.tabbar != NULL) {
+	if (ubqt_win.tabs != NULL) {
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.tabbar, strlen(ubqt_win.tabbar));
+		pango_layout_set_markup(layout, ubqt_win.tabs, strlen(ubqt_win.tabs));
 		pthread_mutex_unlock(&mutex);
 		cairo_save(cr);
 		cairo_move_to(cr, x, y);
@@ -256,7 +256,7 @@ ubqt_draw()
 
 }
 
-void
+int
 ubqt_draw_new_data_callback()
 {
 
@@ -268,6 +268,8 @@ ubqt_draw_new_data_callback()
 
 	xcb_send_event(c, 0, window, XCB_EVENT_MASK_NO_EVENT, (const char *)&ev);
 	xcb_flush(c);
+
+	return UBQT_SUCCESS;
 
 }
 

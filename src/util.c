@@ -12,12 +12,20 @@ ubqt_data_update(char *data, char *path)
 	/*
 	 * Ordered by presumed frequency
 	 * file read errors will result in NULL value assignment
+	 * lock mutex only after data has been parsed
+	 * to avoid locking up gfx thread too much
+	 * so markup operations can be as advanced as we want
 	 */
+
 	char *tmp;
 
 	if (!strcmp(data, "main")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
+
+		if (ubqt_win.main != NULL)
+			free(ubqt_win.main);
+
 		ubqt_win.main = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
@@ -25,6 +33,10 @@ ubqt_data_update(char *data, char *path)
 	else if (!strcmp(data, "tabs")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
+
+		if (ubqt_win.tabs != NULL)
+			free(ubqt_win.tabs);
+
 		ubqt_win.tabs = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
@@ -32,6 +44,10 @@ ubqt_data_update(char *data, char *path)
 	else if (!strcmp(data, "title")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
+
+		if (ubqt_win.title != NULL)
+			free(ubqt_win.title);
+
 		ubqt_win.title = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
@@ -39,6 +55,10 @@ ubqt_data_update(char *data, char *path)
 	else if (!strcmp(data, "status")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
+
+		if (ubqt_win.status != NULL)
+			free(ubqt_win.status);
+
 		ubqt_win.status = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
@@ -46,6 +66,10 @@ ubqt_data_update(char *data, char *path)
 	else if (!strcmp(data, "sidebar")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
+
+		if (ubqt_win.sidebar != NULL)
+			free(ubqt_win.sidebar);
+
 		ubqt_win.sidebar = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
@@ -53,6 +77,10 @@ ubqt_data_update(char *data, char *path)
 	else if (!strcmp(data, "slideout")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
+
+		if (ubqt_win.slideout != NULL)
+			free(ubqt_win.slideout);
+
 		ubqt_win.slideout = tmp; 
 		pthread_mutex_unlock(&mutex);
 	}
@@ -63,66 +91,76 @@ void
 ubqt_data_remove(char *data)
 {
 
+	pthread_mutex_lock(&mutex);
+
 	/* Ordered by frequency */
 	if (!strcmp(data, "title")) {
-		pthread_mutex_lock(&mutex);
+		if (ubqt_win.title != NULL)
+			free(ubqt_win.title);
+
 		ubqt_win.title = NULL;
-		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "tabs")) {
-		pthread_mutex_lock(&mutex);
+		if (ubqt_win.tabs != NULL)
+			free(ubqt_win.tabs);
+
 		ubqt_win.tabs = NULL;
-		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "status")) {
-		pthread_mutex_lock(&mutex);
+		if (ubqt_win.status != NULL)
+			free(ubqt_win.status);
+
 		ubqt_win.status = NULL;
-		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "sidebar")) {
-		pthread_mutex_lock(&mutex);
+		if (ubqt_win.sidebar != NULL)
+			free(ubqt_win.sidebar);
+
 		ubqt_win.sidebar = NULL;
-		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "slideout")) {
-		pthread_mutex_lock(&mutex);
+		if (ubqt_win.slideout != NULL)
+			free(ubqt_win.slideout);
+
 		ubqt_win.sidebar = NULL;
-		pthread_mutex_unlock(&mutex);
 	}
 
 	else if (!strcmp(data, "main")) {
-		pthread_mutex_lock(&mutex);
+		if (ubqt_win.main != NULL)
+			free(ubqt_win.main);
+
 		ubqt_win.main = NULL;
-		pthread_mutex_unlock(&mutex);
 	}
 
-}
-
-int
-ubqt_join(char *first, char *second)
-{
-
-	char *new_str;
-	asprintf(&new_str, "%s%s", first, second);
-	free(first);
-	return UBQT_SUCCESS;
+	pthread_mutex_unlock(&mutex);
 
 }
 
 int
-ubqt_substr(char *md, unsigned start, unsigned end)
+ubqt_substr(char *str, unsigned start, unsigned end)
 {
 
+	/* If we have a string that is 4 chars long, and
+	 * we're trying to get substring 2, 5, we'll be
+	 * looking 3 chars past the end of our string
+	 * make sure we fail here
+	 */
+
+	if (start + end > strlen(str))
+		return UBQT_FAILURE;
+
+	/* this would return a 0 length string */
+	if (end == 0)
+		return UBQT_FAILURE;
 
 	unsigned i;
-	char *str = malloc(end - start);
 
-	for(i = start; i < end; i++)
-		str[i - start] = md[i];
+	for(i = 0; i < end; i++)
+		str[i] = str[i + start];
 
 	str[end] = 0;
 

@@ -55,31 +55,22 @@ ubqt_data_read(char *name, char *path)
 		ssize_t read;
 		char *ln;
 		char *markup = "";
-		char *str;
-		char *tmp;
 		bool codeblock = false;
 
 		while((read = getline(&ln, &len, fp)) != 1) {
 
-			/* Hold previous result */
-			tmp = markup;
-
 			if (codeblock)
-				str = ubqt_markup_code(ln);
+				ubqt_markup_code(ln);
 
 			else
-				str = ubqt_markup_line(ln);
+				ubqt_markup_line(ln);
 
-			/* Set flag only, no append */
-			if (!strcmp(str, "-codeblock-")) {
-				if (codeblock)
-					codeblock = false;
-				else
-					codeblock = true;
+			if (!strcmp(ln, "-codeblock-")) {
+				codeblock = !codeblock;
 				continue;
 			}
 
-			markup = ubqt_join(tmp, str);
+			ubqt_join(markup, ln);
 
 		}
 		printf("Here after loop\n");

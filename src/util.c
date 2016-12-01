@@ -154,8 +154,10 @@ ubqt_substr(char *str, unsigned start, unsigned end)
 		return UBQT_FAILURE;
 
 	/* this would return a 0 length string */
-	if (end == 0)
-		return UBQT_FAILURE;
+	if (end == 0) {
+		str[0] = 0;
+		return UBQT_SUCCESS;
+	}
 
 	unsigned i;
 

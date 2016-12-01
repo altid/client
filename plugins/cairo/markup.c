@@ -31,17 +31,6 @@ ubqt_markup_whole_line(char *md)
 
 	}
 
-	/* TODO: Seems to miss on ubqt_markup_color, uncertain why */
-	if (md[0] == '[' && md[1] == '#' && md[8] == ']') {
-
-		char *color = strndup(md, strlen(md));
-		ubqt_substr(color, 2, 6);
-
-		asprintf(&md, "%s%s%s%s", "<span color=\"#", color, "\">", md + 9);
-
-		free(color);
-	}
-
 	return md;
 
 }
@@ -61,12 +50,13 @@ ubqt_markup_inline(char *md)
 				tmp = strndup(md, len);
 				ubqt_substr(md, 0, 1);
 				asprintf(&md, "%s%s%s", md, "&amp;", tmp + i + 1);
+
 				len = strlen(md);
 				i += 5;
 				break;
 			case '[':
 				/* [>] starts input */
-				if (md[i + 1] == '>') {
+				if (md[i + 1] == '>' && md[i + 2] == ']') {
 					tmp = strndup(md, len);
 					ubqt_substr(md, 0, i);
 					asprintf(&md, "%s%s%s", md, "<span underline=\"low\"> ", tmp + i + 3);

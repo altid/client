@@ -1,4 +1,3 @@
-// aurface holds everything that we need
 #include <xcb/xcb.h>
 //#include <xcb/xkb.h>
 #include <cairo-xcb.h>
@@ -10,6 +9,10 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include "../../src/ubqt.h"
+
+enum {
+	BORDER = 2
+};
 
 // Global variables :(
 xcb_connection_t *c;
@@ -187,6 +190,8 @@ ubqt_draw()
 	
 	pango_layout_set_width(layout, width * PANGO_SCALE);
 	pango_layout_set_height(layout, height * PANGO_SCALE);
+	PangoRectangle *ink = malloc(sizeof(PangoRectangle));
+	PangoRectangle *logical = malloc(sizeof(PangoRectangle));
 
 	// bg #262626
 	cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
@@ -197,22 +202,29 @@ ubqt_draw()
 	cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
 
 	/* We need a local representation of the remaining surface */
-	int x = 3, y = 3,  w = width - 3, h = height - 3;
+	int x = 3, y = 3, h = height - 3, w = width - 3;
 
 	if (ubqt_win.title != NULL) {
+		pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.title, strlen(ubqt_win.title));
 		pthread_mutex_unlock(&mutex);
 		ubqt_do_draw(cr, x, y);
-		y += pango_layout_get_baseline(layout) / PANGO_SCALE;
+		pango_layout_get_pixel_extents(layout, ink, logical);
+		y += logical->height;
+		pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
 	}
+	
 
 	if (ubqt_win.sidebar != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.sidebar, strlen(ubqt_win.sidebar));
 		pthread_mutex_unlock(&mutex);
 		ubqt_do_draw(cr, x, y);
-		x += (int)pango_layout_get_width(layout) / PANGO_SCALE / 4;
+		pango_layout_get_pixel_extents(layout, ink, logical);
+		x += (logical->width) > w / 2 ? w / 2 : logical->width + (BORDER * 3);
+		pango_layout_set_width(layout, (w - x) * PANGO_SCALE);
+		//TODO: Draw a bar here to seperate
 	}
 
 	if (ubqt_win.tabs != NULL) {
@@ -220,33 +232,39 @@ ubqt_draw()
 		pango_layout_set_markup(layout, ubqt_win.tabs, strlen(ubqt_win.tabs));
 		pthread_mutex_unlock(&mutex);
 		ubqt_do_draw(cr, x, y);
-		y += pango_layout_get_baseline(layout) / PANGO_SCALE;
+		pango_layout_get_pixel_extents(layout, ink, logical);
+		y += logical->height / 2;
 	}
 
 	if (ubqt_win.input != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.input, strlen(ubqt_win.input));
 		pthread_mutex_unlock(&mutex);
-		h -= 14;
+		pango_layout_get_pixel_extents(layout, ink, logical);
+		h -= logical->height / 2;
 		ubqt_do_draw(cr, x, h);
+
 	}
 
 	if (ubqt_win.status != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.status, strlen(ubqt_win.status));
 		pthread_mutex_unlock(&mutex);
-		h -= 14;
+		pango_layout_get_pixel_extents(layout, ink, logical);
+		h -= logical->height / 2;
 		ubqt_do_draw(cr, x, h);
 	}
 
 	if (ubqt_win.main != NULL) {
+		//TODO: Flag option to toggle pango_layout_set_justify(layout, true);
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.main, strlen(ubqt_win.main));
 		pthread_mutex_unlock(&mutex);
 		ubqt_do_draw(cr, x, y);
 	}
 	
-
+	free(ink);
+	free(logical);
 	cairo_surface_flush(surface);
 	xcb_flush(c);
 
@@ -325,13 +343,13 @@ ubqt_draw_loop()
 				ubqt_draw();
 				break;
 
-			case XCB_KEY_RELEASE:
 			case XCB_KEY_PRESS:
 				done = ubqt_event_keypress(e);
 				ubqt_draw();
 				break;
 
 			case XCB_CLIENT_MESSAGE:
+			case XCB_KEY_RELEASE:
 				ubqt_draw();
 				break;
 		}

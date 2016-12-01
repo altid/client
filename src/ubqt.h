@@ -38,10 +38,6 @@ enum {
 /* ubqt_substr(char startindex endcount)                */
 /*    	squash string, from 'start' to 'end' chars      */
 /*                                                      */
-/* ubqt_join(allocated string other string)             */
-/*     appends second string to first, allocating       */
-/*     as necessary                                     */
-/*                                                      */
 /* ubqt_insert(allocated string other string offset)    */
 /*     insert char array at point n in string           */
 /*                                                      */
@@ -54,18 +50,26 @@ enum {
 /* ubqt_data_update(data, path)                         */
 /*     threadsafe setter for ubqt_win.path              */
 /*                                                      */
+/* ubqt_data_destroy()                                  */
+/*     clean up all data structures                     */
+/*                                                      */
 /********************************************************/
 int   ubqt_substr(char *, unsigned, unsigned);
-int   ubqt_join(char *, char *);
 char *ubqt_insert(char *, const char *, unsigned);
-int  ubqt_input_update(char *, char *);
-void ubqt_data_remove(char *);
-void ubqt_data_update(char *, char *);
-void ubqt_data_destroy();
+int   ubqt_input_update(char *, char *);
+void  ubqt_data_update(char *, char *);
+void  ubqt_data_remove(char *);
+void  ubqt_data_destroy();
 
 
 
 /**Inotify, socket, 9p***********************************/
+/*                                                      */
+/* ubqt_data_read(name, path)                           */
+/*     reads data from named file in path               */
+/*     calls ubqt_markup_code ubqt_markup_line as needed*/
+/*     returns pointer to stack-allocated data          */
+/*     (data freed in ubqt_data_update, don't free it)  */
 /*                                                      */
 /* ubqt_data_init(path)                                 */
 /*     given a path, load up ubqt_win struct            */
@@ -75,16 +79,10 @@ void ubqt_data_destroy();
 /*     ubqt_data_update and ubqt_draw_new_data_callback */
 /*     on new data                                      */
 /*                                                      */
-/* ubqt_data_read(name, path)                           */
-/*     reads data from named file in path               */
-/*     calls ubqt_markup_code ubqt_markup_line as needed*/
-/*     returns pointer to stack-allocated data          */
-/*     (data freed in ubqt_data_update, don't free it)  */
-/*                                                      */
 /********************************************************/
-int ubqt_data_init(char *);
-int ubqt_data_loop(char *);
 char *ubqt_data_read(char *, char *);
+int   ubqt_data_init(char *);
+int   ubqt_data_loop(char *);
 
 
 /**cairo, nuklear, ncurses*******************************/
@@ -142,8 +140,24 @@ int ubqt_input_destroy();
 /*     server side; this function is called on only the */
 /*     "some code" line.                                */
 /*                                                      */
+/* Tag struct set when we have open tag available       */
+/* img_main_index holds a stack of our images - images  */
+/* only supported in main element, so this holds the    */
+/* offsets in text where they reside                    */
+/*                                                      */ 
 /********************************************************/
 char *ubqt_markup_line(char *);
 char *ubqt_markup_code(char *);
+
+struct Tag {
+	unsigned *img_main_index;
+	unsigned in_list;
+	bool strong_em;
+	bool uu_line;
+	bool u_line;
+	bool strike;
+	bool code;
+	bool em;
+} tag_open;
 
  /* When on a mutable buffer that isn't input we send chunk-by-chunk to the server TODO: Define best chunk size char *ubqt_text_chunk; */

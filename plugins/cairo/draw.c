@@ -107,7 +107,7 @@ ubqt_draw_init(char *title)
 	c = xcb_connect(NULL, NULL);
 	uint32_t mask;
 	uint32_t values[2];
-
+	
 	if (xcb_connection_has_error(c)) {
 		fprintf(stderr, "xcb_connect error\n");
 		return 1;
@@ -151,7 +151,7 @@ ubqt_draw_init(char *title)
 	cr = cairo_create(surface);
 	
 	layout = pango_cairo_create_layout(cr);
-	desc = pango_font_description_from_string("DejaVu Sans Mono 8");
+	desc = pango_font_description_from_string("DejaVu Sans Mono 10");
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
@@ -202,17 +202,18 @@ ubqt_draw()
 	cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
 
 	/* We need a local representation of the remaining surface */
-	int x = 3, y = 3, h = height - 3, w = width - 3;
+	int x = BORDER, y = BORDER, h = height - BORDER, w = width - BORDER;
 
 	if (ubqt_win.title != NULL) {
 		pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.title, strlen(ubqt_win.title));
 		pthread_mutex_unlock(&mutex);
-		ubqt_do_draw(cr, x, y);
 		pango_layout_get_pixel_extents(layout, ink, logical);
-		y += logical->height;
+		ubqt_do_draw(cr, x, y);
+		y += logical->height / 2;
 		pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+
 	}
 	
 
@@ -222,7 +223,7 @@ ubqt_draw()
 		pthread_mutex_unlock(&mutex);
 		ubqt_do_draw(cr, x, y);
 		pango_layout_get_pixel_extents(layout, ink, logical);
-		x += (logical->width) > w / 2 ? w / 2 : logical->width + (BORDER * 3);
+		x += (logical->width) > w / 2 ? w / 2 : logical->width + (BORDER * 2);
 		pango_layout_set_width(layout, (w - x) * PANGO_SCALE);
 		//TODO: Draw a bar here to seperate
 	}
@@ -265,6 +266,7 @@ ubqt_draw()
 	
 	free(ink);
 	free(logical);
+	
 	cairo_surface_flush(surface);
 	xcb_flush(c);
 

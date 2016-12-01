@@ -1,4 +1,4 @@
-// Surface holds everything that we need
+// aurface holds everything that we need
 #include <xcb/xcb.h>
 //#include <xcb/xkb.h>
 #include <cairo-xcb.h>
@@ -23,14 +23,14 @@ PangoLayout *layout;
 PangoFontDescription *desc;
 
 struct xkb_state *state;
-int width = 500;
-int height = 500;
+int width = 800;
+int height = 600;
 
 char *
 ubqt_draw_error(int err)
 {
 
-	return "See scrollback for glfw error\n";
+	return "To be implemented\n";
 
 }
 
@@ -151,6 +151,7 @@ ubqt_draw_init(char *title)
 	desc = pango_font_description_from_string("DejaVu Sans Mono 8");
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
+	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
 
 	return 0;
 
@@ -169,10 +170,21 @@ ubqt_draw_destroy()
 }
 
 void
+ubqt_do_draw(cairo_t *cr, int x, int y)
+{
+
+	cairo_save (cr);
+	cairo_move_to(cr, x, y);
+	pango_cairo_show_layout(cr, layout);
+	cairo_restore(cr);
+
+}
+
+
+void
 ubqt_draw()
 {
 	
-	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
 	pango_layout_set_width(layout, width * PANGO_SCALE);
 	pango_layout_set_height(layout, height * PANGO_SCALE);
 
@@ -187,69 +199,53 @@ ubqt_draw()
 	/* We need a local representation of the remaining surface */
 	int x = 3, y = 3,  w = width - 3, h = height - 3;
 
-	//TODO: Push this to a seperate function
 	if (ubqt_win.title != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.title, strlen(ubqt_win.title));
 		pthread_mutex_unlock(&mutex);
-		cairo_save (cr);
-		cairo_move_to(cr, x, y);
-		pango_cairo_show_layout (cr, layout);
-		cairo_restore(cr);
-		y += 14;
+		ubqt_do_draw(cr, x, y);
+		y += pango_layout_get_baseline(layout) / PANGO_SCALE;
 	}
 
 	if (ubqt_win.sidebar != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.sidebar, strlen(ubqt_win.sidebar));
 		pthread_mutex_unlock(&mutex);
-		cairo_save(cr);
-		pango_cairo_show_layout(cr, layout);
-		cairo_move_to(cr, x, y);
-		y += 14;
+		ubqt_do_draw(cr, x, y);
+		x += (int)pango_layout_get_width(layout) / PANGO_SCALE / 4;
 	}
 
 	if (ubqt_win.tabs != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.tabs, strlen(ubqt_win.tabs));
 		pthread_mutex_unlock(&mutex);
-		cairo_save(cr);
-		cairo_move_to(cr, x, y);
-		pango_cairo_show_layout(cr, layout);
-		cairo_restore(cr);
-		y += 14;
-	}
-
-	if (ubqt_win.status != NULL) {
-		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.status, strlen(ubqt_win.status));
-		pthread_mutex_unlock(&mutex);
-		cairo_save(cr);
-		cairo_move_to(cr, x, h - 14);
-		pango_cairo_show_layout(cr, layout);
-		cairo_restore(cr);
-		h -=14;
+		ubqt_do_draw(cr, x, y);
+		y += pango_layout_get_baseline(layout) / PANGO_SCALE;
 	}
 
 	if (ubqt_win.input != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.input, strlen(ubqt_win.input));
 		pthread_mutex_unlock(&mutex);
-		cairo_save(cr);
-		pango_cairo_show_layout(cr, layout);
-		cairo_move_to(cr, x, h - 14);
 		h -= 14;
+		ubqt_do_draw(cr, x, h);
+	}
+
+	if (ubqt_win.status != NULL) {
+		pthread_mutex_lock(&mutex);
+		pango_layout_set_markup(layout, ubqt_win.status, strlen(ubqt_win.status));
+		pthread_mutex_unlock(&mutex);
+		h -= 14;
+		ubqt_do_draw(cr, x, h);
 	}
 
 	if (ubqt_win.main != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.main, strlen(ubqt_win.main));
 		pthread_mutex_unlock(&mutex);
-		cairo_save(cr);
-		cairo_move_to(cr, x, y);
-		pango_cairo_show_layout(cr, layout);
-		cairo_restore(cr);
+		ubqt_do_draw(cr, x, y);
 	}
+	
 
 	cairo_surface_flush(surface);
 	xcb_flush(c);
@@ -260,6 +256,7 @@ int
 ubqt_draw_new_data_callback()
 {
 
+	/* Make sure we zero out the message first */
 	xcb_client_message_event_t ev;
 	memset(&ev, 0, sizeof(xcb_client_message_event_t));
 

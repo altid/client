@@ -168,27 +168,21 @@ ubqt_substr(char *str, unsigned start, unsigned end)
 
 }
 
-int
+char *
 ubqt_insert(char *str, const char *token, unsigned index)
 {
 
-	if(token == NULL)
-		return UBQT_FAILURE;
-
 	if(str == NULL)
-		return UBQT_FAILURE;
+		return NULL;
 
 	if(index > strlen(str))
-		return UBQT_FAILURE;
+		return str;
 
-	char *tmp = strdup(str);
-
+	char *tmp = strndup(str, strlen(str));
 	ubqt_substr(str, 0, index);
-
 	asprintf(&str, "%s%s%s", str, token, tmp + index);
-
 	free(tmp);
 
-	return UBQT_SUCCESS;
+	return str;
 	
 }

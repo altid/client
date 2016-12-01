@@ -55,9 +55,9 @@ enum {
 /*     threadsafe setter for ubqt_win.path              */
 /*                                                      */
 /********************************************************/
-int  ubqt_substr(char *, unsigned, unsigned);
-int  ubqt_join(char *, char *);
-int  ubqt_insert(char *, const char *, unsigned);
+int   ubqt_substr(char *, unsigned, unsigned);
+int   ubqt_join(char *, char *);
+char *ubqt_insert(char *, const char *, unsigned);
 int  ubqt_input_update(char *, char *);
 void ubqt_data_remove(char *);
 void ubqt_data_update(char *, char *);

@@ -31,7 +31,7 @@ ubqt_markup_whole_line(char *md)
 
 	}
 
-	/* TODO: Seems to miss on ubqt_markup_color, uncertain why */
+	/* TODO: Seems to miss on ubqt_markup_color, uncertain why */ 
 	if (md[0] == '[' && md[1] == '#' && md[8] == ']') {
 
 		char *color = strndup(md, strlen(md));
@@ -47,81 +47,74 @@ ubqt_markup_whole_line(char *md)
 }
 
 char *
-ubqt_markup_color(char *md) {
-
-	int i = 1, len = strlen(md);
-
-	while(i < len) {
-		
-		/* [#XXXXXX] starts color */
-		if(md[i] == '[' && md[i + 1] == '#' && md[i + 8] == ']') {
-
-			char *color = strndup(md, len);
-			char *tmp = strndup(md, len);
-			ubqt_substr(md, 0, i);
-			ubqt_substr(color, i + 2, 6);
-
-			asprintf(&md, "%s%s%s%s%s", md, "<span color=\"#", color, "\">", tmp + i + 9);
-
-			free(tmp);
-			free(color);
-
-			len = strlen(md);
-
-		}
-
-		/* [#END] ends color */
-		else if(md[i] == '[' && md[i + 2] == 'E' && md[i + 3] == 'N' && md[i + 4] == 'D' && md[i + 5] == ']') {
-			char *tmp = strndup(md, len);
-
-			ubqt_substr(md, 0, i);
-			asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 6);
-
-			free(tmp);
-
-			len = strlen(md);
-		}
-
-		else
-			i++;
-	}
-
-	return md;
-
-}
-
-char *
 ubqt_markup_inline(char *md)
 {
 
 	int i = 0;
 	int len = strlen(md);
-
+	
+	/* sadly two loops for now, something is wrong */
 	while(i < len) {
-		/* pointer to a pointer to my data, md */
 		switch(md[i]) {
-
+			/*	
 			case '&':
 				ubqt_insert(md, "&amp;", i);
-				len += 4;
-				i += 4;
+				i += 5;
 				break;
+			*/
+			case '[':	
+				/* [>] starts input */
+				if (md[i + 1] == '>') {
+					char *tmp = strndup(md, len);
+					ubqt_substr(md, 0, i);
+					asprintf(&md, "%s%s%s", md, "<span underline=\"low\"> ", tmp + i + 3);
+					free(tmp);
+					len = strlen(md);
+					i += 23;
 
-			case '<':
-				ubqt_insert(md, "&lt;", i);
-				len += 3;
-				i += 3;
-				break;
+				}
 
-			case '>':
-				ubqt_insert(md, "&gt;", i);
-				len += 3;
-				i += 3;
+				/* [#XXXXXX] starts color */
+				else if (md[i + 1] == '#' && md[i + 8] == ']') {
+
+					char *color = strndup(md, len);
+					char *tmp = strndup(md, len);
+					ubqt_substr(md, 0, i);
+					ubqt_substr(color, i + 2, 6);
+
+					asprintf(&md, "%s%s%s%s%s", md, "<span color=\"#", color, "\">", tmp + i + 9);
+
+					free(tmp);
+					free(color);
+
+					len = strlen(md);
+
+					/* Move i to end of newly added material */
+					i += 21;
+
+				}
+
+				/* [#END] ends color or input*/
+				else if (md[i + 2] == 'E' && md[i + 3] == 'N' && md[i + 4] == 'D' && md[i + 5] == ']') {
+					char *tmp = strndup(md, len);
+
+					ubqt_substr(md, 0, i);
+					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 6);
+					free(tmp);
+
+					len = strlen(md);
+					
+					/* move i to end of newly added material */
+					i += 6;
+				} 
+
+				i++;
 				break;
 
 			default:
 				i++;
 				break;
+	
 		}
 	}
 
@@ -138,7 +131,6 @@ ubqt_markup_line(char *md)
 
 	else {
 		md = ubqt_markup_inline(md);
-		md = ubqt_markup_color(md);
 		md = ubqt_markup_whole_line(md);
 	}
 

@@ -31,7 +31,7 @@ ubqt_markup_whole_line(char *md)
 
 	}
 
-	/* TODO: Seems to miss on ubqt_markup_color, uncertain why */ 
+	/* TODO: Seems to miss on ubqt_markup_color, uncertain why */
 	if (md[0] == '[' && md[1] == '#' && md[8] == ']') {
 
 		char *color = strndup(md, strlen(md));
@@ -52,23 +52,24 @@ ubqt_markup_inline(char *md)
 
 	int i = 0;
 	int len = strlen(md);
-	
-	/* sadly two loops for now, something is wrong */
+	char *tmp = NULL;
+
 	while(i < len) {
+
 		switch(md[i]) {
-			/*	
 			case '&':
-				ubqt_insert(md, "&amp;", i);
+				tmp = strndup(md, len);
+				ubqt_substr(md, 0, 1);
+				asprintf(&md, "%s%s%s", md, "&amp;", tmp + i + 1);
+				len = strlen(md);
 				i += 5;
 				break;
-			*/
-			case '[':	
+			case '[':
 				/* [>] starts input */
 				if (md[i + 1] == '>') {
-					char *tmp = strndup(md, len);
+					tmp = strndup(md, len);
 					ubqt_substr(md, 0, i);
 					asprintf(&md, "%s%s%s", md, "<span underline=\"low\"> ", tmp + i + 3);
-					free(tmp);
 					len = strlen(md);
 					i += 23;
 
@@ -78,35 +79,31 @@ ubqt_markup_inline(char *md)
 				else if (md[i + 1] == '#' && md[i + 8] == ']') {
 
 					char *color = strndup(md, len);
-					char *tmp = strndup(md, len);
+					tmp = strndup(md, len);
 					ubqt_substr(md, 0, i);
 					ubqt_substr(color, i + 2, 6);
 
 					asprintf(&md, "%s%s%s%s%s", md, "<span color=\"#", color, "\">", tmp + i + 9);
 
-					free(tmp);
 					free(color);
 
 					len = strlen(md);
-
-					/* Move i to end of newly added material */
 					i += 21;
 
 				}
 
 				/* [#END] ends color or input*/
 				else if (md[i + 2] == 'E' && md[i + 3] == 'N' && md[i + 4] == 'D' && md[i + 5] == ']') {
-					char *tmp = strndup(md, len);
+					tmp = strndup(md, len);
 
 					ubqt_substr(md, 0, i);
 					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 6);
-					free(tmp);
 
 					len = strlen(md);
-					
+
 					/* move i to end of newly added material */
 					i += 6;
-				} 
+				}
 
 				i++;
 				break;
@@ -114,9 +111,10 @@ ubqt_markup_inline(char *md)
 			default:
 				i++;
 				break;
-	
 		}
 	}
+
+	free(tmp);
 
 	return md;
 

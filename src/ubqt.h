@@ -54,10 +54,11 @@ enum {
 /*     clean up all data structures                     */
 /*                                                      */
 /********************************************************/
-int   ubqt_substr(char *, unsigned, unsigned);
-char *ubqt_insert(char *, const char *, unsigned);
-int   ubqt_input_update(char *, char *);
-void  ubqt_data_update(char *, char *);
+int  ubqt_substr(char *, unsigned, unsigned);
+int  ubqt_insert(char **, const char *, unsigned);
+int  ubqt_replace(char **, const char *, unsigned, unsigned);
+int  ubqt_input_update(char *, char *);
+void ubqt_data_update(char *, char *);
 void  ubqt_data_remove(char *);
 void  ubqt_data_destroy();
 

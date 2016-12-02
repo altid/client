@@ -170,21 +170,42 @@ ubqt_substr(char *str, unsigned start, unsigned end)
 
 }
 
-char *
-ubqt_insert(char *str, const char *token, unsigned index)
+int
+ubqt_insert(char **str, const char *token, unsigned index)
 {
 
-	if(str == NULL)
-		return NULL;
+	/* Out of bounds */
+	if(index > strlen(*str))
+		return 0;
 
-	if(index > strlen(str))
-		return str;
+	unsigned start = strlen(*str);
+	char *tmp = strndup(*str, index);
 
-	char *tmp = strndup(str, strlen(str));
-	ubqt_substr(str, 0, index);
-	asprintf(&str, "%s%s%s", str, token, tmp + index);
+	asprintf(str, "%s%s%s", tmp, token, *str + index);
 	free(tmp);
 
-	return str;
+	return strlen(*str) - start;
+
+}
+
+int
+ubqt_replace(char **str, const char *token, unsigned index, unsigned range)
+{
+
+	unsigned start = strlen(*str);
 	
+	/* Out of bounds */
+	if(index > start || range > start)
+		return 0;
+
+	if(index + range > strlen(*str))
+		return 0;
+
+	char *tmp = strndup(*str, index);
+
+	asprintf(str, "%s%s%s", tmp, token, *str + index + range);
+	free(tmp);
+
+	return strlen(*str) - start;
+
 }

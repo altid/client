@@ -148,7 +148,7 @@ int ubqt_input_destroy();
 char *ubqt_markup_line(char *);
 char *ubqt_markup_code(char *);
 
-struct *Item {
+struct Item {
 	char *str;
 	char *name;
 	int   index;

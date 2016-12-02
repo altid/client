@@ -1,6 +1,8 @@
 # ubqt
 ![What it looks like so far](https://pb.gehidore.net/GWfH.png)
 
+** This is pre-alpha, please do not expect anything of this **
+
 http://tiamat.tsotech.com/pao inspired playground, using filesystem-based program state representations to allow clients to draw content based on a suitable toolkit. 
 
 ## Usage

@@ -65,6 +65,10 @@ ubqt_markup_whole_line(char *md)
 				ubqt_nested(md);
 			break;
 
+		case '>':
+			asprintf(&md, "%s%s", "▌ ", md + 1);
+			break;
+
 		default:
 			break;
 	}
@@ -82,7 +86,7 @@ ubqt_markup_inline(char *md)
 	char *tmp = NULL;
 
 	while(i < len) {
-
+		printf("markdown %s i %d\n", md, i);
 		switch(md[i]) {
 			/* If we're escaping something, cut slash, and move 2 forward */
 			case '\\':
@@ -92,67 +96,154 @@ ubqt_markup_inline(char *md)
 				i++;
 				break;
 
-			//case '*':
-				//if (md[1 + 1] == '*') {
-					/* turn on or off span */
-					//if (tag_open.strong_em);
-						
-				//}
-			//	break;
-
-			case '[':
-				/* [>] starts input */
-				if (md[i + 1] == 'i' && md[i + 2] == ']') {
+			case '*':
+				/* open strong bold */
+				if (!tag_open.strong_em && md[i + 1] == '*' && (md[i - 1] == ' ' || i == 0)) {
+					tag_open.strong_em = true;
 					tmp = strndup(md, len);
 					ubqt_substr(md, 0, i);
-					asprintf(&md, "%s%s%s", md, "<span underline=\"low\"> ", tmp + i + 3);
+					asprintf(&md, "%s%s%s", md, "<span weight=\"ultrabold\">", tmp + i + 2);
 					len = strlen(md);
-					i += 23;
+					i += 24;
+				}
+				
+				/* close strong bold tag */
+				else if (tag_open.strong_em && md[i + 1] == '*') {
+					tag_open.strong_em = false;
+					tmp = strndup(md, len);
+					ubqt_substr(md, 0, i);
+					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 2);
+					len = strlen(md);
+					i += 6;
+				}
+
+				else if (!tag_open.em && (md[i + 1] != ' ' && md[i - 1] != ' ')) {
+					tag_open.em = true;
+					tmp = strndup(md, len);
+					ubqt_substr(md, 0, i);
+					asprintf(&md, "%s%s%s", md, "<span weight=\"bold\">", tmp + i + 1);
+					len = strlen(md);
+					i += 19;
+				}
+
+				else if (tag_open.em && (md[i + 1] != ' ' && md[i - 1] != ' ')) {
+					tag_open.em = false;
+					tmp = strndup(md, len);
+					ubqt_substr(md, 0, i);
+					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 1);
+					len = strlen(md);
+					i += 6;
+				}
+
+				i++;	
+				break;
+
+			case '[':
+				
+				/* [>12345678](Hint) sets up input block using as much line as possible */
+				if (md[i + 1] == '>') {
+					int j;
+					for (j = 0; j < 8; j++) {
+						if(md[j] == ']')
+							break;
+					}
+
+					tag_open.input = true;
+					char *hint = strndup(md, len);
+					tmp = strndup(md, len);
+					ubqt_substr(md, 0, i);
+					ubqt_substr(hint, i + 2, j - 2); 
+					asprintf(&md, "%s%s%s%s", md, hint, ": <span underline=\"low\">", tmp + i + j + 2);
+					free(hint);
+					len = strlen(md);
+					i += (j + 17);
 
 				}
 
-				/* [#XXXXXX] starts color */
 				else if (md[i + 1] == '#' && md[i + 8] == ']') {
-
+					tag_open.color = true;
 					char *color = strndup(md, len);
 					tmp = strndup(md, len);
 					ubqt_substr(md, 0, i);
 					ubqt_substr(color, i + 2, 6);
-
-					asprintf(&md, "%s%s%s%s%s", md, "<span color=\"#", color, "\">", tmp + i + 9);
-
+					asprintf(&md, "%s%s%s%s%s", md, "<span color=\"#", color, "\">", tmp + i + 10);
 					free(color);
-
 					len = strlen(md);
-					i += 21;
-
+					i += 22;
 				}
 
-				/* [E] ends tags or input*/
-				else if (md[i + 1] == 'E' && md[i + 2] == ']') {
-					tmp = strndup(md, len);
-
-					ubqt_substr(md, 0, i);
-					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 3);
-
-					len = strlen(md);
-
-					/* move i to end of newly added material */
-					i += 6;
+				else if (md[i + 1] == ' ' || md[i + 1] == 'x') {
+					i += 3;
+					break;
 				}
 
+				/* image or url */
+				else
+					tag_open.square = true;
 				i++;
 				break;
 
-			//case '\n':
-			//case '\0':
-				/* iterate through tags, close any open */
-			//	break;
+			case ']':
+
+				if (tag_open.square && md[i + 1] == '(') {
+					/* [name](!/path/to/image) */
+					if (md[i + 2] == '!') {
+						// tag_open.img[-1].str = path;
+						// tag_open.img[-1].name = name;
+						// put the path here, so we can index it, parse the text by index, and profit.
+					}
+					/* [name](http://somelink.com) */
+					else {
+						// tag_open.img[-1].str = path;
+						// tag_open.img[-1].name = name;
+						// may need to malloc?
+					}
+					i++;
+				}
+
+				else if (tag_open.input && md[i + 1] == '(') {
+					tmp = strndup(md, len);
+					ubqt_substr(md, 0, i - 3);
+					asprintf(&md, "%s%s%s", md, "<span underline=\"low\"> ", tmp + i);
+					len = strlen(md);
+					i += 24;
+				}
+
+				else if (tag_open.color && md[i + 1] == '(') {
+					
+				}
+
+				break;
+
+			case ')':
+				if (tag_open.color || tag_open.input) {
+					tmp = strndup(md, len);
+					ubqt_substr(md, 0, i);
+					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 1);
+					len = strlen(md);
+					i += 6;
+				}
+					
+				if (tag_open.color)
+					tag_open.color = false;
+
+				else if (tag_open.input)
+					tag_open.input = false;
+
+				i++;
+				break;
+			
+			case '\n':
+			case '\0':
+				i = len;
+				break;
 
 			default:
 				i++;
 				break;
 		}
+		printf("After: %s\n", md);
+
 	}
 
 	free(tmp);

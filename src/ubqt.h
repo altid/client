@@ -141,21 +141,28 @@ int ubqt_input_destroy();
 /*     "some code" line.                                */
 /*                                                      */
 /* Tag struct set when we have open tag available       */
-/* img_main_index holds a stack of our images - images  */
-/* only supported in main element, so this holds the    */
-/* offsets in text where they reside                    */
+/* img_main_index holds a stack of our images           */
 /*                                                      */ 
 /********************************************************/
 char *ubqt_markup_line(char *);
 char *ubqt_markup_code(char *);
 
+struct Item {
+	char *str;
+	char *name;
+};
+
 struct Tag {
-	unsigned *img_main_index;
 	unsigned in_list;
+	struct Item *img;
+	struct Item *link;
 	bool strong_em;
 	bool uu_line;
 	bool u_line;
 	bool strike;
+	bool square;
+	bool input;
+	bool color;
 	bool code;
 	bool em;
 } tag_open;

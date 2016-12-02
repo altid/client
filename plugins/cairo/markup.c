@@ -87,7 +87,6 @@ ubqt_markup_inline(char *md)
 	char *tmp = NULL;
 
 	while(i < len) {
-		printf("markdown %s i %d\n", md, i);
 		switch(md[i]) {
 			/* If we're escaping something, cut slash, and move 2 forward */
 			case '\\':
@@ -222,8 +221,7 @@ ubqt_markup_inline(char *md)
 					i += 24;
 				}
 
-				else if (tag_open.image && md[i + 1] == '(') {
-					printf("path %s\n", md);
+				//else if (tag_open.image && md[i + 1] == '(') {
 					//tmp = strndup(md, len);
 					//ubqt_substr(tmp, tag_open.img[-1].index, i - 1 - tag_open.img[-1].index);
 					/* ![name](/path/to/image) */
@@ -233,7 +231,7 @@ ubqt_markup_inline(char *md)
 
 				}
 					/* [name](http://somelink.com) */
-				else if (tag_open.path) {
+				//else if (tag_open.path) {
 						// tag_open.img[-1].str = path;
 						// tag_open.img[-1].name = name;
 						// may need to malloc?
@@ -251,7 +249,6 @@ ubqt_markup_inline(char *md)
 				i++;
 				break;
 		}
-		printf("After: %s\n", md);
 
 	}
 

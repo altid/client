@@ -81,6 +81,7 @@ char *
 ubqt_markup_inline(char *md)
 {
 
+	//TODO: use 'int to_next' to increment anything, so we know what these random numbers all point to.
 	int i = 0;
 	int len = strlen(md);
 	char *tmp = NULL;
@@ -106,7 +107,7 @@ ubqt_markup_inline(char *md)
 					len = strlen(md);
 					i += 24;
 				}
-				
+
 				/* close strong bold tag */
 				else if (tag_open.strong_em && md[i + 1] == '*') {
 					tag_open.strong_em = false;
@@ -135,11 +136,11 @@ ubqt_markup_inline(char *md)
 					i += 6;
 				}
 
-				i++;	
+				i++;
 				break;
 
 			case '[':
-				
+
 				/* [>12345678](Hint) sets up input block using as much line as possible */
 				if (md[i + 1] == '>') {
 					int j;
@@ -176,43 +177,21 @@ ubqt_markup_inline(char *md)
 					i += 3;
 					break;
 				}
-
-				/* image or url */
 				else
 					tag_open.square = true;
+
 				i++;
 				break;
 
-			case ']':
-
-				if (tag_open.square && md[i + 1] == '(') {
-					/* [name](!/path/to/image) */
-					if (md[i + 2] == '!') {
-						// tag_open.img[-1].str = path;
-						// tag_open.img[-1].name = name;
-						// put the path here, so we can index it, parse the text by index, and profit.
-					}
-					/* [name](http://somelink.com) */
-					else {
-						// tag_open.img[-1].str = path;
-						// tag_open.img[-1].name = name;
-						// may need to malloc?
-					}
+			case '!':
+				if(md[i + 1] == '[') {
+					tag_open.image = true;
+					//tag_open.img[-1] = malloc(sizeof(tag_open.img[-1]));
+					//tag_open.img[-1].index = i + 2;
 					i++;
 				}
 
-				else if (tag_open.input && md[i + 1] == '(') {
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i - 3);
-					asprintf(&md, "%s%s%s", md, "<span underline=\"low\"> ", tmp + i);
-					len = strlen(md);
-					i += 24;
-				}
-
-				else if (tag_open.color && md[i + 1] == '(') {
-					
-				}
-
+				i++;
 				break;
 
 			case ')':
@@ -223,7 +202,7 @@ ubqt_markup_inline(char *md)
 					len = strlen(md);
 					i += 6;
 				}
-					
+
 				if (tag_open.color)
 					tag_open.color = false;
 
@@ -232,7 +211,37 @@ ubqt_markup_inline(char *md)
 
 				i++;
 				break;
-			
+
+			case ']':
+
+				if (tag_open.input && md[i + 1] == '(') {
+					tmp = strndup(md, len);
+					ubqt_substr(md, 0, i - 3);
+					asprintf(&md, "%s%s%s", md, "<span underline=\"low\"> ", tmp + i);
+					len = strlen(md);
+					i += 24;
+				}
+
+				else if (tag_open.image && md[i + 1] == '(') {
+					printf("path %s\n", md);
+					//tmp = strndup(md, len);
+					//ubqt_substr(tmp, tag_open.img[-1].index, i - 1 - tag_open.img[-1].index);
+					/* ![name](/path/to/image) */
+					// tag_open.img[-1].name = name;
+					// tag_open.img[-1].index = i
+					// put the path here, so we can index it, parse the text by index, and profit.
+
+				}
+					/* [name](http://somelink.com) */
+				else if (tag_open.path) {
+						// tag_open.img[-1].str = path;
+						// tag_open.img[-1].name = name;
+						// may need to malloc?
+				}
+
+				i++;
+				break;
+
 			case '\n':
 			case '\0':
 				i = len;
@@ -255,7 +264,7 @@ ubqt_markup_inline(char *md)
 char *
 ubqt_markup_line(char *md)
 {
-	
+
 	tag_open.strong_em	= false;
 	tag_open.uu_line	= false;
 	tag_open.u_line		= false;

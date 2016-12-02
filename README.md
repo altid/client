@@ -46,3 +46,4 @@ A leanback-friendly (gamepad, optional keyboard) will likely accompany the Nukle
 
 ## -YOUR BACKEND HERE-
 include [src/ubqt.h](https://github.com/halfwit/ubqt/blob/master/src/ubqt.h), drop your functions in to plugin/foo, add a plugin/foo/foo.mk; and you should be able to build your target backend by modifying the appropriate flag in config.mk 
+If you have any questions, insights, ideas; feel free to join #ubqt on freenode

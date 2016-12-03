@@ -93,7 +93,7 @@ ubqt_markup_inline(char *md)
 
 			/* If we're escaping something, cut slash, and move 2 forward */
 			case '\\':
-				i += ubqt_replace_ch(&md, tmp[i] i, 2);
+				i += ubqt_replace_ch(&md, md[i + 1], i, 2);
 				len = strlen(md);
 				break;
 
@@ -125,6 +125,14 @@ ubqt_markup_inline(char *md)
 				}
 
 				len = strlen(md);
+				break;
+
+			case '_':
+				i++;
+				break;
+
+			case '~':
+				i++;
 				break;
 
 			case '[':

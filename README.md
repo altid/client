@@ -44,6 +44,17 @@ This will end up as a sister project, if we get through the first few.
 I plan on a full vi-like stack where possible, including visual selection (save for images - more on that later), and a url highlighting function.
 A leanback-friendly (gamepad, optional keyboard) will likely accompany the Nuklear backend
 
+## Markdown
+Ubqt is meant to translate markdown to backend-specific markup; examples of this will eventually follow. It's expected that the following characters will be escaped, `\\` 
+Should be escaped | Don't need to be 
+---------------------------|-------------------------
+\\ backslash \`back tick | \(\) parentheses 
+\# hash mark \* asterisk | \+ plus sign 
+\[\] square brackets \_ underscore | \! exclamation 
+\- minus sign \{\} curly braces | \. dot \[\]  \! exclamation
+
+\`\`\` wraps a code block, but currently there's no github-esque 
+
 ## -YOUR BACKEND HERE-
 include [src/ubqt.h](https://github.com/halfwit/ubqt/blob/master/src/ubqt.h), drop your functions in to plugin/foo, add a plugin/foo/foo.mk; and you should be able to build your target backend by modifying the appropriate flag in config.mk 
 If you have any questions, insights, ideas; feel free to join #ubqt on freenode

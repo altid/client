@@ -206,6 +206,23 @@ ubqt_replace(char **str, const char *token, unsigned index, unsigned range)
 	asprintf(str, "%s%s%s", tmp, token, *str + index + range);
 	free(tmp);
 
-	return strlen(*str) - start;
+	return strlen(*str) + range - start;
 
+}
+
+int
+ubqt_replace_ch(char **str, const char token, unsigned index, unsigned range)
+{
+
+	unsigned start = strlen(*str);
+
+	if(range > start)
+		return 0;
+
+	char *tmp = strndup(*str, index);
+
+	asprintf(str, "%s%c%s", tmp, token, *str + index + range);
+	free(tmp);
+
+	return strlen(*str) + range - start;
 }

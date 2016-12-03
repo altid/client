@@ -20,7 +20,6 @@ ubqt_markup_whole_line(char *md)
 {
 
 	switch(md[0]) {
-
 		case '#':
 			if(md[1] != '#')
 				asprintf(&md, "%s%s%s", "<span size=\"xx-large\" weight=\"bold\">", md + 1, "</span>");
@@ -63,6 +62,10 @@ ubqt_markup_whole_line(char *md)
 		case ' ':
 			if (md[1] == ' ' && tag_open.in_list)
 				ubqt_nested(md);
+
+			else if (md[1] == '*' || md[1] == '-')
+				asprintf(&md, "%s%s", " • ", md + 2);
+
 			break;
 
 		case '>':
@@ -81,105 +84,90 @@ char *
 ubqt_markup_inline(char *md)
 {
 
-	//TODO: use 'int to_next' to increment anything, so we know what these random numbers all point to.
 	int i = 0;
 	int len = strlen(md);
 	char *tmp = NULL;
 
 	while(i < len) {
 		switch(md[i]) {
+
 			/* If we're escaping something, cut slash, and move 2 forward */
 			case '\\':
-				tmp = strndup(md, len);
-				ubqt_substr(md, 0, i);
-				asprintf(&md, "%s%s", md, tmp + (++i));
-				i++;
+				i += ubqt_replace_ch(&md, tmp[i] i, 2);
+				len = strlen(md);
 				break;
 
 			case '*':
-				/* open strong bold */
-				if (!tag_open.strong_em && md[i + 1] == '*' && (md[i - 1] == ' ' || i == 0)) {
+				if (!tag_open.strong_em && md[i + 1] == '*') {
 					tag_open.strong_em = true;
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i);
-					asprintf(&md, "%s%s%s", md, "<span weight=\"ultrabold\">", tmp + i + 2);
-					len = strlen(md);
-					i += 24;
+					i += ubqt_replace(&md, "<span weight=\"ultrabold\">", i, 2);
 				}
 
-				/* close strong bold tag */
 				else if (tag_open.strong_em && md[i + 1] == '*') {
 					tag_open.strong_em = false;
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i);
-					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 2);
-					len = strlen(md);
-					i += 6;
+					i += ubqt_replace(&md, "</span>", i, 2);
 				}
 
-				else if (!tag_open.em && (md[i + 1] != ' ' && md[i - 1] != ' ')) {
+				else if (!tag_open.em) {
 					tag_open.em = true;
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i);
-					asprintf(&md, "%s%s%s", md, "<span weight=\"bold\">", tmp + i + 1);
-					len = strlen(md);
-					i += 19;
+					i += ubqt_replace(&md, "<span weight=\"bold\">", i, 1);
 				}
 
-				else if (tag_open.em && (md[i + 1] != ' ' && md[i - 1] != ' ')) {
+				else if (tag_open.em) {
 					tag_open.em = false;
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i);
-					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 1);
-					len = strlen(md);
-					i += 6;
+					i += ubqt_replace(&md, "</span>", i, 1);
 				}
 
-				i++;
+				/* We should never get here */
+				else {
+					printf("We got here though\n");
+					i++;
+				}
+
+				len = strlen(md);
 				break;
 
 			case '[':
 
 				/* [>12345678](Hint) sets up input block using as much line as possible */
 				if (md[i + 1] == '>') {
+
+					char *hint = strndup(md, len);
+					tag_open.input = true;
+
+					/* Locate closing of tag */
+					//TODO: int j = ubqt_next(&md, ']')
 					int j;
 					for (j = 0; j < 8; j++) {
 						if(md[j] == ']')
 							break;
 					}
 
-					tag_open.input = true;
-					char *hint = strndup(md, len);
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i);
 					ubqt_substr(hint, i + 2, j - 2); 
-					asprintf(&md, "%s%s%s%s", md, hint, ": <span underline=\"low\">", tmp + i + j + 2);
-					free(hint);
+					i += ubqt_replace(&md, hint, i, 2);
+
+					i += ubqt_replace(&md, ": <span underline=\"low\">", i, j);
 					len = strlen(md);
-					i += (j + 17);
+					free(hint);
 
 				}
 
 				else if (md[i + 1] == '#' && md[i + 8] == ']') {
 					tag_open.color = true;
-					char *color = strndup(md, len);
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i);
-					ubqt_substr(color, i + 2, 6);
-					asprintf(&md, "%s%s%s%s%s", md, "<span color=\"#", color, "\">", tmp + i + 10);
-					free(color);
+
+					i += ubqt_replace(&md, "<span color=\"#", i, 2);
+					i += ubqt_replace(&md, "\">", i + 6, 2);
+
 					len = strlen(md);
-					i += 22;
 				}
 
-				else if (md[i + 1] == ' ' || md[i + 1] == 'x') {
+				else if (md[i + 2] == ']' ){
 					i += 3;
-					break;
 				}
-				else
-					tag_open.square = true;
 
-				i++;
+				else
+					i++;
+
 				break;
 
 			case '!':
@@ -187,7 +175,7 @@ ubqt_markup_inline(char *md)
 					tag_open.image = true;
 					//tag_open.img[-1] = malloc(sizeof(tag_open.img[-1]));
 					//tag_open.img[-1].index = i + 2;
-					i++;
+					//i++;
 				}
 
 				i++;
@@ -195,11 +183,8 @@ ubqt_markup_inline(char *md)
 
 			case ')':
 				if (tag_open.color || tag_open.input) {
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i);
-					asprintf(&md, "%s%s%s", md, "</span>", tmp + i + 1);
+					i += ubqt_replace(&md, "</span>", i, 1);
 					len = strlen(md);
-					i += 6;
 				}
 
 				if (tag_open.color)
@@ -214,11 +199,8 @@ ubqt_markup_inline(char *md)
 			case ']':
 
 				if (tag_open.input && md[i + 1] == '(') {
-					tmp = strndup(md, len);
-					ubqt_substr(md, 0, i - 3);
-					asprintf(&md, "%s%s%s", md, "<span underline=\"low\"> ", tmp + i);
+					i += ubqt_replace(&md, "<span underline=\"low\"> ", i, 1);
 					len = strlen(md);
-					i += 24;
 				}
 
 				//else if (tag_open.image && md[i + 1] == '(') {
@@ -229,15 +211,17 @@ ubqt_markup_inline(char *md)
 					// tag_open.img[-1].index = i
 					// put the path here, so we can index it, parse the text by index, and profit.
 
-				}
+				//}
 					/* [name](http://somelink.com) */
 				//else if (tag_open.path) {
 						// tag_open.img[-1].str = path;
 						// tag_open.img[-1].name = name;
 						// may need to malloc?
-				}
+				//}
 
-				i++;
+				else
+					i++;
+
 				break;
 
 			case '\n':
@@ -249,11 +233,9 @@ ubqt_markup_inline(char *md)
 				i++;
 				break;
 		}
-
 	}
 
 	free(tmp);
-
 	return md;
 
 }
@@ -266,15 +248,20 @@ ubqt_markup_line(char *md)
 	tag_open.uu_line	= false;
 	tag_open.u_line		= false;
 	tag_open.strike		= false;
+	tag_open.square		= false;
+	tag_open.image		= false;
+	tag_open.input		= false;
+	tag_open.color		= false;
 	tag_open.code		= false;
+	tag_open.path		= false;
 	tag_open.em			= false;
 
 	if ((md[0] == '`') && (md[1] == '`') && (md[2] == '`'))
 		return "-codeblock-";
 
 	else {
-		md = ubqt_markup_inline(md);
 		md = ubqt_markup_whole_line(md);
+		md = ubqt_markup_inline(md);
 	}
 
 	return md;

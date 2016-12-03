@@ -35,11 +35,16 @@ enum {
 /* watch this line for changes                          */
 /* Non-void return UBQT_SUCCESS or UBQT_FAILURE         */
 /*                                                      */
-/* ubqt_substr(char startindex endcount)                */
-/*    	squash string, from 'start' to 'end' chars      */
+/* ubqt_substr(string startindex endcount)              */
+/*     squash string, from 'start' to 'end' chars       */
 /*                                                      */
 /* ubqt_insert(allocated string other string offset)    */
 /*     insert char array at point n in string           */
+/*     returns change in size to string                 */
+/*                                                      */
+/* ubqt_replace|_ch(string, token, index, range)        */
+/*     replace area at index, range with token          */
+/*     returns change in size to string                 */
 /*                                                      */
 /* ubqt_input_update(file, buffer                       */
 /*     push buffer to named file                        */
@@ -57,6 +62,7 @@ enum {
 int  ubqt_substr(char *, unsigned, unsigned);
 int  ubqt_insert(char **, const char *, unsigned);
 int  ubqt_replace(char **, const char *, unsigned, unsigned);
+int  ubqt_replace_ch(char **, const char, unsigned, unsigned);
 int  ubqt_input_update(char *, char *);
 void ubqt_data_update(char *, char *);
 void  ubqt_data_remove(char *);

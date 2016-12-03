@@ -46,6 +46,7 @@ A leanback-friendly (gamepad, optional keyboard) will likely accompany the Nukle
 
 ## Markdown
 Ubqt is meant to translate markdown to backend-specific markup; examples of this will eventually follow. It's expected that the following characters will be escaped, `\\` 
+
 Should be escaped | Don't need to be 
 ---------------------------|-------------------------
 \\ backslash \`back tick | \(\) parentheses 

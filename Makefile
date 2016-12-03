@@ -2,8 +2,6 @@
 # See LICENSE for copyright and license details.
 
 
-# Have make output usage with no args
-# := defines as immediately assigned, for += assignments done later
 SRC := src/ubqt.c src/util.c
 OBJ := src/ubqt.o src/util.o
 

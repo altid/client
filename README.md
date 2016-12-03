@@ -54,7 +54,7 @@ Should be escaped | Don't need to be
 \[\] square brackets \_ underscore | \! exclamation 
 \- minus sign \{\} curly braces | \. dot \[\]
 
-\`\`\` wraps a code block, but currently there's no github-esque 
+\`\`\` wraps a code block, but currently there's no github-esque language specific highlighting for code blocks
 
 ## -YOUR BACKEND HERE-
 include [src/ubqt.h](https://github.com/halfwit/ubqt/blob/master/src/ubqt.h), drop your functions in to plugin/foo, add a plugin/foo/foo.mk; and you should be able to build your target backend by modifying the appropriate flag in config.mk 

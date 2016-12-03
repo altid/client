@@ -52,8 +52,10 @@ ubqt_data_read(char *name, char *path)
 	}
 
 	else {
+		unsigned lineno = 0;
 		size_t len = 0;
 		ssize_t read;
+		
 		char *ln = NULL;
 		bool codeblock = false;
 
@@ -63,20 +65,23 @@ ubqt_data_read(char *name, char *path)
 				ln = ubqt_markup_code(ln);
 
 			else
-				ln = ubqt_markup_line(ln);
+				ln = ubqt_markup_line(ln, lineno);
 
-			/* Absurdly intuitive functions, strcmp */
-			if (!strcmp(ln, "-codeblock-")) {
+			/* Skip this line completely */
+			if (!strcmp(ln, "-codeblock-"))
 				codeblock = !codeblock;
-			}
 
 			/* First line */
-			else if(markup == NULL)
+			else if(markup == NULL) {
 				asprintf(&markup, "%s", ln);
+				lineno++;
+			}
 
 			/* Next lines */
-			else
+			else {
 				asprintf(&markup, "%s%s", markup, ln);
+				lineno++;
+			}
 
 		}
 	}

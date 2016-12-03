@@ -81,7 +81,7 @@ ubqt_markup_whole_line(char *md)
 }
 
 char *
-ubqt_markup_inline(char *md)
+ubqt_markup_inline(char *md, unsigned lineno)
 {
 
 	int i = 0;
@@ -152,6 +152,21 @@ ubqt_markup_inline(char *md)
 
 				break;
 
+			case '`':
+				if (!tag_open.code) {
+					tag_open.code = true;
+					i += ubqt_replace(&md, "<span background=\"#444444\"><tt>", i, 1);
+				}
+
+				else if (tag_open.code) {
+					tag_open.code = false;
+					i += ubqt_replace(&md, "</tt></span>", i, 1);
+				}
+
+				else
+					i++;
+				break;
+
 			case '~':
 				if (!tag_open.strike && md[i + 1] == '~') {
 					tag_open.strike = true;
@@ -169,17 +184,17 @@ ubqt_markup_inline(char *md)
 
 			case '[':
 
-				/* [>12345678](Hint) sets up input block using as much line as possible */
+				/* [>myfile](Hint) sets up input block using as much line as possible */
 				if (md[i + 1] == '>') {
 					char *hint = strndup(md, len);
-					tag_open.input = true;
+					tag_open.inp = true;
 
-					/* Locate closing of tag */
+					//Locate closing of tag
 					int j = ubqt_next(md, ']', i);
 					ubqt_substr(hint, i + 2, j - 2);
 					i += ubqt_replace(&md, hint, i, 2);
 
-					i += ubqt_replace(&md, ": <span underline=\"low\">", i, j);
+					i += ubqt_replace(&md, ": <u>", i, j);
 					len = strlen(md);
 					free(hint);
 				}
@@ -200,33 +215,40 @@ ubqt_markup_inline(char *md)
 					i++;
 
 				break;
-
+/*
 			case '!':
 				if(md[i + 1] == '[') {
 					tag_open.image = true;
-					//tag_open.img[-1] = malloc(sizeof(tag_open.img[-1]));
-					//tag_open.img[-1].index = i + 2;
-					//i++;
+					tag_open.img[-1] = malloc(sizeof(tag_open.img[-1]));
+					tag_open.img[-1].index = i + 2;
+					i++;
 				}
 
 				i++;
 				break;
-
+*/
 			case ')':
-				if (tag_open.color || tag_open.input) {
+				if (tag_open.color) {
 					i += ubqt_replace(&md, "</span>", i, 1);
+					len = strlen(md);
+				}
+
+				else if (tag_open.inp) {
+					i += ubqt_replace(&md, "</u>", i, 1);
 					len = strlen(md);
 				}
 
 				if (tag_open.color)
 					tag_open.color = false;
 
-				else if (tag_open.input)
-					tag_open.input = false;
+				else if (tag_open.inp)
+					tag_open.inp = false;
 
-				i++;
+				else
+					i++;
+
 				break;
-
+/*
 			case ']':
 
 				if (tag_open.input && md[i + 1] == '(') {
@@ -234,10 +256,10 @@ ubqt_markup_inline(char *md)
 					len = strlen(md);
 				}
 
-				//else if (tag_open.image && md[i + 1] == '(') {
-					//tmp = strndup(md, len);
-					//ubqt_substr(tmp, tag_open.img[-1].index, i - 1 - tag_open.img[-1].index);
-					/* ![name](/path/to/image) */
+				else if (tag_open.image && md[i + 1] == '(') {
+					tmp = strndup(md, len);
+					ubqt_substr(tmp, tag_open.img[-1].index, i - 1 - tag_open.img[-1].index);
+				*/	/* ![name](/path/to/image) */
 					// tag_open.img[-1].key = name;
 					// tag_open.img[-1].value
 					// put the path here, so we can index it, parse the text by index, and profit.
@@ -250,10 +272,10 @@ ubqt_markup_inline(char *md)
 						// may need to malloc?
 				//}
 
-				else
-					i++;
+			//	else
+			//		i++;
 
-				break;
+			//	break;
 
 			case '\n':
 			case '\0':
@@ -272,7 +294,7 @@ ubqt_markup_inline(char *md)
 }
 
 char *
-ubqt_markup_line(char *md)
+ubqt_markup_line(char *md, unsigned lineno)
 {
 
 	tag_open.ex_bold	= false;
@@ -280,11 +302,12 @@ ubqt_markup_line(char *md)
 	tag_open.strike		= false;
 	tag_open.square		= false;
 	tag_open.ex_em		= false;
-	tag_open.image		= false;
-	tag_open.input		= false;
 	tag_open.color		= false;
 	tag_open.code		= false;
 	tag_open.path		= false;
+	tag_open.img 		= false;
+	tag_open.inp		= false;
+	tag_open.lnk		= false;
 	tag_open.em			= false;
 
 	if ((md[0] == '`') && (md[1] == '`') && (md[2] == '`')) {
@@ -293,7 +316,7 @@ ubqt_markup_line(char *md)
 
 	else {
 		md = ubqt_markup_whole_line(md);
-		md = ubqt_markup_inline(md);
+		md = ubqt_markup_inline(md, lineno);
 	}
 
 	return md;

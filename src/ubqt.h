@@ -151,32 +151,37 @@ int ubqt_input_destroy();
 /*     "some code" line.                                */
 /*                                                      */
 /* Tag struct set when we have open tag available       */
-/* img_main_index holds a stack of our images           */
+/* img/link will be [key](value) pairs to be used in    */ 
+/*     the input functions on selection                 */
+/*     underline is reserved for these cases alone      */
 /*                                                      */ 
 /********************************************************/
-char *ubqt_markup_line(char *);
+char *ubqt_markup_line(char *, unsigned);
 char *ubqt_markup_code(char *);
 
+/* [key](value) line it occurs on */
 struct Item {
-	char *str;
-	char *name;
-	int   index;
+	char *key;
+	char *value;
+	unsigned line;
 };
 
 struct Tag {
 	unsigned in_list;
-	struct Item *img;
-	struct Item *link;
+	struct Item input;
+	struct Item image;
+	struct Item link;
 	bool ex_bold;
 	bool ex_em;
 	bool strike;
 	bool square;
-	bool image;
-	bool input;
 	bool color;
 	bool path;
 	bool code;
 	bool bold;
+	bool img;
+	bool inp;
+	bool lnk;
 	bool em;
 } tag_open;
 

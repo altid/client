@@ -65,14 +65,16 @@ ubqt_data_read(char *name, char *path)
 			else
 				ln = ubqt_markup_line(ln);
 
+			/* Absurdly intuitive functions, strcmp */
 			if (!strcmp(ln, "-codeblock-")) {
 				codeblock = !codeblock;
-				continue;
 			}
 
-			if(markup == NULL)
+			/* First line */
+			else if(markup == NULL)
 				asprintf(&markup, "%s", ln);
 
+			/* Next lines */
 			else
 				asprintf(&markup, "%s%s", markup, ln);
 

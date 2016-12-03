@@ -22,4 +22,4 @@ CPPFLAGS := -D_FORTIFY_SOURCE=2
 CFLAGS := -std=c99 -Wall ${INCS}
 LDFLAGS := -s ${LIBS}
 
-CC = clang
+CC = clang -rpath /usr/lib

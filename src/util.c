@@ -226,3 +226,19 @@ ubqt_replace_ch(char **str, const char token, unsigned index, unsigned range)
 
 	return strlen(*str) + range - start;
 }
+
+unsigned
+ubqt_next(char *md, const char token, unsigned i)
+{
+
+	if (i > strlen(md))
+		return 0;
+
+	for(; i < strlen(md); i++) {
+		if(md[i] == token)
+			return i;
+	}
+
+	return 0;
+
+}

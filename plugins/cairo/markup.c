@@ -98,29 +98,28 @@ ubqt_markup_inline(char *md)
 				break;
 
 			case '*':
-				if (!tag_open.strong_em && md[i + 1] == '*') {
-					tag_open.strong_em = true;
+				if (!tag_open.ex_bold && md[i + 1] == '*') {
+					tag_open.ex_bold = true;
 					i += ubqt_replace(&md, "<span weight=\"ultrabold\">", i, 2);
 				}
 
-				else if (tag_open.strong_em && md[i + 1] == '*') {
-					tag_open.strong_em = false;
+				else if (tag_open.ex_bold && md[i + 1] == '*') {
+					tag_open.ex_bold = false;
 					i += ubqt_replace(&md, "</span>", i, 2);
 				}
 
-				else if (!tag_open.em) {
-					tag_open.em = true;
-					i += ubqt_replace(&md, "<span weight=\"bold\">", i, 1);
+				else if (!tag_open.bold) {
+					tag_open.bold = true;
+					i += ubqt_replace(&md, "<b>", i, 1);
 				}
 
-				else if (tag_open.em) {
-					tag_open.em = false;
-					i += ubqt_replace(&md, "</span>", i, 1);
+				else if (tag_open.bold) {
+					tag_open.bold = false;
+					i += ubqt_replace(&md, "</b>", i, 1);
 				}
 
 				/* We should never get here */
 				else {
-					printf("We got here though\n");
 					i++;
 				}
 
@@ -128,36 +127,61 @@ ubqt_markup_inline(char *md)
 				break;
 
 			case '_':
-				i++;
+				if (!tag_open.ex_em && md[i + 1] == '_') {
+					tag_open.ex_em = true;
+					i += ubqt_replace(&md, "<span style=\"oblique\">", i, 2);
+				}
+
+				else if (tag_open.ex_em && md[i + 1] == '_') {
+					tag_open.ex_em = false;
+					i += ubqt_replace(&md, "</span>", i, 2);
+				}
+
+				else if (!tag_open.em) {
+					tag_open.em = true;
+					i += ubqt_replace(&md, "<i>", i, 1);
+				}
+
+				else if (tag_open.em) {
+					tag_open.em = false;
+					i += ubqt_replace(&md, "</i>", i, 1);
+				}
+
+				else
+					i++;
+
 				break;
 
 			case '~':
-				i++;
+				if (!tag_open.strike && md[i + 1] == '~') {
+					tag_open.strike = true;
+					i += ubqt_replace(&md, "<s>", i, 2);
+				}
+
+				else if (tag_open.strike && md[i + 1] == '~') {
+					tag_open.strike = false;
+					i += ubqt_replace(&md, "</s>", i, 2);
+				}
+
+				else
+					i++;
 				break;
 
 			case '[':
 
 				/* [>12345678](Hint) sets up input block using as much line as possible */
 				if (md[i + 1] == '>') {
-
 					char *hint = strndup(md, len);
 					tag_open.input = true;
 
 					/* Locate closing of tag */
-					//TODO: int j = ubqt_next(&md, ']')
-					int j;
-					for (j = 0; j < 8; j++) {
-						if(md[j] == ']')
-							break;
-					}
-
-					ubqt_substr(hint, i + 2, j - 2); 
+					int j = ubqt_next(md, ']', i);
+					ubqt_substr(hint, i + 2, j - 2);
 					i += ubqt_replace(&md, hint, i, 2);
 
 					i += ubqt_replace(&md, ": <span underline=\"low\">", i, j);
 					len = strlen(md);
 					free(hint);
-
 				}
 
 				else if (md[i + 1] == '#' && md[i + 8] == ']') {
@@ -169,9 +193,8 @@ ubqt_markup_inline(char *md)
 					len = strlen(md);
 				}
 
-				else if (md[i + 2] == ']' ){
+				else if (md[i + 2] == ']' )
 					i += 3;
-				}
 
 				else
 					i++;
@@ -215,8 +238,8 @@ ubqt_markup_inline(char *md)
 					//tmp = strndup(md, len);
 					//ubqt_substr(tmp, tag_open.img[-1].index, i - 1 - tag_open.img[-1].index);
 					/* ![name](/path/to/image) */
-					// tag_open.img[-1].name = name;
-					// tag_open.img[-1].index = i
+					// tag_open.img[-1].key = name;
+					// tag_open.img[-1].value
 					// put the path here, so we can index it, parse the text by index, and profit.
 
 				//}
@@ -252,11 +275,11 @@ char *
 ubqt_markup_line(char *md)
 {
 
-	tag_open.strong_em	= false;
-	tag_open.uu_line	= false;
-	tag_open.u_line		= false;
+	tag_open.ex_bold	= false;
+	tag_open.bold		= false;
 	tag_open.strike		= false;
 	tag_open.square		= false;
+	tag_open.ex_em		= false;
 	tag_open.image		= false;
 	tag_open.input		= false;
 	tag_open.color		= false;
@@ -264,8 +287,9 @@ ubqt_markup_line(char *md)
 	tag_open.path		= false;
 	tag_open.em			= false;
 
-	if ((md[0] == '`') && (md[1] == '`') && (md[2] == '`'))
-		return "-codeblock-";
+	if ((md[0] == '`') && (md[1] == '`') && (md[2] == '`')) {
+		asprintf(&md, "%s", "-codeblock-");
+	}
 
 	else {
 		md = ubqt_markup_whole_line(md);
@@ -281,11 +305,10 @@ ubqt_markup_code(char *md)
 {
 
 	if ((md[0] == '`') && (md[1] == '`') && (md[2] == '`'))
-		return "-codeblock-";
+		asprintf(&md, "%s", "-codeblock-");
 
 	else {
-		md = ubqt_markup_line(md);
-		asprintf(&md, "%s%s%s", "<span background=\"#444444\">", md, "</span>");
+		asprintf(&md, "%s%s%s", "<span background=\"#444444\"><tt>", md, "</tt></span>");
 	}
 
 	return md;

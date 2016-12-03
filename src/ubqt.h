@@ -33,7 +33,9 @@ enum {
 /*                                                      */
 /* These functions are provided                         */
 /* watch this line for changes                          */
-/* Non-void return UBQT_SUCCESS or UBQT_FAILURE         */
+/*                                                      */
+/* ubqt_next(string, char, startingpoint)               */
+/*     find next occurance of char or return 0          */
 /*                                                      */
 /* ubqt_substr(string startindex endcount)              */
 /*     squash string, from 'start' to 'end' chars       */
@@ -59,11 +61,12 @@ enum {
 /*     clean up all data structures                     */
 /*                                                      */
 /********************************************************/
-int  ubqt_substr(char *, unsigned, unsigned);
-int  ubqt_insert(char **, const char *, unsigned);
-int  ubqt_replace(char **, const char *, unsigned, unsigned);
-int  ubqt_replace_ch(char **, const char, unsigned, unsigned);
-int  ubqt_input_update(char *, char *);
+unsigned ubqt_next(char *, const char, unsigned);
+int ubqt_substr(char *, unsigned, unsigned);
+int ubqt_insert(char **, const char *, unsigned);
+int ubqt_replace(char **, const char *, unsigned, unsigned);
+int ubqt_replace_ch(char **, const char, unsigned, unsigned);
+int ubqt_input_update(char *, char *);
 void ubqt_data_update(char *, char *);
 void  ubqt_data_remove(char *);
 void  ubqt_data_destroy();
@@ -164,9 +167,8 @@ struct Tag {
 	unsigned in_list;
 	struct Item *img;
 	struct Item *link;
-	bool strong_em;
-	bool uu_line;
-	bool u_line;
+	bool ex_bold;
+	bool ex_em;
 	bool strike;
 	bool square;
 	bool image;
@@ -174,6 +176,7 @@ struct Tag {
 	bool color;
 	bool path;
 	bool code;
+	bool bold;
 	bool em;
 } tag_open;
 

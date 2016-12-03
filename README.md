@@ -45,14 +45,14 @@ I plan on a full vi-like stack where possible, including visual selection (save 
 A leanback-friendly (gamepad, optional keyboard) will likely accompany the Nuklear backend
 
 ## Markdown
-Ubqt is meant to translate markdown to backend-specific markup; examples of this will eventually follow. It's expected that the following characters will be escaped, `\\` 
+Ubqt is meant to translate markdown to backend-specific markup; examples of this will eventually follow. It's expected that the following characters will be escaped, `\` 
 
 Should be escaped | Don't need to be 
 ---------------------------|-------------------------
 \\ backslash \`back tick | \(\) parentheses 
 \# hash mark \* asterisk | \+ plus sign 
 \[\] square brackets \_ underscore | \! exclamation 
-\- minus sign \{\} curly braces | \. dot \[\]  \! exclamation
+\- minus sign \{\} curly braces | \. dot \[\]
 
 \`\`\` wraps a code block, but currently there's no github-esque 
 

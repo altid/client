@@ -1,5 +1,4 @@
 CFLAGS +=
 LDFLAGS +=
-
-SRC +=
-OBJ +=
+SRC += plugins/vi/input.c
+OBJ += plugins/vi/input.o

@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <locale.h>
 #include <xkbcommon/xkbcommon-x11.h>
 #include <xcb/xcb.h>
@@ -8,6 +9,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include "../../src/ubqt.h"
@@ -67,13 +69,10 @@ update_keymap()
 {
 
 	struct xkb_keymap *new_keymap = xkb_x11_keymap_new_from_device(ctx, c, device_id, 0);
-	printf("Here\n");
 	struct xkb_state *new_state = xkb_x11_state_new_from_device(new_keymap, c, device_id);
 
-	printf("Here\n");
 	xkb_state_unref(state);
 	xkb_keymap_unref(keymap);
-	printf("Here\n");
 	keymap = new_keymap;
 	state = new_state;
 
@@ -83,8 +82,10 @@ int
 ubqt_draw_init(char *title)
 {
 
+	setlocale(LC_CTYPE, "");
 	xcb_visualtype_t *visual;
-
+	asprintf(&ubqt_win.input, "%s", " ‣ ");
+	
 	c = xcb_connect(NULL, NULL);
 	int ret;
 	uint32_t mask;
@@ -264,7 +265,7 @@ ubqt_draw()
 		pango_layout_set_markup(layout, ubqt_win.input, strlen(ubqt_win.input));
 		pthread_mutex_unlock(&mutex);
 		pango_layout_get_pixel_extents(layout, ink, logical);
-		h -= logical->height / 2;
+		h -= logical->height;
 		ubqt_do_draw(cr, x, h);
 
 	}
@@ -313,25 +314,26 @@ ubqt_draw_new_data_callback()
 }
 
 int
-ubqt_event_keypress(xcb_generic_event_t *e)
+ubqt_keypress_event(xcb_generic_event_t *e)
 {
-	
-	//char *buffer;
-	//int size;
-/*
+
+	//TODO: Handle modmasks
+	size_t size = 0;
 	xcb_key_press_event_t *ev;
-	ev = (xcb_key_press_event_t *)e;
-
 	xkb_keycode_t keycode;
-	xkb_keysym_t keysym;
 
+	ev = (xcb_key_press_event_t *)e;
 	keycode = ev->detail;
-	size = xkb_state_key_get_utf8(state, keycode, NULL, 0) + 1;
-	if(size > 1) {
-		xkb_state_key_get_utf8(state, keycode, buffer, size);
-		printf("got: %s\n", buffer);
-	}
-*/
+
+	char *buffer = malloc(xkb_state_key_get_utf8(state, keycode, NULL, size) + 1);
+	xkb_state_key_get_utf8(state, keycode, buffer, sizeof(buffer));
+
+	//TODO: ubqt_input_handle(buffer, ubqt_win.current)
+	//      ubqt_win.current is window with cursos: input, main, tabs, etc
+	//      input tracks modes so things like scrolling happen at the vi layer
+	if(ubqt_input_handle(buffer))
+		return 1;
+
 	return 0;
 }
 
@@ -368,7 +370,7 @@ ubqt_draw_loop()
 				break;
 
 			case XCB_KEY_PRESS:
-				done = ubqt_event_keypress(e);
+				done = ubqt_keypress_event(e);
 				ubqt_draw();
 				break;
 

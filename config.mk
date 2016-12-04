@@ -2,7 +2,7 @@
 VERSION = 0.0
 
 # Customize below to fit your system
-BACK = cairo
+BACK = ncurses
 SEAT = vi
 TRAN = local
 
@@ -22,4 +22,4 @@ CPPFLAGS := -D_FORTIFY_SOURCE=2
 CFLAGS := -std=c99 -Wall ${INCS}
 LDFLAGS := -s ${LIBS}
 
-CC = clang -rpath /usr/lib
+CC = clang

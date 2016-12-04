@@ -22,6 +22,7 @@ struct Ubqt_win {
 	char *status;
 	char *sidebar;
 	char *slideout;
+	char *path;
 } ubqt_win;
 
 enum {
@@ -81,6 +82,9 @@ void  ubqt_data_destroy();
 /*     returns pointer to stack-allocated data          */
 /*     (data freed in ubqt_data_update, don't free it)  */
 /*                                                      */
+/* ubqt_data_write(name, string)                        */
+/*     write data to file name                          */
+/*                                                      */
 /* ubqt_data_init(path)                                 */
 /*     given a path, load up ubqt_win struct            */
 /*                                                      */
@@ -91,7 +95,8 @@ void  ubqt_data_destroy();
 /*                                                      */
 /********************************************************/
 char *ubqt_data_read(char *, char *);
-int   ubqt_data_init(char *);
+int   ubqt_data_write(char *, char *);
+int   ubqt_data_init();
 int   ubqt_data_loop(char *);
 
 
@@ -133,7 +138,7 @@ int ubqt_draw_new_data_callback();
 /*                                                      */
 /********************************************************/
 int ubqt_input_init();
-int ubqt_input_loop();
+int ubqt_input_handle(char *);
 int ubqt_input_destroy();
 
 

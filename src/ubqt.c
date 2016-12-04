@@ -39,6 +39,12 @@ main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 	
+	if ((err = ubqt_input_init())) {
+		fprintf(stderr, "Input init error: %s\n", strerror(err));
+		ubqt_draw_destroy();
+		exit(EXIT_FAILURE);
+	}
+
 	if ((err = pthread_mutex_init(&mutex, NULL))) {
 		fprintf(stderr, "Unable to create mutex: %s\n", strerror(err));
 		ubqt_draw_destroy();

@@ -11,18 +11,40 @@
 int
 ubqt_data_init(char *path)
 {
+	ubqt_win.path = path;
 	DIR *d;
 	struct dirent *dp;
 
-	if ((d = opendir(path)) == NULL)
+	if ((d = opendir(ubqt_win.path)) == NULL)
 		return errno;
 
 	while ((dp = readdir(d)) != NULL)
-		ubqt_data_update(dp->d_name, path);
+		ubqt_data_update(dp->d_name, ubqt_win.path);
 
 	closedir(d);
 
 	return 0;
+}
+
+int
+ubqt_data_write(char *name, char *buffer)
+{
+
+	FILE *fp;
+	char *fullpath = NULL;
+
+	asprintf(&fullpath, "%s/%s", ubqt_win.path, name); 
+	if ((fp = fopen(fullpath, "w")) == NULL)
+		return UBQT_FAILURE;
+
+	else
+		fprintf(fp, "%s%s", buffer, "\n");
+	
+	fclose(fp);
+	
+	free(fullpath);
+
+	return UBQT_SUCCESS;
 }
 
 char *
@@ -30,20 +52,10 @@ ubqt_data_read(char *name, char *path)
 {
 
 	FILE *fp;
-	char *fullpath;
+	char *fullpath = NULL;
 	char *markup = NULL;
 
-	fullpath = malloc(strlen(name) + strlen(path) + 2);
-
-	if (!fullpath) {
-		fprintf(stderr, "Failed to read %s\n", path);
-		return NULL;
-	}
-
-	if ((sprintf(fullpath, "%s/%s", path, name)) < 0)
-		fprintf(stderr, "Failed to build path %s/%s\n", path, name);
-
-	fullpath[strlen(fullpath)] = 0;
+	asprintf(&fullpath, "%s/%s", path, name);
 
 	if ((fp = fopen(fullpath, "r")) == NULL) {
 		fprintf(stderr, "Failed to open path %s\n", fullpath);

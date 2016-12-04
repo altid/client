@@ -42,12 +42,14 @@ ubqt_markup_whole_line(char *md)
 
 		case '[':
 			if(md[1] == 'x' && md[2] == ']') {
-				asprintf(&md, "%s%s", " ☒", md + 3);
+				/* 3 width mono alignment */
+				asprintf(&md, "%s%s", "<span font=\"DejaVu\">&#8201;☒</span>", md + 3);
 				break;
 			}
 
 			else if(md[1] == ' ' && md[2] == ']') {
-				asprintf(&md, "%s%s", " ☐", md + 3);
+				/* 3 width mono alignment */
+				asprintf(&md, "%s%s", "<span font=\"DejaVu\">&#8201;☐</span>", md + 3);
 				break;
 			}
 
@@ -93,7 +95,15 @@ ubqt_markup_inline(char *md, unsigned lineno)
 
 			/* If we're escaping something, cut slash, and move 2 forward */
 			case '\\':
-				i += ubqt_replace_ch(&md, md[i + 1], i, 2);
+				if (md[i + 1] == '>')
+					i += ubqt_replace(&md, "&gt;", i, 2);
+
+				else if (md[i + 1] == '<')
+					i += ubqt_replace(&md, "&lt;", i, 2);
+
+				else 
+					i += ubqt_replace_ch(&md, md[i + 1], i, 2);
+
 				len = strlen(md);
 				break;
 

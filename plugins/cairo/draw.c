@@ -1,6 +1,8 @@
+#include <locale.h>
+#include <xkbcommon/xkbcommon-x11.h>
 #include <xcb/xcb.h>
-//#include <xcb/xkb.h>
-#include <cairo-xcb.h>
+#include <xcb/xkb.h>
+#include <cairo/cairo-xcb.h>
 #include <pango/pango.h>
 #include <pango/pangocairo.h>
 #include <math.h>
@@ -25,7 +27,12 @@ cairo_surface_t *surface = NULL;
 PangoLayout *layout;
 PangoFontDescription *desc;
 
+struct xkb_context *ctx;
+struct xkb_keymap *keymap;
 struct xkb_state *state;
+uint8_t *first_xkb_event;
+int32_t device_id;
+
 int width = 800;
 int height = 600;
 
@@ -55,56 +62,31 @@ find_visual(xcb_connection_t *c, xcb_visualid_t visual)
 	return NULL;
 }
 
-/*
-static struct xkb_keymap *
-get_keymap() {
+void
+update_keymap()
+{
 
-	xcb_get_property_cookie_t cookie;
-	xcb_get_property_reply_t *reply;
-	struct xkb_rule_names names;
-	struck xkb_keymap *ret;
-	const char *value_all, *value_part;
-	int length_all, length_part;
+	struct xkb_keymap *new_keymap = xkb_x11_keymap_new_from_device(ctx, c, device_id, 0);
+	printf("Here\n");
+	struct xkb_state *new_state = xkb_x11_state_new_from_device(new_keymap, c, device_id);
 
-	memset(&names, 0, sizeof(names));
-	//TODO: Get xkb_names atom and string
-	cookie = xcb_get_property(c, 0, screen->root, XCB_ATOM_XKB_NAMES, atom_string, 0, 1024);
-	reply = xcb_get_property_reply(c, cookie, NULL);
-	if (reply == NULL)
-		return NULL;
+	printf("Here\n");
+	xkb_state_unref(state);
+	xkb_keymap_unref(keymap);
+	printf("Here\n");
+	keymap = new_keymap;
+	state = new_state;
 
-	value_all = xcb_get_property_value(reply);
-	length_all = xcb_get_property_value_length(reply);
-	value_part = value_all;
-
-#define copy_prop_value(to) \
-  	length_part = strlen(value_part); \
-if (value_part + length_part < (value_all + length_all) && \
-		length_part > names.to = value_part; \
-		value_part += length_part + 1;
-	
-  	copy_prop_value(rules);
-	copy_prop_value(model);
-	copy_prop_value(layout);
-	copy_prop_value(variant);
-	copy_prop_value(options);
-#undef copy_prop_value
-	
-	//TODO: Fix for us ret = xkb_keymap_new_from_names(b->compositor->xkb_context, &names, 0);
-	free(reply);
-	return ret;
-
-}*/
+}
 
 int
 ubqt_draw_init(char *title)
 {
 
 	xcb_visualtype_t *visual;
-	//struct xkb_context *ctx;
-	//struct xkb_keymap *keymap;
 
 	c = xcb_connect(NULL, NULL);
+	int ret;
 	uint32_t mask;
 	uint32_t values[2];
 	
@@ -113,18 +95,6 @@ ubqt_draw_init(char *title)
 		return 1;
 	}
 
-	/*TODO: Find out xcb bindings for this
-	ctx = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-
-	int32_t dev_id;
-	dev_id = xkb_x11_get_core_keyboard_device_id(c);
-	
-	keymap = get_keymap(); 
-
-	
-	xcb_xkd_get_state_reply_t *state;
-	state = xcb_xkb_get_state_reply(xcb_xkb_get_state(c, device));
-	*/
 	mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
 	values[0] = 1;
 	values[1] = XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE;
@@ -156,6 +126,56 @@ ubqt_draw_init(char *title)
 	pango_font_description_free(desc);
 	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
 
+	ret = xkb_x11_setup_xkb_extension(c, XKB_X11_MIN_MAJOR_XKB_VERSION, XKB_X11_MIN_MINOR_XKB_VERSION, XKB_X11_SETUP_XKB_EXTENSION_NO_FLAGS, NULL, NULL, first_xkb_event, NULL);
+
+	device_id = xkb_x11_get_core_keyboard_device_id(c);
+
+	ctx = xkb_context_new(XKB_CONTEXT_NO_DEFAULT_INCLUDES | XKB_CONTEXT_NO_ENVIRONMENT_NAMES);
+	
+	update_keymap();
+
+	enum {
+		required_events =
+            (XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY |
+             XCB_XKB_EVENT_TYPE_MAP_NOTIFY |
+             XCB_XKB_EVENT_TYPE_STATE_NOTIFY),
+
+        required_nkn_details =
+            (XCB_XKB_NKN_DETAIL_KEYCODES),
+
+        required_map_parts =
+            (XCB_XKB_MAP_PART_KEY_TYPES |
+             XCB_XKB_MAP_PART_KEY_SYMS |
+             XCB_XKB_MAP_PART_MODIFIER_MAP |
+             XCB_XKB_MAP_PART_EXPLICIT_COMPONENTS |
+             XCB_XKB_MAP_PART_KEY_ACTIONS |
+             XCB_XKB_MAP_PART_VIRTUAL_MODS |
+             XCB_XKB_MAP_PART_VIRTUAL_MOD_MAP),
+
+        required_state_details =
+            (XCB_XKB_STATE_PART_MODIFIER_BASE |
+             XCB_XKB_STATE_PART_MODIFIER_LATCH |
+             XCB_XKB_STATE_PART_MODIFIER_LOCK |
+             XCB_XKB_STATE_PART_GROUP_BASE |
+             XCB_XKB_STATE_PART_GROUP_LATCH |
+             XCB_XKB_STATE_PART_GROUP_LOCK),
+    };
+
+    static const xcb_xkb_select_events_details_t details = {
+        .affectNewKeyboard = required_nkn_details,
+        .newKeyboardDetails = required_nkn_details,
+        .affectState = required_state_details,
+        .stateDetails = required_state_details,
+    };
+
+    xcb_void_cookie_t cookie = xcb_xkb_select_events_aux_checked(c, device_id, required_events, 0, 0, required_map_parts, required_map_parts, &details);
+
+    xcb_generic_error_t *error = xcb_request_check(c, cookie);
+    if (error) {
+        free(error);
+        return -1;
+    }
+	
 	return 0;
 
 }
@@ -164,6 +184,8 @@ int
 ubqt_draw_destroy()
 {
 
+	xkb_state_unref(state);
+	xkb_keymap_unref(keymap);
 	g_object_unref(layout);
 	cairo_destroy(cr);
 	cairo_surface_finish(surface);

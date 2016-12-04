@@ -62,12 +62,64 @@ ubqt_draw_init(char *title)
 
 }
 
+void
+ubqt_draw()
+{
+
+	//stdscr
+	if (ubqt_win.title != NULL) {
+		//TODO: create window
+		pthread_mutex_lock(&mutex);
+		//TODO: draw window from data
+		pthread_mutex_unlock(&mutex);
+		//TODO: update any data to reflect new sizes
+	}
+	if (ubqt_win.sidebar != NULL) {
+		//TODO: create window
+		pthread_mutex_lock(&mutex);
+		//TODO: draw window from data
+		pthread_mutex_unlock(&mutex);
+		//TODO: update any data to reflect new sizes
+	}
+	if (ubqt_win.tabs != NULL) {
+		//TODO: create window
+		pthread_mutex_lock(&mutex);
+		//TODO: draw window from data
+		pthread_mutex_unlock(&mutex);
+		//TODO: update any data to reflect new sizes
+	}
+	if (ubqt_win.input != NULL) {
+		//TODO: create window
+		pthread_mutex_lock(&mutex);
+		//TODO: draw window from data
+		pthread_mutex_unlock(&mutex);
+		//TODO: update any data to reflect new sizes
+	}
+	if (ubqt_win.status != NULL) {
+		//TODO: create window
+		pthread_mutex_lock(&mutex);
+		//TODO: draw window from data
+		pthread_mutex_unlock(&mutex);
+		//TODO: update any data to reflect new sizes
+	}
+	if (ubqt_win.main != NULL) {
+		//TODO: create window
+		pthread_mutex_lock(&mutex);
+		//TODO: draw window from data
+		pthread_mutex_unlock(&mutex);
+		//TODO: update any data to reflect new sizes
+	}
+
+	//TODO: Then update and draw to screen
+
+}
+
 int
 ubqt_draw_new_data_callback()
 {
 
 	eventfd_write(evntfd, 1);
-	return 0;	
+	return 0;
 
 }
 
@@ -82,7 +134,7 @@ ubqt_draw_loop()
 	/* Wait for our event, redraw */
 	while(c != 'q') {
 		int count = epoll_wait(epollfd, evnts, EVENTS, -1);
-		
+
 		if (count == -1 && errno != EINTR)
 			return 1;
 
@@ -94,11 +146,11 @@ ubqt_draw_loop()
 				printf("%c\n", c);
 			}
 
-			//do_draw();
+			ubqt_draw();
 
 		}
 	}
-	
+
 	return 0;
 
 }

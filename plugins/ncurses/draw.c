@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <stdlib.h>
@@ -10,7 +11,7 @@
 #include "../../src/ubqt.h"
 
 int row, col; 
-int epollfd, evntfd;
+int epollfd, evfd;
 
 char *
 ubqt_markup_code(char *md)
@@ -40,7 +41,9 @@ ubqt_draw_init(char *title)
 	/* Attempt to set the window title */
 	printf("\033];%s\007", title);
 	
+	cbreak();
 	keypad(stdscr, TRUE);
+	nodelay(stdscr, TRUE);
 	timeout(0);
 	noecho();
 	start_color();
@@ -48,15 +51,19 @@ ubqt_draw_init(char *title)
 	
 	/* Set up epoll watching */
 	epollfd = epoll_create1(0);
-	evntfd = eventfd(0, EFD_NONBLOCK);
+	evfd = eventfd(0, EFD_NONBLOCK);
 
-	struct epoll_event evnt;
-	evnt.data.fd = evntfd;
-	evnt.events = EPOLLIN | EPOLLET;
-	epoll_ctl(epollfd, EPOLL_CTL_ADD, evntfd, &evnt);
+	struct epoll_event ev;
+	ev.data.fd = evfd;
+	ev.events = EPOLLIN | EPOLLET;
 
-	evnt.data.fd = STDIN_FILENO;
-	epoll_ctl(epollfd, EPOLL_CTL_ADD, STDIN_FILENO, &evnt); 
+	epoll_ctl(epollfd, EPOLL_CTL_ADD, evfd, &ev);
+
+	ev.data.fd = STDIN_FILENO;
+	ev.events = EPOLLIN | EPOLLPRI | EPOLLERR;
+	//fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
+
+	epoll_ctl(epollfd, EPOLL_CTL_ADD, STDIN_FILENO, &ev); 
 
 	return 0;
 
@@ -118,7 +125,7 @@ int
 ubqt_draw_new_data_callback()
 {
 
-	eventfd_write(evntfd, 1);
+	eventfd_write(evfd, 1);
 	return 0;
 
 }
@@ -126,30 +133,34 @@ ubqt_draw_new_data_callback()
 int
 ubqt_draw_loop()
 {
-	static const int EVENTS = 20;
-	struct epoll_event evnts[EVENTS];
-	int i;
+	struct epoll_event ev;
 	char c = 0;
 
 	/* Wait for our event, redraw */
-	while(c != 'q') {
-		int count = epoll_wait(epollfd, evnts, EVENTS, -1);
+	for (;;) {
 
-		if (count == -1 && errno != EINTR)
+		int fds = epoll_wait(epollfd, &ev, 1, -1);
+
+		if (fds == -1 && errno != EINTR)
 			return 1;
 
-		for (i = 0; i < count; i++) {
-			struct epoll_event *e  = evnts + i;
+		ubqt_draw();
+		
+		if (fds == 0)
+			continue;
 
-			if (e->data.fd == STDIN_FILENO) {
-				c = getch();
-				printf("%c\n", c);
-			}
 
-			ubqt_draw();
-
+		if (ev.data.fd == STDIN_FILENO) {
+			c = getch();
+			//ubqt_input_handle(c)
+			if (c == 'q')
+				break;
+			addch(c);
 		}
 	}
+
+	close(epollfd);
+	close(evfd);
 
 	return 0;
 
@@ -160,6 +171,7 @@ ubqt_draw_destroy()
 {
 	/* This should free any structures */
 	echo();
+	nocbreak();
 	endwin();
 	return 0;
 

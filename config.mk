@@ -18,7 +18,7 @@ INCS =
 LIBS = -lpthread
 
 # flags
-CPPFLAGS := -D_FORTIFY_SOURCE=2
+CPPFLAGS := -D_FORTIFY_SOURCE=2 -O2
 CFLAGS := -std=c99 -Wall ${INCS}
 LDFLAGS := -s ${LIBS}
 

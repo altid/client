@@ -122,6 +122,11 @@ int ubqt_draw_loop();
 int ubqt_draw_destroy();
 int ubqt_draw_new_data_callback();
 
+struct {
+	char *cur; /* Name of window that holds focus */
+	int x;
+	int y;
+} cursor;
 
 /**vi, leanback******************************************/
 /*                                                      */

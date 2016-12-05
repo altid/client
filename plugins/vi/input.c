@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
-#include "stdio.h"
+#include <string.h>
+#include <stdio.h>
 #include "utf8.h"
 #include "../../src/ubqt.h"
 
@@ -11,6 +12,7 @@ ubqt_input_init()
 
 }
 
+/* Return UBQT_FAILURE on exit so we can exit */
 int
 ubqt_input_handle(char *buffer)
 {
@@ -26,29 +28,35 @@ ubqt_input_handle(char *buffer)
 	KEY_escape[1] = '\x00';
 
 	
-	if (!utf8cmp(KEY_escape, buffer))
-		return 1;
+	if (!utf8cmp(KEY_escape, buffer)) {
+		ubqt_win.input = "-exit-";
+		return UBQT_FAILURE;
+	}
 
 	else if (!utf8cmp(KEY_enter, buffer)) {
 		pthread_mutex_lock(&mutex);
-		if(utf8cmp(ubqt_win.input, " ‣ "))
-			ubqt_data_write("input", ubqt_win.input + utf8size(" ‣ ") - 1);
 
-		asprintf(&ubqt_win.input, "%s", " ‣ ");
+		if(utf8cmp(ubqt_win.input, " ‣ ")) {
+			ubqt_data_write("input", ubqt_win.input + utf8size(" ‣ ") - 1);
+			asprintf(&ubqt_win.input, "%s", " ‣ ");
+		}
+
 		pthread_mutex_unlock(&mutex);
-		return 0;
+
+		return UBQT_SUCCESS;
 	}
 
 	else if (!utf8cmp(KEY_back, buffer)) {
-		/* move back through all continuation bits then null terminate */
-		int i   = utf8size(ubqt_win.input) - 1;
-		//TODO: int lim = utf8size(win.prompt);
-		int lim = utf8size(" ‣ ");
+		
+		/* Ignore current character in backwards search */
+		size_t i = utf8size(ubqt_win.input) - 1;
 
-		while(i >= lim && (0x80 == (ubqt_win.input[i--] & 0xc0)));
+		/* 0x80 AND result means we are on continuation */
+		/* move back until we are on the start char     */
+		while(i > 0 && (0x80 == (ubqt_win.input[i--] & 0xc0)));
 		ubqt_win.input[i] = 0;
 
-		return 0;
+		return UBQT_SUCCESS;
 	}
 
 	else {
@@ -61,6 +69,6 @@ ubqt_input_handle(char *buffer)
 		pthread_mutex_unlock(&mutex);
 	}
 	
-	return 0;
+	return UBQT_SUCCESS;
 
 }

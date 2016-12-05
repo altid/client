@@ -10,7 +10,7 @@ include plugins/$(BACK)/$(BACK).mk
 include plugins/$(SEAT)/$(SEAT).mk
 include plugins/$(TRAN)/$(TRAN).mk
 
-all: ubqt
+all: ubqt-$(BACK)
 
 options:
 	@echo "Usage: make <backend> <input> <data>"
@@ -32,7 +32,7 @@ options:
 $(OBJ) : src/ubqt.h
 
 # if any objects change, update ubqt
-ubqt: $(OBJ)
+ubqt-$(BACK): $(OBJ)
 	@echo CC -o $@
 	@$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
@@ -46,13 +46,13 @@ dist: clean
 
 clean:
 	@echo cleaning
-	@rm -rf $(OBJ) *~ ubqt
+	@rm -rf $(OBJ) *~ ubqt-$(BACK)
 
-install: ubqt
+install: ubqt-$(BACK)
 	@echo installing executable file to $(DESTDIR)$(PREFIX)/bin
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
-	@cp -f ubqt $(DESTDIR)$(PREFIX)/bin/ubqt
-	@chmod 755 $(DESTDIR)$(PREFIX)/bin/ubqt
+	@cp -f ubqt-$(BACK) $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
+	@chmod 755 $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
 	@echo installing manual page to $(DESTDIR)$(MANPREFIX)/man1
 	@mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	@sed "s/VERSION/${VERSION}/g" < ubqt.1 > $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
@@ -60,7 +60,7 @@ install: ubqt
 
 uninstall:
 	@echo removing executable file from $(DESTDIR)$(PREFIX)/bin
-	@rm -f $(DESTDIR)$(PREFIX)/bin/ubqt
+	@rm -f $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
 	@echo removing manual page from $(DESTDIR)$(MANPREFIX)/man1
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 

@@ -122,7 +122,7 @@ ubqt_draw_init(char *title)
 	cr = cairo_create(surface);
 	
 	layout = pango_cairo_create_layout(cr);
-	desc = pango_font_description_from_string("DejaVu Sans Mono 10");
+	desc = pango_font_description_from_string("DejaVu Sans 10");
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
@@ -227,6 +227,7 @@ ubqt_draw()
 	/* We need a local representation of the remaining surface */
 	int x = BORDER, y = BORDER, h = height - BORDER, w = width - BORDER;
 
+	//TODO: Draw cursor in appropriate if'd section
 	if (ubqt_win.title != NULL) {
 		pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
 		pthread_mutex_lock(&mutex);
@@ -236,7 +237,6 @@ ubqt_draw()
 		ubqt_do_draw(cr, x, y);
 		y += logical->height / 2;
 		pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
-
 	}
 	
 
@@ -328,12 +328,10 @@ ubqt_keypress_event(xcb_generic_event_t *e)
 	char *buffer = malloc(xkb_state_key_get_utf8(state, keycode, NULL, size) + 1);
 	xkb_state_key_get_utf8(state, keycode, buffer, sizeof(buffer));
 
-	//TODO: ubqt_input_handle(buffer, ubqt_win.current)
-	//      ubqt_win.current is window with cursos: input, main, tabs, etc
-	//      input tracks modes so things like scrolling happen at the vi layer
 	if(ubqt_input_handle(buffer))
 		return 1;
 
+	free(buffer);
 	return 0;
 }
 
@@ -355,9 +353,8 @@ ubqt_draw_loop()
 
 	ubqt_draw();
 
-	int done = 0;
-
 	xcb_generic_event_t *e;
+	int done = 0;
 
 	while(!done) {
 

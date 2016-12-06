@@ -9,34 +9,21 @@
 #include <unistd.h>
 #include <errno.h>
 #include <ncurses.h>
-//#include <panel.h>
 #include "../../src/ubqt.h"
 
-int row, col; 
+#define U_MAX_BYTES 4
+
+int row, col;
 int epfd, evfd;
 WINDOW *win[6];
-/* 
+
+/*
  * Ncurses doesn't speak any particular form of markdown
  * we have to translate it when it's finally written to
- * screen - these functions simply no-op and return 
+ * screen - these functions simply no-op and return
  */
-
-char *
-ubqt_markup_code(char *md)
-{
-	
-	return md;
-
-}
-
-char *
-ubqt_markup_line(char *md, unsigned line)
-{
-
-	(void) line;
-	return md;
-
-}
+char *ubqt_markup_code(char *md) { return md; }
+char *ubqt_markup_line(char *md, unsigned line) { (void)line; return md; }
 
 int
 ubqt_draw_init(char *title)
@@ -55,7 +42,7 @@ ubqt_draw_init(char *title)
 	timeout(0);
 	noecho();
 	getmaxyx(stdscr, row, col);
-	
+
 	/* Set up epoll watching */
 	epfd = epoll_create1(0);
 	evfd = eventfd(0, EFD_NONBLOCK);
@@ -70,7 +57,7 @@ ubqt_draw_init(char *title)
 	ev.events  = EPOLLIN | EPOLLET;
 	fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
 
-	epoll_ctl(epfd, EPOLL_CTL_ADD, STDIN_FILENO, &ev); 
+	epoll_ctl(epfd, EPOLL_CTL_ADD, STDIN_FILENO, &ev);
 
 	/* Attempt to set the window title */
 	printf("\033]0;%s\007", title);
@@ -83,25 +70,27 @@ ubqt_draw_init(char *title)
 }
 
 static unsigned
-get_height(int cols, char *buf)
+get_height(char *buf)
 {
 
-	if (!buf)
+	if(strlen(buf) < 1)
 		return 1;
 
-	/* If string length is greater than columns, return difference */
-	if ((strlen(buf) / cols) > 1) 
-		return strlen(buf) / (unsigned)cols + 1; 
+	/* Simply count newlines */
+	int i = 0, j = 0;
+	while(buf[i] != '\0') {
+		if(buf[i] == '\n' || buf[i] == '\x0d')
+			j++;
+		i++;
+	}
 
-	else
-		return 1;
-
+	return (j) ? j : 1;
 }
 
 static unsigned
 get_width(int cols, char *buf)
 {
-	
+
 	/* Return lesser of max line size or cols / 4 */
 	int i = 0, j = 0, max = 0, wid = cols / 4;
 	while(buf[i] != '\0') {
@@ -109,16 +98,16 @@ get_width(int cols, char *buf)
 
 		if(j > wid)
 			return wid;
-		
+
 		if(j > max)
 			max = j;
 
-		if(buf[i] == '\n')
+		if(buf[i] == '\n' || buf[i] == '\x0d')
 			j = 0;
 
 		i++;
 	}
-	
+
 	return max;
 
 }
@@ -128,15 +117,15 @@ ubqt_draw()
 {
 	
 	int bottom = 0, x = 0, y = 0, w = COLS, h = LINES;
-	//If we have data, create a window, draw all for now; see about improving in the future
 
 	clear();
 	refresh();
 
+	//TODO: Add cursor in appropriate if here 
 	if (ubqt_win.title != NULL) {
 		pthread_mutex_lock(&mutex);
-		int lineh = get_height(w, ubqt_win.title);
-		win[0] = newwin(lineh, w, y, x);	
+		int lineh = get_height(ubqt_win.title);
+		win[0] = newwin(lineh, w, y, x);
 		wprintw(win[0], ubqt_win.title);
 		pthread_mutex_unlock(&mutex);
 		wrefresh(win[0]);
@@ -144,9 +133,7 @@ ubqt_draw()
 		h -= lineh;
 	}
 
-	//TODO: Add cursor in appropriate if here 
 	if (ubqt_win.sidebar != NULL) {
-
 		pthread_mutex_lock(&mutex);
 		int linew = get_width(w, ubqt_win.sidebar);
 		win[1] = newwin(h, linew, y, x);
@@ -159,7 +146,7 @@ ubqt_draw()
 
 	if (ubqt_win.tabs != NULL) {
 		pthread_mutex_lock(&mutex);
-		int lineh = get_height(w, ubqt_win.tabs);
+		int lineh = get_height(ubqt_win.tabs);
 		win[2] = newwin(lineh, y, y, x);
 		wprintw(win[2], ubqt_win.tabs);
 		pthread_mutex_unlock(&mutex);
@@ -170,7 +157,7 @@ ubqt_draw()
 
 	if (ubqt_win.input != NULL) {
 		pthread_mutex_lock(&mutex);
-		int lineh = get_height(w, ubqt_win.input);
+		int lineh = get_height(ubqt_win.input);
 		win[3] = newwin(lineh, w, LINES - lineh, x);
 		wprintw(win[3], ubqt_win.input);
 		pthread_mutex_unlock(&mutex);
@@ -181,7 +168,7 @@ ubqt_draw()
 
 	if (ubqt_win.status != NULL) {
 		pthread_mutex_lock(&mutex);
-		int lineh = get_height(w, ubqt_win.status);
+		int lineh = get_height(ubqt_win.status);
 		win[4] = newwin(lineh, w, LINES - lineh - bottom, x);
 		wprintw(win[4], ubqt_win.status);
 		pthread_mutex_unlock(&mutex);
@@ -213,46 +200,60 @@ int
 ubqt_draw_loop()
 {
 	struct epoll_event ev;
-	char c[2];
+	static unsigned short mask[] = {192, 224, 240};
+	char *c = (char*)calloc(U_MAX_BYTES + 1, sizeof(char));
+
+	int done = 0;
 
 	/* If input window, give some initial data */
 	ubqt_draw();
 
 	/* Wait for our event, redraw */
-	for (;;) {
-		
-		if(!strcmp("-exit-", ubqt_win.input))
-			break;
+	while (!done) {
 
 		int fds = epoll_wait(epfd, &ev, 1, -1);
 
-		if (fds == -1 && errno != EINTR)
+		if (fds == -1 && errno != EINTR) {
+			free(c);
 			return 1;
+		}
 
 		if (ev.data.fd == evfd) {
 			ubqt_draw();
-			update_cursor(0);
 		}
 
 		if (ev.data.fd == STDIN_FILENO) {
-			c[0] = fgetc(stdin);
-			c[1] = 0;	
+			//TODO: libicu u_getc
+			unsigned i, j;
+			memset(c, 0, U_MAX_BYTES + 1);
 
-			if(c[0] == '\n')
-				c[0] = '\x0d';
+			c[0] = getc(stdin);
 
-			if(c[0] == 127 | c[0] == 8)
+			i = 0;
+
+			if ((c[0] & mask[0]) == mask[0]) i++;
+			if ((c[0] & mask[1]) == mask[1]) i++;
+			if ((c[0] & mask[2]) == mask[2]) i++;
+
+			j = 0;
+			while (j < i) {
+				j++;
+				c[j] = getc(stdin);
+			}
+
+			/* This will be fixed using libicu */
+			if ((c[0] == 127 || c[0] == 8) && c[1] == 0)
 				c[0] = '\x08';
 
-			int ret = ubqt_input_handle(c);
+			done = ubqt_input_handle(c);
 			ubqt_draw();
-			
+
 		}
 	}
 
 	close(epfd);
 	close(evfd);
-
+	free(c);
 	return 0;
 
 }
@@ -261,7 +262,6 @@ int
 ubqt_draw_destroy()
 {
 
-	/* This should free any structures */
 	echo();
 	nocbreak();
 	endwin();

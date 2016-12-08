@@ -130,7 +130,7 @@ ubqt_draw()
 		int lineh = get_height(ubqt_win.title);
 		win[0] = newwin(lineh, w, y, x);
 		ubqt_ncurses_markup(win[0], ubqt_win.title);
-		wrefresh(win[1]);
+		wrefresh(win[0]);
 		pthread_mutex_unlock(&mutex);
 		y += lineh;
 		h -= lineh;

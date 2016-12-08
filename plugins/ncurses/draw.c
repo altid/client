@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <ncurses.h>
+#include "draw.h"
 #include "../../src/ubqt.h"
 
 #define U_MAX_BYTES 4
@@ -31,14 +32,19 @@ ubqt_draw_init(char *title)
 
 	setlocale(LC_ALL, "");
 
+	/* Attempt to set title */
+	printf("\033]0;%s\007", title);
+
 	if (!initscr()) {
 		fprintf(stderr, "Error calling initscr()\n");
 		return 1;
 	}
 
+	start_color();
 	cbreak();
 	keypad(stdscr, TRUE);
 	nodelay(stdscr, TRUE);
+	scrollok(stdscr, TRUE);
 	timeout(0);
 	noecho();
 	getmaxyx(stdscr, row, col);
@@ -58,9 +64,6 @@ ubqt_draw_init(char *title)
 	fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
 
 	epoll_ctl(epfd, EPOLL_CTL_ADD, STDIN_FILENO, &ev);
-
-	/* Attempt to set the window title */
-	printf("\033]0;%s\007", title);
 
 	//TODO: If :set input hidden
 	ubqt_win.input = " ‣ ";
@@ -126,9 +129,9 @@ ubqt_draw()
 		pthread_mutex_lock(&mutex);
 		int lineh = get_height(ubqt_win.title);
 		win[0] = newwin(lineh, w, y, x);
-		wprintw(win[0], ubqt_win.title);
+		ubqt_ncurses_markup(win[0], ubqt_win.title);
+		wrefresh(win[1]);
 		pthread_mutex_unlock(&mutex);
-		wrefresh(win[0]);
 		y += lineh;
 		h -= lineh;
 	}
@@ -138,8 +141,8 @@ ubqt_draw()
 		int linew = get_width(w, ubqt_win.sidebar);
 		win[1] = newwin(h, linew, y, x);
 		wprintw(win[1], ubqt_win.sidebar);
-		pthread_mutex_unlock(&mutex);
 		wrefresh(win[1]);
+		pthread_mutex_unlock(&mutex);
 		x += linew;
 		w -= linew;
 	}
@@ -148,40 +151,39 @@ ubqt_draw()
 		pthread_mutex_lock(&mutex);
 		int lineh = get_height(ubqt_win.tabs);
 		win[2] = newwin(lineh, y, y, x);
-		wprintw(win[2], ubqt_win.tabs);
-		pthread_mutex_unlock(&mutex);
+		ubqt_ncurses_markup(win[2], ubqt_win.tabs);
 		wrefresh(win[2]);
+		pthread_mutex_unlock(&mutex);
 		y += lineh;
 		h -= lineh;
 	}
 
 	if (ubqt_win.input != NULL) {
 		pthread_mutex_lock(&mutex);
-		int lineh = get_height(ubqt_win.input);
-		win[3] = newwin(lineh, w, LINES - lineh, x);
+		win[3] = newwin(1, w, LINES - 1, x);
 		wprintw(win[3], ubqt_win.input);
-		pthread_mutex_unlock(&mutex);
 		wrefresh(win[3]);
-		bottom += lineh;
-		h -= lineh;
+		pthread_mutex_unlock(&mutex);
+		bottom += 1;
+		h -= 1;
 	}
 
 	if (ubqt_win.status != NULL) {
 		pthread_mutex_lock(&mutex);
 		int lineh = get_height(ubqt_win.status);
 		win[4] = newwin(lineh, w, LINES - lineh - bottom, x);
-		wprintw(win[4], ubqt_win.status);
-		pthread_mutex_unlock(&mutex);
+		ubqt_ncurses_markup(win[4], ubqt_win.status);
 		wrefresh(win[4]);
+		pthread_mutex_unlock(&mutex);
 		h -= lineh;
 	}
 
 	if (ubqt_win.main != NULL) {
 		pthread_mutex_lock(&mutex);
 		win[5] = newwin(h, w, y, x);
-		wprintw(win[5], ubqt_win.main);
-		pthread_mutex_unlock(&mutex);
+		ubqt_ncurses_markup(win[5], ubqt_win.main);
 		wrefresh(win[5]);
+		pthread_mutex_unlock(&mutex);
 	}
 
 }
@@ -206,10 +208,11 @@ ubqt_draw_loop()
 	int done = 0;
 
 	/* If input window, give some initial data */
-	ubqt_draw();
 
 	/* Wait for our event, redraw */
 	while (!done) {
+		
+		ubqt_draw();
 
 		int fds = epoll_wait(epfd, &ev, 1, -1);
 
@@ -224,29 +227,45 @@ ubqt_draw_loop()
 
 		if (ev.data.fd == STDIN_FILENO) {
 			//TODO: libicu u_getc
-			unsigned i, j;
+			unsigned i = 0, j;
+
+			int ch = getch();
+			
+			if(ch == KEY_RESIZE) {
+				endwin();
+				ubqt_draw();
+				continue;
+			}
+				
 			memset(c, 0, U_MAX_BYTES + 1);
 
-			c[0] = getc(stdin);
+			switch(ch) {
 
-			i = 0;
+				case 127:
+				case KEY_BACKSPACE:
+					c[0] = '\x08';
+					break;
+				
+				case '\n':
+					c[0] = '\x0d';
+					break;
 
-			if ((c[0] & mask[0]) == mask[0]) i++;
-			if ((c[0] & mask[1]) == mask[1]) i++;
-			if ((c[0] & mask[2]) == mask[2]) i++;
+				default:
+					c[0] = ch;
+					if ((c[0] & mask[0]) == mask[0]) i++;
+					if ((c[0] & mask[1]) == mask[1]) i++;
+					if ((c[0] & mask[2]) == mask[2]) i++;
 
-			j = 0;
-			while (j < i) {
-				j++;
-				c[j] = getc(stdin);
+					j = 0;
+					while (j < i) {
+						j++;
+						c[j] = getc(stdin);
+					}
+
+					break;
 			}
 
-			/* This will be fixed using libicu */
-			if ((c[0] == 127 || c[0] == 8) && c[1] == 0)
-				c[0] = '\x08';
-
 			done = ubqt_input_handle(c);
-			ubqt_draw();
 
 		}
 	}

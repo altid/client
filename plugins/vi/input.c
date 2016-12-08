@@ -4,10 +4,22 @@
 #include "utf8.h"
 #include "../../src/ubqt.h"
 
+//TODO: Modes
+
 int
 ubqt_input_init()
 {
 
+	/* Set up modes, cursor, default to pos 1 at input if it exists */
+	//if (ubqt_win.input)
+		cursor.cur = ubqt_win.input;
+	
+	//else
+		//cursor.cur = ubqt_win.main;
+	
+	cursor.x = 0;
+	cursor.y = 0;
+			
 	return 0;
 
 }
@@ -51,8 +63,8 @@ ubqt_input_handle(char *buffer)
 		/* Ignore current character in backwards search */
 		size_t i = utf8size(ubqt_win.input) - 1;
 
-		/* 0x80 AND result means we are on continuation */
-		/* move back until we are on the start char     */
+		/* 0x80 AND result means we are on continuation char */
+		/* move back until we are on the start char          */
 		while(i > 0 && (0x80 == (ubqt_win.input[i--] & 0xc0)));
 		ubqt_win.input[i] = 0;
 

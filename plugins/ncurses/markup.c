@@ -1,17 +1,18 @@
+#define _BSD_SOURCE
 #include <stdlib.h>
 #include <string.h>
 #include "draw.h"
 
 void
-ubqt_ncurses_markup(WINDOW *win, char *md)
+ubqt_ncurses_markup(WINDOW *win, char *markup)
 {
-	
+
 	init_pair(1, COLOR_BLUE, COLOR_BLACK);
 
-	char *line = strtok(md, "\n");
-	
-	while (line != NULL) {		
-	//char *line = md;
+	char *md = strdup(markup);
+	char *line = strtok(md, "\n\x0d");
+
+	while(line != NULL) {
 		switch (line[0]) {
 			case '#':
 				wattron(win, A_BOLD | COLOR_PAIR(1));
@@ -43,10 +44,12 @@ ubqt_ncurses_markup(WINDOW *win, char *md)
 			default:
 				wprintw(win, line);
 				waddch(win, '\n');
+				break;
 		}
-		
-		line = strtok(NULL, "\n\0");
-		
+
+		line = strtok(NULL, "\n\x0d");
 	}
-	
+
+	free(md);
+
 }

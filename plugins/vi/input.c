@@ -59,6 +59,7 @@ ubqt_input_handle(char *buffer)
 	}
 
 	else if (!utf8cmp(KEY_back, buffer)) {
+		pthread_mutex_lock(&mutex);
 		
 		/* Ignore current character in backwards search */
 		size_t i = utf8size(ubqt_win.input) - 1;
@@ -67,6 +68,7 @@ ubqt_input_handle(char *buffer)
 		/* move back until we are on the start char          */
 		while(i > 0 && (0x80 == (ubqt_win.input[i--] & 0xc0)));
 		ubqt_win.input[i] = 0;
+		pthread_mutex_unlock(&mutex);
 
 		return UBQT_SUCCESS;
 	}

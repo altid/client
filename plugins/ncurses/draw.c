@@ -121,11 +121,12 @@ ubqt_draw()
 	
 	int bottom = 0, x = 0, y = 0, w = COLS, h = LINES;
 
-	clear();
-	refresh();
+	//clear();
+	//refresh();
 
 	//TODO: Add cursor in appropriate if here 
 	if (ubqt_win.title != NULL) {
+		delwin(win[0]);
 		pthread_mutex_lock(&mutex);
 		int lineh = get_height(ubqt_win.title);
 		win[0] = newwin(lineh, w, y, x);
@@ -137,10 +138,11 @@ ubqt_draw()
 	}
 
 	if (ubqt_win.sidebar != NULL) {
+		delwin(win[1]);
 		pthread_mutex_lock(&mutex);
 		int linew = get_width(w, ubqt_win.sidebar);
 		win[1] = newwin(h, linew, y, x);
-		wprintw(win[1], ubqt_win.sidebar);
+		ubqt_ncurses_markup(win[1], ubqt_win.sidebar);
 		wrefresh(win[1]);
 		pthread_mutex_unlock(&mutex);
 		x += linew;
@@ -148,6 +150,7 @@ ubqt_draw()
 	}
 
 	if (ubqt_win.tabs != NULL) {
+		delwin(win[2]);
 		pthread_mutex_lock(&mutex);
 		int lineh = get_height(ubqt_win.tabs);
 		win[2] = newwin(lineh, y, y, x);
@@ -159,6 +162,7 @@ ubqt_draw()
 	}
 
 	if (ubqt_win.input != NULL) {
+		delwin(win[3]);
 		pthread_mutex_lock(&mutex);
 		win[3] = newwin(1, w, LINES - 1, x);
 		wprintw(win[3], ubqt_win.input);
@@ -169,6 +173,7 @@ ubqt_draw()
 	}
 
 	if (ubqt_win.status != NULL) {
+		delwin(win[4]);
 		pthread_mutex_lock(&mutex);
 		int lineh = get_height(ubqt_win.status);
 		win[4] = newwin(lineh, w, LINES - lineh - bottom, x);
@@ -179,6 +184,7 @@ ubqt_draw()
 	}
 
 	if (ubqt_win.main != NULL) {
+		delwin(win[5]);
 		pthread_mutex_lock(&mutex);
 		win[5] = newwin(h, w, y, x);
 		ubqt_ncurses_markup(win[5], ubqt_win.main);
@@ -232,7 +238,7 @@ ubqt_draw_loop()
 			int ch = getch();
 			
 			if(ch == KEY_RESIZE) {
-				endwin();
+				//endwin();
 				ubqt_draw();
 				continue;
 			}

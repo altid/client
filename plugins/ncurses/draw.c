@@ -229,7 +229,6 @@ ubqt_draw_loop()
 	sa.sa_handler = ubqt_resize;
 	sigaction(SIGWINCH, &sa, NULL);
 
-	/* Wait for our event, redraw */
 	while (!done) {
 
 		ubqt_draw();

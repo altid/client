@@ -248,6 +248,9 @@ ubqt_markup_inline(char *md, unsigned lineno)
 					len = strlen(md);
 				}
 
+				else
+					i += ubqt_replace(&md, "&#41;", i, 1);
+
 				if (tag_open.color)
 					tag_open.color = false;
 
@@ -258,7 +261,13 @@ ubqt_markup_inline(char *md, unsigned lineno)
 					i++;
 
 				break;
+			case '(':
+				if (!tag_open.color && !tag_open.inp) {
+					i += ubqt_replace(&md, "&#40;", i, 1);
+				}
+				break;
 /*
+
 			case ']':
 
 				if (tag_open.input && md[i + 1] == '(') {
@@ -320,9 +329,8 @@ ubqt_markup_line(char *md, unsigned lineno)
 	tag_open.lnk		= false;
 	tag_open.em			= false;
 
-	if ((md[0] == '`') && (md[1] == '`') && (md[2] == '`')) {
+	if ((md[0] == '`') && (md[1] == '`') && (md[2] == '`'))
 		asprintf(&md, "%s", "-codeblock-");
-	}
 
 	else {
 		md = ubqt_markup_whole_line(md);
@@ -340,9 +348,8 @@ ubqt_markup_code(char *md)
 	if ((md[0] == '`') && (md[1] == '`') && (md[2] == '`'))
 		asprintf(&md, "%s", "-codeblock-");
 
-	else {
+	else
 		asprintf(&md, "%s%s%s", "<span background=\"#444444\"><tt>", md, "</tt></span>");
-	}
 
 	return md;
 

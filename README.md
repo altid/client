@@ -1,5 +1,5 @@
 # ubqt
-![What it looks like so far](https://pb.gehidore.net/GWfH.png)
+![What it looks like so far](https://pb.gehidore.net/8DiS.png)
 
 ** This is pre-alpha, please do not expect anything of this **
 

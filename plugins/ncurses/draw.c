@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <stdlib.h>
@@ -43,11 +44,10 @@ ubqt_draw_init(char *title)
 	start_color();
 	cbreak();
 	keypad(stdscr, TRUE);
-	nodelay(stdscr, TRUE);
 	scrollok(stdscr, TRUE);
-	timeout(0);
 	noecho();
 	getmaxyx(stdscr, row, col);
+	use_default_colors();
 
 	/* Set up epoll watching */
 	epfd = epoll_create1(0);
@@ -121,9 +121,6 @@ ubqt_draw()
 	
 	int bottom = 0, x = 0, y = 0, w = COLS, h = LINES;
 
-	//clear();
-	//refresh();
-
 	//TODO: Add cursor in appropriate if here 
 	if (ubqt_win.title != NULL) {
 		delwin(win[0]);
@@ -131,8 +128,8 @@ ubqt_draw()
 		int lineh = get_height(ubqt_win.title);
 		win[0] = newwin(lineh, w, y, x);
 		ubqt_ncurses_markup(win[0], ubqt_win.title);
-		wrefresh(win[0]);
 		pthread_mutex_unlock(&mutex);
+		wrefresh(win[0]);
 		y += lineh;
 		h -= lineh;
 	}
@@ -142,9 +139,10 @@ ubqt_draw()
 		pthread_mutex_lock(&mutex);
 		int linew = get_width(w, ubqt_win.sidebar);
 		win[1] = newwin(h, linew, y, x);
+		scrollok(win[1], TRUE);
 		ubqt_ncurses_markup(win[1], ubqt_win.sidebar);
-		wrefresh(win[1]);
 		pthread_mutex_unlock(&mutex);
+		wrefresh(win[1]);
 		x += linew;
 		w -= linew;
 	}
@@ -155,8 +153,8 @@ ubqt_draw()
 		int lineh = get_height(ubqt_win.tabs);
 		win[2] = newwin(lineh, y, y, x);
 		ubqt_ncurses_markup(win[2], ubqt_win.tabs);
-		wrefresh(win[2]);
 		pthread_mutex_unlock(&mutex);
+		wrefresh(win[2]);
 		y += lineh;
 		h -= lineh;
 	}
@@ -165,9 +163,10 @@ ubqt_draw()
 		delwin(win[3]);
 		pthread_mutex_lock(&mutex);
 		win[3] = newwin(1, w, LINES - 1, x);
+		scrollok(win[3], TRUE);
 		wprintw(win[3], ubqt_win.input);
-		wrefresh(win[3]);
 		pthread_mutex_unlock(&mutex);
+		wrefresh(win[3]);
 		bottom += 1;
 		h -= 1;
 	}
@@ -178,18 +177,20 @@ ubqt_draw()
 		int lineh = get_height(ubqt_win.status);
 		win[4] = newwin(lineh, w, LINES - lineh - bottom, x);
 		ubqt_ncurses_markup(win[4], ubqt_win.status);
-		wrefresh(win[4]);
 		pthread_mutex_unlock(&mutex);
+		wrefresh(win[4]);
 		h -= lineh;
 	}
 
 	if (ubqt_win.main != NULL) {
 		delwin(win[5]);
-		pthread_mutex_lock(&mutex);
 		win[5] = newwin(h, w, y, x);
+		scrollok(win[5], TRUE);
+		pthread_mutex_lock(&mutex);
 		ubqt_ncurses_markup(win[5], ubqt_win.main);
-		wrefresh(win[5]);
+		wscrl(win[5], -2);
 		pthread_mutex_unlock(&mutex);
+		wrefresh(win[5]);
 	}
 
 }
@@ -203,6 +204,16 @@ ubqt_draw_new_data_callback()
 
 }
 
+static void
+ubqt_resize(int sig)
+{
+
+	(void) sig;
+	endwin();
+	refresh();
+	ubqt_draw();
+
+}
 
 int
 ubqt_draw_loop()
@@ -213,13 +224,17 @@ ubqt_draw_loop()
 
 	int done = 0;
 
-	/* If input window, give some initial data */
+	struct sigaction sa;
+	memset(&sa, 0, sizeof(struct sigaction));
+	sa.sa_handler = ubqt_resize;
+	sigaction(SIGWINCH, &sa, NULL);
 
 	/* Wait for our event, redraw */
 	while (!done) {
-		
+
 		ubqt_draw();
 
+		/* We implicitly handle the eventfd, as we'll no-op back to ubqt_draw */
 		int fds = epoll_wait(epfd, &ev, 1, -1);
 
 		if (fds == -1 && errno != EINTR) {
@@ -227,33 +242,33 @@ ubqt_draw_loop()
 			return 1;
 		}
 
-		if (ev.data.fd == evfd) {
-			ubqt_draw();
-		}
-
 		if (ev.data.fd == STDIN_FILENO) {
-			//TODO: libicu u_getc
-			unsigned i = 0, j;
 
+			unsigned i = 0, j;
 			int ch = getch();
-			
-			if(ch == KEY_RESIZE) {
-				//endwin();
-				ubqt_draw();
+
+			/* We handle with sigwinch */
+			if(ch == KEY_RESIZE)
 				continue;
-			}
-				
+
 			memset(c, 0, U_MAX_BYTES + 1);
 
 			switch(ch) {
-
 				case 127:
 				case KEY_BACKSPACE:
 					c[0] = '\x08';
 					break;
-				
+
 				case '\n':
 					c[0] = '\x0d';
+					break;
+
+				case KEY_UP:
+					wscrl(win[3], 1);
+					break;
+
+				case KEY_DOWN:
+					wscrl(win[3], -1);
 					break;
 
 				default:
@@ -270,9 +285,7 @@ ubqt_draw_loop()
 
 					break;
 			}
-
 			done = ubqt_input_handle(c);
-
 		}
 	}
 

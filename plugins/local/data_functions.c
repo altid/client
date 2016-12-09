@@ -67,7 +67,7 @@ ubqt_data_read(char *name, char *path)
 		unsigned lineno = 0;
 		size_t len = 0;
 		ssize_t read;
-		
+
 		char *ln = NULL;
 		bool codeblock = false;
 
@@ -94,7 +94,6 @@ ubqt_data_read(char *name, char *path)
 				asprintf(&markup, "%s%s", markup, ln);
 				lineno++;
 			}
-
 		}
 	}
 

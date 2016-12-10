@@ -17,8 +17,7 @@ ubqt_input_init()
 	//else
 		//cursor.cur = ubqt_win.main;
 	
-	cursor.x = 0;
-	cursor.y = 0;
+	cursor.index = 0;
 			
 	return 0;
 
@@ -48,6 +47,7 @@ ubqt_input_handle(char *buffer)
 	else if (!utf8cmp(KEY_enter, buffer)) {
 		pthread_mutex_lock(&mutex);
 
+		//TODO: ubqt prompt handling, readline mode as well as raw newline inserts on not-input window
 		if(utf8cmp(ubqt_win.input, " ‣ ")) {
 			ubqt_data_write("input", ubqt_win.input + utf8size(" ‣ ") - 1);
 			asprintf(&ubqt_win.input, "%s", " ‣ ");

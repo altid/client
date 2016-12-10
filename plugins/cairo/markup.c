@@ -194,7 +194,7 @@ ubqt_markup_inline(char *md, unsigned lineno)
 
 			case '[':
 
-				/* [>myfile](Hint) sets up input block using as much line as possible */
+				/* [>hint](/path/to/file/to/write/to) sets up input block using as much line as possible */
 				if (md[i + 1] == '>') {
 					char *hint = strndup(md, len);
 					tag_open.inp = true;

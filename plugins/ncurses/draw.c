@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <signal.h>
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <stdlib.h>
@@ -44,6 +43,7 @@ ubqt_draw_init(char *title)
 	start_color();
 	cbreak();
 	keypad(stdscr, TRUE);
+	nodelay(stdscr, FALSE);
 	scrollok(stdscr, TRUE);
 	noecho();
 	getmaxyx(stdscr, row, col);
@@ -204,17 +204,6 @@ ubqt_draw_new_data_callback()
 
 }
 
-static void
-ubqt_resize(int sig)
-{
-
-	(void) sig;
-	endwin();
-	refresh();
-	ubqt_draw();
-
-}
-
 int
 ubqt_draw_loop()
 {
@@ -224,16 +213,12 @@ ubqt_draw_loop()
 
 	int done = 0;
 
-	struct sigaction sa;
-	memset(&sa, 0, sizeof(struct sigaction));
-	sa.sa_handler = ubqt_resize;
-	sigaction(SIGWINCH, &sa, NULL);
-
 	while (!done) {
 
 		ubqt_draw();
 
 		/* We implicitly handle the eventfd, as we'll no-op back to ubqt_draw */
+		
 		int fds = epoll_wait(epfd, &ev, 1, -1);
 
 		if (fds == -1 && errno != EINTR) {
@@ -244,11 +229,14 @@ ubqt_draw_loop()
 		if (ev.data.fd == STDIN_FILENO) {
 
 			unsigned i = 0, j;
-			int ch = getch();
+			int ch = wgetch(stdscr);
 
-			/* We handle with sigwinch */
-			if(ch == KEY_RESIZE)
+			//TODO: This won't fire until we've had at least 1 char of input
+			if(ch == KEY_RESIZE) {
+				endwin();
+				refresh();
 				continue;
+			}
 
 			memset(c, 0, U_MAX_BYTES + 1);
 

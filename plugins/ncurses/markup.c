@@ -248,6 +248,29 @@ ubqt_ncurses_markup(WINDOW *win, char *markup)
 					else
 						i++;
 					break;
+				case '[':
+					if (line[i + 1] == '#' && line[i + 8] == ']') {
+						tag_open.color = true;
+						line[i] = 0;
+						wprintw(win, line);
+						line += 10;
+						i = 0;
+					
+					}
+					else
+						i++;
+					break;
+
+				case ')':
+
+					if (tag_open.color && (line[i + 1] == '\n' || line[i + 1] == 0)) {
+						line[i] = 0;
+						continue;
+					}
+
+					else
+						i++;
+					break;
 
 				default:
 					i++;

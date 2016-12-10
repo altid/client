@@ -124,8 +124,7 @@ int ubqt_draw_new_data_callback();
 
 struct {
 	char *cur; /* Name of window that holds focus */
-	int x;
-	int y;
+	int index;
 } cursor;
 
 /**vi, leanback******************************************/
@@ -169,11 +168,11 @@ int ubqt_input_destroy();
 char *ubqt_markup_line(char *, unsigned);
 char *ubqt_markup_code(char *);
 
-/* [key](value) line it occurs on */
+/* [key](value) index it occurs at */
 struct Item {
 	char *key;
 	char *value;
-	unsigned line;
+	unsigned index;
 };
 
 struct Tag {

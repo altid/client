@@ -10,12 +10,14 @@ int
 ubqt_input_init()
 {
 
-	/* Set up modes, cursor, default to pos 1 at input if it exists */
-	//if (ubqt_win.input)
+	/* Set up modes, cursor, default end of input if it exists */
+	if (ubqt_win.input) {
+		cursor.index = strlen(ubqt_win.input);
 		cursor.cur = ubqt_win.input;
+	}
 	
-	//else
-		//cursor.cur = ubqt_win.main;
+	else
+		cursor.cur = NULL;
 	
 	cursor.index = 0;
 			
@@ -39,15 +41,16 @@ ubqt_input_handle(char *buffer)
 	KEY_escape[1] = '\x00';
 
 	
+	//TODO: if cursor.cur == NULL don't draw cursor
 	if (!utf8cmp(KEY_escape, buffer)) {
 		ubqt_win.input = "-exit-";
 		return UBQT_FAILURE;
 	}
 
+	//TODO: ubqt prompt handling, readline mode as well as raw newline inserts on not-input window
 	else if (!utf8cmp(KEY_enter, buffer)) {
 		pthread_mutex_lock(&mutex);
 
-		//TODO: ubqt prompt handling, readline mode as well as raw newline inserts on not-input window
 		if(utf8cmp(ubqt_win.input, " ‣ ")) {
 			ubqt_data_write("input", ubqt_win.input + utf8size(" ‣ ") - 1);
 			asprintf(&ubqt_win.input, "%s", " ‣ ");
@@ -58,6 +61,7 @@ ubqt_input_handle(char *buffer)
 		return UBQT_SUCCESS;
 	}
 
+	//TODO: backspace in normal mode handling? 
 	else if (!utf8cmp(KEY_back, buffer)) {
 		pthread_mutex_lock(&mutex);
 		
@@ -82,6 +86,8 @@ ubqt_input_handle(char *buffer)
 			asprintf(&ubqt_win.input, "%s", buffer);
 		pthread_mutex_unlock(&mutex);
 	}
+
+	cursor.index = strlen(ubqt_win.input);
 	
 	return UBQT_SUCCESS;
 

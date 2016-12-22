@@ -122,7 +122,7 @@ ubqt_draw_init(char *title)
 	cr = cairo_create(surface);
 	
 	layout = pango_cairo_create_layout(cr);
-	desc = pango_font_description_from_string("DejaVu Sans Mono 10");
+	desc = pango_font_description_from_string("DejaVu Sans Mono 8");
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);

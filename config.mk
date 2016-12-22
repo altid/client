@@ -2,7 +2,7 @@
 VERSION = 0.0
 
 # Customize below to fit your system
-BACK = ncurses
+BACK = cairo
 SEAT = vi
 TRAN = local
 

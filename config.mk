@@ -4,7 +4,7 @@ VERSION = 0.0
 # Customize below to fit your system
 BACK = cairo
 SEAT = vi
-TRAN = local
+TRAN = 9p
 
 # paths
 PREFIX = /usr/local

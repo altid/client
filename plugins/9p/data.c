@@ -38,7 +38,7 @@ int
 ubqt_data_write(char *name, char *buffer)
 {
 
-	//Send Rwrite
+	//Send Twrite
 	return 0;
 
 }
@@ -47,7 +47,7 @@ char *
 ubqt_data_read(char *name, char *path)
 {
 
-	//Send Rread
+	//Send Tread
 	//-codeblock- ignore
 	return "test";
 

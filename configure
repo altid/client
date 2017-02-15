@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# .configure
+
+echo "select a backend:"
+echo "1) cairo"
+echo "2) ncurses"
+
+read -r backend
+case $backend in
+	1*|cairo)   sed -i 's/BACK = .*$/BACK = cairo/'   config.mk ;;
+	2*|ncurses) sed -i 's/BACK = .*$/BACK = ncurses/' config.mk ;;
+esac
+
+echo "select an input method:"
+echo "1) vi"
+echo "2) leanback"
+
+read -r input
+case $input in
+	1*|vi)       sed -i 's/INPUT = .*$/BACK = vi/'      config.mk ;;
+	2*|leanback) sed -i 's/INPUT = .*$/BACK = leanback' config.mk ;;
+esac
+
+echo "select connection method:"
+echo "1) local"
+echo "2) 9p"
+
+read -r connection
+case $connection in
+	1*|local) sed -i 's/TRAN = .*$/TRAN = local/' config.mk ;;
+	2*|9p)    sed -i 's/TRAN = .*$/TRAN = 9p/'    config.mk ;;
+esac

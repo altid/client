@@ -4,7 +4,7 @@ VERSION = 0.0
 # Customize below to fit your system
 BACK = ncurses
 SEAT = vi
-TRAN = 9p
+TRAN = local
 
 # paths
 PREFIX = /usr/local

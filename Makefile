@@ -6,22 +6,11 @@ SRC := src/ubqt.c src/util.c
 OBJ := src/ubqt.o src/util.o
 
 include config.mk
-include plugins/$(BACK)/$(BACK).mk
+include plugins/$(TRANSPORT)/$(TRANSPORT).mk
+include plugins/$(BACKEND)/$(BACKEND).mk
 include plugins/$(SEAT)/$(SEAT).mk
-include plugins/$(TRAN)/$(TRAN).mk
 
-all: ubqt-$(BACK)
-
-options:
-	@echo "Usage: make <backend> <input> <data>"
-	@echo "backends = cairo"
-	@echo "         = ncurses"
-	@echo "         = nuklear"
-	@echo "(input)  = vi"
-	@echo "         = game"
-	@echo "(data)	= local"
-	@echo "         = socket"
-	@echo "         = 9p"
+all: ubqt-$(BACKEND)
 
 # cc -c -l %.c -o %.o
 %.o: %.c
@@ -46,13 +35,13 @@ dist: clean
 
 clean:
 	@echo cleaning
-	@rm -rf $(OBJ) *~ ubqt-$(BACK)
+	@rm -rf $(OBJ) *~ ubqt-$(BACKEND)
 
-install: ubqt-$(BACK)
+install: ubqt-$(BACKEND)
 	@echo installing executable file to $(DESTDIR)$(PREFIX)/bin
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
-	@cp -f ubqt-$(BACK) $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
-	@chmod 755 $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
+	@cp -f ubqt-$(BACKEND) $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACKEND)
+	@chmod 755 $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACKEND)
 	@echo installing manual page to $(DESTDIR)$(MANPREFIX)/man1
 	@mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	@sed "s/VERSION/${VERSION}/g" < ubqt.1 > $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
@@ -60,7 +49,7 @@ install: ubqt-$(BACK)
 
 uninstall:
 	@echo removing executable file from $(DESTDIR)$(PREFIX)/bin
-	@rm -f $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
+	@rm -f $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACKEND)
 	@echo removing manual page from $(DESTDIR)$(MANPREFIX)/man1
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 

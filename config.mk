@@ -2,9 +2,9 @@
 VERSION = 0.0
 
 # Customize below to fit your system
-BACK = ncurses
+TRANSPORT = local
+BACKEND = ncurses
 SEAT = vi
-TRAN = local
 
 # paths
 PREFIX = /usr/local

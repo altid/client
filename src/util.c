@@ -149,6 +149,8 @@ ubqt_substr(char *str, unsigned start, unsigned end)
 	 * looking 3 chars past the end of our string
 	 * make sure we fail here
 	 */
+	if (str == NULL)
+		return UBQT_FAILURE;
 
 	if (start + end > strlen(str))
 		return UBQT_FAILURE;
@@ -175,6 +177,9 @@ ubqt_insert(char **str, const char *token, unsigned index)
 {
 
 	/* Out of bounds */
+	if (str == NULL)
+		return 0;
+
 	if(index > strlen(*str))
 		return 0;
 

@@ -21,7 +21,7 @@ all: ubqt-$(BACKEND)
 $(OBJ) : src/ubqt.h
 
 # if any objects change, update ubqt
-ubqt-$(BACK): $(OBJ)
+ubqt-$(BACKEND): $(OBJ)
 	@echo CC -o $@
 	@$(CC) -o $@ $(OBJ) $(LDFLAGS)
 

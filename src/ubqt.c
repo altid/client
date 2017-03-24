@@ -7,22 +7,17 @@
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void *
-run_data_loop(void *arg)
-{
-
+run_data_loop(void *arg) {
 	char *path = arg;
 	ubqt_data_loop(path);
 	return 0;
-
 }
 
 int
-main(int argc, char* argv[])
-{
-
+main(int argc, char* argv[]) {
 	int err;
 	pthread_t file_thread;
-	
+
 	if (argc != 2) {
 		fprintf(stderr, "usage: %s <path>\n", argv[0]);
 		exit(EXIT_FAILURE);
@@ -79,5 +74,4 @@ main(int argc, char* argv[])
 		exit(EXIT_SUCCESS);
 
 	exit(EXIT_FAILURE);
-
 }

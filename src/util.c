@@ -19,7 +19,7 @@ ubqt_data_update(char *data, char *path)
 
 	char *tmp = NULL;
 
-	if (!strcmp(data, "main")) {
+	if (!strcmp(data, "feed")) {
 		tmp = ubqt_data_read(data, path);
 		pthread_mutex_lock(&mutex);
 
@@ -129,7 +129,7 @@ ubqt_data_remove(char *data)
 		ubqt_win.sidebar = NULL;
 	}
 
-	else if (!strcmp(data, "main")) {
+	else if (!strcmp(data, "feed")) {
 		if (ubqt_win.main != NULL)
 			free(ubqt_win.main);
 

@@ -8,8 +8,8 @@ echo "2) ncurses"
 
 read -r backend
 case $backend in
-	1*|cairo)   sed -i 's/BACKEND = .*$/BACKEND = cairo/'   config.mk ;;
-	2*|ncurses) sed -i 's/BACKEND = .*$/BACKEND = ncurses/' config.mk ;;
+	1*|cairo)   sed -i 's/BACK = .*$/BACK = cairo/'   config.mk ;;
+	2*|ncurses) sed -i 's/BACK = .*$/BACK = ncurses/' config.mk ;;
 esac
 
 echo "select an input method:"

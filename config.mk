@@ -3,7 +3,7 @@ VERSION = 0.0
 
 # Customize below to fit your system
 TRANSPORT = local
-BACK = ncurses
+BACK = cairo
 SEAT = vi
 
 # paths

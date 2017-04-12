@@ -18,8 +18,8 @@ echo "2) leanback"
 
 read -r input
 case $input in
-	1*|vi)       sed -i 's/INPUT = .*$/BACK = vi/'      config.mk ;;
-	2*|leanback) sed -i 's/INPUT = .*$/BACK = leanback' config.mk ;;
+	1*|vi)       sed -i 's/INPUT = .*$/INPUT = vi/'      config.mk ;;
+	2*|leanback) sed -i 's/INPUT = .*$/INPUT = leanback' config.mk ;;
 esac
 
 echo "select connection method:"

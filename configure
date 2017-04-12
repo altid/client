@@ -8,8 +8,8 @@ echo "2) ncurses"
 
 read -r backend
 case $backend in
-	1*|cairo)   sed -i 's/BACK = .*$/BACK = cairo/'   config.mk ;;
-	2*|ncurses) sed -i 's/BACK = .*$/BACK = ncurses/' config.mk ;;
+	1*|cairo)   sed -i 's/BACKEND = .*$/BACKEND = cairo/'   config.mk ;;
+	2*|ncurses) sed -i 's/BACKEND = .*$/BACKEND = ncurses/' config.mk ;;
 esac
 
 echo "select an input method:"
@@ -18,8 +18,8 @@ echo "2) leanback"
 
 read -r input
 case $input in
-	1*|vi)       sed -i 's/INPUT = .*$/INPUT = vi/'      config.mk ;;
-	2*|leanback) sed -i 's/INPUT = .*$/INPUT = leanback' config.mk ;;
+	1*|vi)       sed -i 's/SEAT = .*$/SEAT = vi/'      config.mk ;;
+	2*|leanback) sed -i 's/SEAT = .*$/SEAT = leanback' config.mk ;;
 esac
 
 echo "select connection method:"
@@ -28,6 +28,6 @@ echo "2) 9p"
 
 read -r connection
 case $connection in
-	1*|local) sed -i 's/TRAN = .*$/TRAN = local/' config.mk ;;
-	2*|9p)    sed -i 's/TRAN = .*$/TRAN = 9p/'    config.mk ;;
+	1*|local) sed -i 's/TRANSPORT = .*$/TRANSPORT = local/' config.mk ;;
+	2*|9p)    sed -i 's/TRANSPORT = .*$/TRANSPORT = 9p/'    config.mk ;;
 esac

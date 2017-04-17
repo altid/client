@@ -17,8 +17,8 @@ INCS =
 LIBS = -lpthread
 
 # flags
-CPPFLAGS := -D_FORTIFY_SOURCE=2 -O2
+CPPFLAGS := -D_FORTIFY_SOURCE=2
 CFLAGS := -std=c99 -Wall ${INCS}
 LDFLAGS := -s ${LIBS}
 
-CC = clang -rpath /usr/lib
+CC = clang -ggdb -rpath /usr/lib

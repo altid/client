@@ -24,7 +24,7 @@ int
 ubqt_data_loop(char *path)
 {
 
-	//We should be able to select at some point on the fd here
+	//read event, update based on string result from reads
 	//ubqt_data_update(name, path)
 	//ubqt_draw_new_data_callback()
 	//ubqt_data_remove(name)

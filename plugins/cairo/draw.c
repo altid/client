@@ -105,7 +105,8 @@ ubqt_draw_init(char *title)
 
 	xcb_create_window(c, XCB_COPY_FROM_PARENT, window, screen->root, 20, 20, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, mask, values);
 
-	xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, strlen(title), title);
+	xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, 8, strlen(title), title);
+	xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, XCB_ATOM_WM_TITLE, XCB_ATOM_STRING, 8, strlen(title), title);
 	
 	//TODO: Get user mapping to generate key
 
@@ -122,7 +123,7 @@ ubqt_draw_init(char *title)
 	cr = cairo_create(surface);
 	
 	layout = pango_cairo_create_layout(cr);
-	desc = pango_font_description_from_string("Source Code Pro 10");
+	desc = pango_font_description_from_string("Source Code Pro 9");
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);

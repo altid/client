@@ -26,7 +26,6 @@ ubqt-$(BACK): $(OBJ)
 	@$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
 dist: clean
-	@echo creating dist tarball
 	@mkdir -p ubqt-$(VERSION)
 	@cp -R LICENSE Makefile README.md ubqt.1 $(SRC) $(OBJ) ubqt-$(VERSION)
 	@tar -cf ubqt-$(VERSION).tar ubqt-$(VERSION)
@@ -34,23 +33,18 @@ dist: clean
 	@rm -rf ubqt-$(VERSION)
 
 clean:
-	@echo cleaning
 	@rm -rf $(OBJ) *~ ubqt-$(BACK)
 
 install: ubqt-$(BACK)
-	@echo installing executable file to $(DESTDIR)$(PREFIX)/bin
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
 	@cp -f ubqt-$(BACK) $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
 	@chmod 755 $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
-	@echo installing manual page to $(DESTDIR)$(MANPREFIX)/man1
 	@mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	@sed "s/VERSION/${VERSION}/g" < ubqt.1 > $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 	@chmod 644 $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 
 uninstall:
-	@echo removing executable file from $(DESTDIR)$(PREFIX)/bin
 	@rm -f $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
-	@echo removing manual page from $(DESTDIR)$(MANPREFIX)/man1
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 
 .PHONY: all options clean dist install uninstall

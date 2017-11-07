@@ -32,8 +32,10 @@ dist: clean
 	@gzip ubqt-$(VERSION).tar
 	@rm -rf ubqt-$(VERSION)
 
+# from https://stackoverflow.com/a/42908613
+# Clean up code from other .mk files
 clean:
-	@rm -rf $(OBJ) *~ ubqt-$(BACK)
+	@rm -rf $(OBJ) *~ ubqt-$(BACK) $(CLEAN)
 
 install: ubqt-$(BACK)
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin

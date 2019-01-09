@@ -18,7 +18,6 @@ enum {
 	BORDER = 2
 };
 
-// Global variables :(
 xcb_connection_t *c;
 xcb_screen_t *screen;
 xcb_window_t window;
@@ -47,10 +46,8 @@ ubqt_draw_error(int err)
 }
 
 static xcb_visualtype_t *
-find_visual(xcb_connection_t *c, xcb_visualid_t visual)
-{
+find_visual(xcb_connection_t *c, xcb_visualid_t visual) {
  	xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(xcb_get_setup(c));
-
  	for (; screen_iter.rem; xcb_screen_next(&screen_iter)) {
  		xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen_iter.data);
  		for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
@@ -60,14 +57,11 @@ find_visual(xcb_connection_t *c, xcb_visualid_t visual)
  					return visual_iter.data;
  		}
  	}
- 
 	return NULL;
 }
 
 void
-update_keymap()
-{
-
+update_keymap() {
 	struct xkb_keymap *new_keymap = xkb_x11_keymap_new_from_device(ctx, c, device_id, 0);
 	struct xkb_state *new_state = xkb_x11_state_new_from_device(new_keymap, c, device_id);
 
@@ -75,13 +69,10 @@ update_keymap()
 	xkb_keymap_unref(keymap);
 	keymap = new_keymap;
 	state = new_state;
-
 }
 
 int
-ubqt_draw_init(char *title)
-{
-
+ubqt_draw_init(char *title) {
 	setlocale(LC_CTYPE, "");
 	xcb_visualtype_t *visual;
 	asprintf(&ubqt_win.input, "%s", " ‣ ");
@@ -104,36 +95,27 @@ ubqt_draw_init(char *title)
 	window = xcb_generate_id(c);
 
 	xcb_create_window(c, XCB_COPY_FROM_PARENT, window, screen->root, 20, 20, width, height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual, mask, values);
-
 	xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, 8, strlen(title), title);
-	xcb_change_property(c, XCB_PROP_MODE_REPLACE, window, XCB_ATOM_WM_TITLE, XCB_ATOM_STRING, 8, strlen(title), title);
 	
 	//TODO: Get user mapping to generate key
-
 	xcb_map_window(c, window);
-
 	visual = find_visual(c, screen->root_visual);
-
 	if(visual == NULL) {
 		fprintf(stderr, "xcb connect error\n");
 		return 1;
 	}
-
 	surface = cairo_xcb_surface_create(c, window, visual, width, height);
-	cr = cairo_create(surface);
-	
+	cr = cairo_create(surface);	
 	layout = pango_cairo_create_layout(cr);
+
 	desc = pango_font_description_from_string("Source Code Pro 9");
 	pango_layout_set_font_description(layout, desc);
 	pango_font_description_free(desc);
 	pango_layout_set_wrap(layout, PANGO_WRAP_WORD);
 
 	ret = xkb_x11_setup_xkb_extension(c, XKB_X11_MIN_MAJOR_XKB_VERSION, XKB_X11_MIN_MINOR_XKB_VERSION, XKB_X11_SETUP_XKB_EXTENSION_NO_FLAGS, NULL, NULL, first_xkb_event, NULL);
-
 	device_id = xkb_x11_get_core_keyboard_device_id(c);
-
-	ctx = xkb_context_new(XKB_CONTEXT_NO_DEFAULT_INCLUDES | XKB_CONTEXT_NO_ENVIRONMENT_NAMES);
-	
+	ctx = xkb_context_new(XKB_CONTEXT_NO_DEFAULT_INCLUDES | XKB_CONTEXT_NO_ENVIRONMENT_NAMES);	
 	update_keymap();
 
 	enum {
@@ -141,10 +123,8 @@ ubqt_draw_init(char *title)
             (XCB_XKB_EVENT_TYPE_NEW_KEYBOARD_NOTIFY |
              XCB_XKB_EVENT_TYPE_MAP_NOTIFY |
              XCB_XKB_EVENT_TYPE_STATE_NOTIFY),
-
         required_nkn_details =
             (XCB_XKB_NKN_DETAIL_KEYCODES),
-
         required_map_parts =
             (XCB_XKB_MAP_PART_KEY_TYPES |
              XCB_XKB_MAP_PART_KEY_SYMS |
@@ -153,7 +133,6 @@ ubqt_draw_init(char *title)
              XCB_XKB_MAP_PART_KEY_ACTIONS |
              XCB_XKB_MAP_PART_VIRTUAL_MODS |
              XCB_XKB_MAP_PART_VIRTUAL_MOD_MAP),
-
         required_state_details =
             (XCB_XKB_STATE_PART_MODIFIER_BASE |
              XCB_XKB_STATE_PART_MODIFIER_LATCH |
@@ -169,23 +148,17 @@ ubqt_draw_init(char *title)
         .affectState = required_state_details,
         .stateDetails = required_state_details,
     };
-
     xcb_void_cookie_t cookie = xcb_xkb_select_events_aux_checked(c, device_id, required_events, 0, 0, required_map_parts, required_map_parts, &details);
-
     xcb_generic_error_t *error = xcb_request_check(c, cookie);
     if (error) {
         free(error);
         return -1;
-    }
-	
+    }	
 	return 0;
-
 }
 
 int
-ubqt_draw_destroy()
-{
-
+ubqt_draw_destroy() {
 	xkb_state_unref(state);
 	xkb_keymap_unref(keymap);
 	g_object_unref(layout);
@@ -193,25 +166,18 @@ ubqt_draw_destroy()
 	cairo_surface_finish(surface);
 	xcb_disconnect(c);
 	return 0;
-
 }
 
 void
-ubqt_do_draw(cairo_t *cr, int x, int y)
-{
-
+ubqt_do_draw(cairo_t *cr, int x, int y) {
 	cairo_save (cr);
 	cairo_move_to(cr, x, y);
 	pango_cairo_show_layout(cr, layout);
 	cairo_restore(cr);
-
 }
 
-
 void
-ubqt_draw()
-{
-	
+ubqt_draw() {	
 	pango_layout_set_width(layout, width * PANGO_SCALE);
 	pango_layout_set_height(layout, height * PANGO_SCALE);
 	PangoRectangle *ink = malloc(sizeof(PangoRectangle));
@@ -221,7 +187,6 @@ ubqt_draw()
 	cairo_set_source_rgb(cr, 0.148, 0.148, 0.148);
 	cairo_rectangle(cr, 0, 0, width, height);
 	cairo_fill(cr);
-
 	// fg #bcbcbc
 	cairo_set_source_rgb(cr, 0.73, 0.73, 0.73);
 
@@ -240,7 +205,6 @@ ubqt_draw()
 		pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
 	}
 	
-
 	if (ubqt_win.sidebar != NULL) {
 		pthread_mutex_lock(&mutex);
 		pango_layout_set_markup(layout, ubqt_win.sidebar, strlen(ubqt_win.sidebar));
@@ -289,46 +253,35 @@ ubqt_draw()
 	}
 	
 	free(ink);
-	free(logical);
-	
+	free(logical);	
 	cairo_surface_flush(surface);
 	xcb_flush(c);
-
 }
 
 int
-ubqt_draw_new_data_callback()
-{
-
+ubqt_draw_new_data_callback() {
 	/* Make sure we zero out the message first */
 	xcb_client_message_event_t ev;
 	memset(&ev, 0, sizeof(xcb_client_message_event_t));
-
 	ev.response_type = XCB_CLIENT_MESSAGE;
 	ev.format = 32;
-
 	xcb_send_event(c, 0, window, XCB_EVENT_MASK_NO_EVENT, (const char *)&ev);
 	xcb_flush(c);
 
 	return UBQT_SUCCESS;
-
 }
 
 int
-ubqt_keypress_event(xcb_generic_event_t *e)
-{
-
+ubqt_keypress_event(xcb_generic_event_t *e) {
 	//TODO: Handle modmasks
 	size_t size = 0;
 	xcb_key_press_event_t *ev;
 	xkb_keycode_t keycode;
-
 	ev = (xcb_key_press_event_t *)e;
 	keycode = ev->detail;
 
 	char *buffer = malloc(xkb_state_key_get_utf8(state, keycode, NULL, size) + 1);
 	xkb_state_key_get_utf8(state, keycode, buffer, sizeof(buffer));
-
 	if(ubqt_input_handle(buffer))
 		return 1;
 
@@ -337,48 +290,36 @@ ubqt_keypress_event(xcb_generic_event_t *e)
 }
 
 void
-ubqt_resize_event(xcb_generic_event_t *e)
-{
-
+ubqt_resize_event(xcb_generic_event_t *e) {
 	xcb_expose_event_t *ev;
 	ev = (xcb_expose_event_t *)e;
 	width = ev->width;
 	height = ev->height;
 	cairo_xcb_surface_set_size(surface, width, height);
-
 }
 
 int
-ubqt_draw_loop()
-{
-
+ubqt_draw_loop() {
 	ubqt_draw();
 
 	xcb_generic_event_t *e;
 	int done = 0;
-
 	while(!done) {
-
 		e = xcb_wait_for_event(c);
-
 		switch(e->response_type & ~0x80) {
-			case XCB_EXPOSE:
-				ubqt_resize_event(e);
-				ubqt_draw();
-				break;
-
-			case XCB_KEY_PRESS:
-				done = ubqt_keypress_event(e);
-				ubqt_draw();
-				break;
-
-			case XCB_CLIENT_MESSAGE:
-			case XCB_KEY_RELEASE:
-				ubqt_draw();
-				break;
+		case XCB_EXPOSE:
+			ubqt_resize_event(e);
+			ubqt_draw();
+			break;
+		case XCB_KEY_PRESS:
+			done = ubqt_keypress_event(e);
+			ubqt_draw();
+			break;
+		case XCB_CLIENT_MESSAGE:
+		case XCB_KEY_RELEASE:
+			ubqt_draw();
+			break;
 		}
 	}
-
-	return 0;
-
+	return UBQT_SUCCESS;
 }

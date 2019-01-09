@@ -2,7 +2,7 @@
 VERSION = 0.0
 
 # Customize below to fit your system
-TRANSPORT = local
+TRANSPORT = 9p
 BACK = cairo
 SEAT = vi
 
@@ -21,4 +21,4 @@ CPPFLAGS := -D_FORTIFY_SOURCE=2
 CFLAGS := -std=c99 -Wall ${INCS}
 LDFLAGS := -s ${LIBS}
 
-CC = clang -ggdb -rpath /usr/lib
+CC = cc 

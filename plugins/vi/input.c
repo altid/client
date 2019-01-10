@@ -40,7 +40,7 @@ ubqt_input_handle(char *buffer) {
 	else if (!utf8cmp(KEY_enter, buffer)) {
 		pthread_mutex_lock(&mutex);
 		if(utf8cmp(ubqt_win.input, " ‣ ")) {
-			ubqt_data_write("input", ubqt_win.input + utf8size(" ‣ ") - 1);
+			ubqt_data_write("ctrl", ubqt_win.input + utf8size(" ‣ ") - 1);
 			asprintf(&ubqt_win.input, "%s", " ‣ ");
 		}
 		pthread_mutex_unlock(&mutex);

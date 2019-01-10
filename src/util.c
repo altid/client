@@ -95,7 +95,7 @@ ubqt_data_remove(char *data) {
 	else if (!strcmp(data, "slideout")) {
 		if (ubqt_win.slideout != NULL)
 			free(ubqt_win.slideout);
-		ubqt_win.slideoutbar = NULL;
+		ubqt_win.slideout = NULL;
 	}
 	else if (!strcmp(data, "feed")) {
 		if (ubqt_win.main != NULL)

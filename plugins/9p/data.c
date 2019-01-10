@@ -1,29 +1,149 @@
 #define IXP_NO_P9_ //no prefix
 #define IXP_P9_STRUCTS
 #include <stdint.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <ixp.h>
 #include "../../src/ubqt.h"
 
 #define MAX_EVENTS 16
 IxpClient *client;
 
+enum fileMap {
+	FEED = 1,
+	STAT = 2,
+	TITL = 4,
+	TABS = 8,
+	SIDE = 16,
+	DOCU = 32,
+	FORM = 64,
+	STRM = 128,
+}; 
+
+char *
+unmap(int key) {
+	switch (key) {
+	case FEED:
+		return "feed";
+	case STAT:
+		return "status";
+	case TITL:
+		return "title";
+	case TABS:
+		return "tabs";
+	case SIDE:
+		return "side";
+	case DOCU:
+		return "document";
+	case FORM:
+		return "form";
+	case STRM:
+		return "stream";
+	}
+	return "";
+}
+
 int
-ubqt_data_init(const char *path) {
-	client = ixp_mount(path);
-	if (!client)
-		return 1;
+map(char *val) {
+	if(!strcmp(val, "feed"))
+		return FEED;
+	else if (!strcmp(val, "stat"))
+		return STAT;
+	else if (!strcmp(val, "title"))
+		return TITL;
+	else if (!strcmp(val, "tabs"))
+		return TABS;
+	else if (!strcmp(val, "side"))
+		return SIDE;
+	else if (!strcmp(val, "document"))
+		return DOCU;
+	else if (!strcmp(val, "form"))
+		return FORM;
+	else if (!strcmp(val, "stream"))
+		return STRM;
 	return 0;
 }
 
 int
-ubqt_data_loop(char *path) {
-	//read event, update based on string result from reads
-	//ubqt_data_update(name, path)
-	//ubqt_draw_new_data_callback()
-	//ubqt_data_remove(name)
-	//client.fd, msize, lastfid
-	sleep(10000);
+dir_to_mask() {
+	IxpMsg m;
+	IxpCFid *fid;
+	Stat *stat;
+	char *buf;
+	int i, count, mask, nstat;
+	count = nstat = mask = 0;
+	int mstat = 16;
+	fid = ixp_open(client, "./", P9_OREAD);
+	if (!fid) {
+		return 0;
+	}
+	stat = (Stat*)malloc(sizeof(*stat) * mstat);
+	buf = (char*)malloc(fid->iounit);
+	while((count = ixp_read(fid, buf, fid->iounit)) > 0) {
+		m = ixp_message(buf, count, MsgUnpack);
+		while(m.pos < m.end) {
+			if(nstat == mstat) {
+				// If buffer is too small, allocate double
+				mstat <<= 1;
+				stat = ixp_erealloc(stat, sizeof(*stat) * mstat);
+			}
+			ixp_pstat(&m, &stat[nstat++]);
+		}
+	}
+	for(i = 0; i < nstat; i++) {
+		mask |= map(stat[i].name);
+		ixp_freestat(&stat[i]);
+	}
+	free(stat);
+	free(buf);
+	return mask;
+}
+
+void
+check_data(int bitmask) {
+	char *file;
+	IxpStat *stat;
+	for (int i = 1; i < 256; i <<= 1 ) {
+		if (!(bitmask & i)) continue;
+		file = unmap(bitmask & i);
+		stat = ixp_stat(client, file);
+		if (stat) {
+			char *buf;
+			buf = ubqt_data_read(file, "");
+			ubqt_data_update(file, buf);
+			free(buf);
+		} else {
+			ubqt_data_remove(file);
+			ixp_freestat(stat);
+		}
+	}
+}
+
+int
+ubqt_data_init(char *path) {
+	ixp_pthread_init();
+	client = ixp_mount(path);
+	if (!client)
+		return 1;
+	int mask = dir_to_mask();
+	check_data(mask);
+	return 0;
+}
+
+int
+ubqt_data_loop(char *unused) {
+	(void)unused;
+	IxpCFid *eid;
+	char *event = NULL;
+	int count;
+	int initmask = 0;
+	eid = ixp_open(client, "event", P9_OREAD);
+	while((count = ixp_read(eid, event, eid->iounit)) > 0) {		
+		int mask = dir_to_mask();
+		check_data((initmask & mask) | map(event));
+		ubqt_draw_new_data_callback();
+	}
 	ixp_unmount(client);
 	return 0;
 }
@@ -32,22 +152,27 @@ int
 ubqt_data_write(char *name, char *buffer) {
 	IxpCFid *fid;
 	fid = ixp_open(client, name, P9_OWRITE);
-	ixp_write(fid, buffer, sizeof(buffer));
+	ixp_write(fid, buffer, fid->iounit);
 	ixp_close(fid);
 	return 0;
 }
 
 char *
-ubqt_data_read(char *name, char *path) {
+ubqt_data_read(char *name, char *unused) {
+	(void) unused;
 	IxpCFid *fid;
-	char *file, *buf;
+	char *buf;
 	int count;
-	asprintf(&file, "%s/%s", name, path);
-	fid = ixp_open(client, file, P9_OREAD);
-	while((count = ixp_read(fid, buf, fid->iounit)) > 0)
-		//TODO: allocate buffer here, grow as needed
-		//Return newly allocated buffer
+	fid = ixp_open(client, name, P9_OREAD);
+	buf = (char*)malloc(fid->iounit);
+	while((count = ixp_read(fid, buf, fid->iounit)) > 0);
 	return buf;
 }
 
-// TODO: ixp_remove(client, const char "notify");
+/* TODO: 
+void
+ubqt_clear_notification() {
+	// TODO: Does this return error?
+	ixp_remove(client, const char "notify");
+}
+*/

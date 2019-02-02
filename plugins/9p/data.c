@@ -135,15 +135,23 @@ int
 ubqt_data_loop(char *unused) {
 	(void)unused;
 	IxpCFid *eid;
-	char *event = NULL;
-	int count;
+	char *event;
 	int initmask = 0;
 	eid = ixp_open(client, "event", P9_OREAD);
-	while((count = ixp_read(eid, event, eid->iounit)) > 0) {		
+	if (eid == 0) {
+		// TODO: Log error
+		return 1;
+	}
+	event = (char*)malloc(eid->iounit);
+	while((ixp_read(eid, event, eid->iounit)) > 0) {		
+		printf("%s\n", event);
 		int mask = dir_to_mask();
+		// may need to realloc
 		check_data((initmask & mask) | map(event));
 		ubqt_draw_new_data_callback();
 	}
+	free(event);
+	ixp_close(eid);
 	ixp_unmount(client);
 	return 0;
 }
@@ -151,8 +159,16 @@ ubqt_data_loop(char *unused) {
 int
 ubqt_data_write(char *name, char *buffer) {
 	IxpCFid *fid;
-	fid = ixp_open(client, name, P9_OWRITE);
-	ixp_write(fid, buffer, fid->iounit);
+	// Verify we have a usable fd
+	long len;
+	fid = ixp_open(client, name, P9_OWRITE|P9_OTRUNC);
+	if (fid == 0) {
+		return 1;
+	}
+	len=strlen(buffer);
+	if (ixp_pwrite(fid, buffer, len, 0) < len) {
+		printf("Error reading %s\n", ixp_errbuf());
+	}
 	ixp_close(fid);
 	return 0;
 }
@@ -166,6 +182,7 @@ ubqt_data_read(char *name, char *unused) {
 	fid = ixp_open(client, name, P9_OREAD);
 	buf = (char*)malloc(fid->iounit);
 	while((count = ixp_read(fid, buf, fid->iounit)) > 0);
+	ixp_close(fid);
 	return buf;
 }
 

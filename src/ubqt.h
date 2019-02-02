@@ -139,53 +139,5 @@ int ubqt_input_init();
 int ubqt_input_handle(char *);
 int ubqt_input_destroy();
 
-
-/* Convert markup for draw backend
-
-ubqt_markup_line(line)
-	parse line in to backend specific markup
-
-ubqt_markup_code(line)
-	mark up blockquotes, appearing as
-    ```
-    some code
-    ```
-    server side; this function is called on only the
-    "some code" line.
-
-Tag struct set when we have open tag available
-	img/link will be [key](value) pairs to be used in
-    the input functions on selection
-	underline is reserved for these cases alone
-*/
-	
-char *ubqt_markup_line(char *, unsigned);
-char *ubqt_markup_code(char *);
-
-/* [key](value) index it occurs at */
-struct Item {
-	char *key;
-	char *value;
-	unsigned index;
-};
-
-struct Tag {
-	unsigned in_list;
-	struct Item input;
-	struct Item image;
-	struct Item link;
-	bool ex_bold;
-	bool ex_em;
-	bool strike;
-	bool square;
-	bool color;
-	bool path;
-	bool code;
-	bool bold;
-	bool img;
-	bool inp;
-	bool lnk;
-	bool em;
-} tag_open;
-
- /* When on a mutable buffer that isn't input we send chunk-by-chunk to the server TODO: Define best chunk size char *ubqt_text_chunk; */
+// TODO: This all changes to function calls per element
+// We'll use pass by value here, sending at most a line at a time 

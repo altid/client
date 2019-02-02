@@ -22,6 +22,7 @@ ubqt_input_init() {
 
 int
 ubqt_input_handle(char *buffer) {
+	int retval;
 
 	char KEY_back[2], KEY_enter[2], KEY_escape[2];
 	KEY_back[0] = '\x08';
@@ -39,14 +40,21 @@ ubqt_input_handle(char *buffer) {
 	//TODO: ubqt prompt handling, readline mode as well as raw newline inserts on not-input window
 	else if (!utf8cmp(KEY_enter, buffer)) {
 		pthread_mutex_lock(&mutex);
-		if(utf8cmp(ubqt_win.input, " ‣ ")) {
+		if (utf8cmp(ubqt_win.input, " ‣ :")) {
+			ubqt_data_write("ctrl", ubqt_win.input + utf8size(" ‣ :") - 1);
+			asprintf(&ubqt_win.input, "%s", " ‣ ");
+		}
+		else if (utf8cmp(ubqt_win.input, " ‣ /")) {
+			ubqt_data_write("ctrl", ubqt_win.input + utf8size(" ‣ /") - 1);
+			asprintf(&ubqt_win.input, "%s", " ‣ ");
+		}
+		else if (utf8cmp(ubqt_win.input, " ‣ ")) {
 			ubqt_data_write("ctrl", ubqt_win.input + utf8size(" ‣ ") - 1);
 			asprintf(&ubqt_win.input, "%s", " ‣ ");
 		}
 		pthread_mutex_unlock(&mutex);
 		return UBQT_SUCCESS;
 	}
-
 	//TODO: backspace in normal mode handling? 
 	else if (!utf8cmp(KEY_back, buffer)) {
 		pthread_mutex_lock(&mutex);

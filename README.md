@@ -1,4 +1,4 @@
-# ubqt
+# Linux Client for Ubqt
 ![What it looks like so far](https://ptpb.pw/9OGR.png)
 
 ** This is pre-alpha, please do not expect anything of this **
@@ -6,56 +6,55 @@
 http://tiamat.tsotech.com/pao inspired playground, using filesystem-based program state representations to allow clients to draw content based on a suitable toolkit. 
 
 ## Usage
-Ubqt is designed as a front end for programs that act as a file server - that is, programs that communicate state and input using raw files.
 
-It expects a layout such as the following:
+`linux-client <addr>[:port] [<addr>[:port]...]`
 
-```
-/dir
- | title
- | status
- | main
- | tabs
- | slideout
- | input
- | ctl
- | cmpl
-```
+The default port is 564 for historical reasons.
 
-Any file present will be drawn, with the exception of ctl and cmpl. The file server will display or not display these based on settings through the ctl file.
+### Control
 
-Once you have your file-server-program up and running, the general case would be to simply call `ubqt /path/to/my/dir`.
+Depending on the backend and implementation details, the control methodology will vary; refer to the plugin documentation for further details.
+Each service may describe its own set of available controls, but the default are as follows
 
+ - `close <buffer name>` ends the session with the named buffer, removing its entry from `tabs`, as well as relaying the message to the underlying service; which should result in the path being removed from its runtime directory.
+ - `open <buffer name>` attempts to begin a session for the named resource. For example, 
+   - `open ##ubqt` sent to an IRC service will join that IRC channel
+   - `open /path/to/some/document.pdf` sent to docfs will open the document for viewing
+ - `buffer <buffer name>` will attempt to switch the client session to the named buffer. This will not notify the underlying service.
+ - `quit` sends a quit message to the underlying service
 
-## Cairo backend
-Eventually we'll have runtime configurations; but currently all colors in markup are hardcoded.  The files read are expected to be in markdown; and this will not change in the forseeable future.
-I'm going to be trying out [libclipboard](https://github.com/jtanx/libclipboard) in this, on top of xcb
+Additionally, when used with 9p-server an additional set of control messages are made available. (coming soon)
+ - `9p quit` terminates the 9p-server, as well as the client connection
+ - `9p reload` hot restarts the 9p-server, maintaining the client connection
 
-## Ncurses backend
-To be implemented
+## Backends
 
-## Nuklear backend
-Possibly going to be implemented
+Linux Client allows compile-time pluggable back ends for the drawing library, the input, and the transport method (such as a direct 9p connection, or using local files)
 
-## Android backend
-This will end up as a sister project, if we get through the first few.
+### Drawing
 
-## Input schemes
-I plan on a full vi-like stack where possible, including visual selection (save for images - more on that later), and a url highlighting function.
-A leanback-friendly (gamepad, optional keyboard) will likely accompany the Nuklear backend
+ - Cairo coming soon!
+ - Ncurses coming soon!
+ - Nuklear coming soon!
 
-## Markdown
-Ubqt is meant to translate markdown to backend-specific markup; examples of this will eventually follow. It's expected that the following characters will be escaped, `\` 
+### Input
 
-Should be escaped | Don't need to be 
----------------------------|-------------------------
-\\ backslash \`back tick | \(\) parentheses 
-\# hash mark \* asterisk | \+ plus sign 
-\[\] square brackets \_ underscore | \! exclamation 
-\- minus sign \{\} curly braces | \. dot \[\]
+ - Vi-mode coming soon!
+ - Leanback coming soon!
+ - Touch coming soon!
 
-\`\`\` wraps a code block, but currently there's no github-esque language specific highlighting for code blocks
+### Transport
 
-## -YOUR BACKEND HERE-
-include [src/ubqt.h](https://github.com/halfwit/ubqt/blob/master/src/ubqt.h), drop your functions in to plugin/foo, add a plugin/foo/foo.mk; and you should be able to build your target backend by modifying the appropriate flag in config.mk 
-If you have any questions, insights, ideas; feel free to join #ubqt on freenode
+ - 9p coming soon!
+ - local coming soon!
+
+## Building
+
+Modify config.mk to fit your setup, and set which plugins you wish to target, then simply
+
+`make && make install`
+
+### Dependencies
+
+Refer to the documentation for each plugin for the libraries they require to build.
+Linux Client itself requires `make` and `gcc`

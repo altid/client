@@ -45,8 +45,8 @@ Linux Client allows compile-time pluggable back ends for the drawing library, th
 
 ### Transport
 
- - 9p coming soon!
- - local coming soon!
+ - [9p](https://github.com/ubqt-systems/linux-client/tree/master/pluins/9p/README.md)
+ - Ssh coming soon!
 
 ## Building
 

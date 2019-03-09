@@ -3,7 +3,7 @@ VERSION = 0.0
 
 # Customize below to fit your system
 TRANSPORT = 9p
-BACK = cairo
+DRAW = cairo
 SEAT = vi
 
 # paths

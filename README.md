@@ -33,7 +33,7 @@ Linux Client allows compile-time pluggable back ends for the drawing library, th
 
 ### Drawing
 
- - Cairo coming soon!
+ - [Cairo](https://github.com/ubqt-systems/linux-client/tree/master/plugins/cairo/README.md)
  - Ncurses coming soon!
  - Nuklear coming soon!
 
@@ -45,7 +45,7 @@ Linux Client allows compile-time pluggable back ends for the drawing library, th
 
 ### Transport
 
- - [9p](https://github.com/ubqt-systems/linux-client/tree/master/pluins/9p/README.md)
+ - [9p](https://github.com/ubqt-systems/linux-client/tree/master/plugins/9p/README.md)
  - Ssh coming soon!
 
 ## Building

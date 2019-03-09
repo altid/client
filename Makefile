@@ -1,4 +1,3 @@
-# ubqt - simple frontend for file server-based programs
 # See LICENSE for copyright and license details.
 
 
@@ -7,10 +6,10 @@ OBJ := src/ubqt.o src/util.o
 
 include config.mk
 include plugins/$(TRANSPORT)/$(TRANSPORT).mk
-include plugins/$(BACK)/$(BACK).mk
+include plugins/$(DRAW)/$(DRAW).mk
 include plugins/$(SEAT)/$(SEAT).mk
 
-all: ubqt-$(BACK)
+all: ubqt-$(DRAW)
 
 # cc -c -l %.c -o %.o
 %.o: %.c
@@ -21,7 +20,7 @@ all: ubqt-$(BACK)
 $(OBJ) : src/ubqt.h
 
 # if any objects change, update ubqt
-ubqt-$(BACK): $(OBJ)
+ubqt-$(DRAW): $(OBJ)
 	@echo CC -o $@
 	@$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
@@ -35,18 +34,18 @@ dist: clean
 # from https://stackoverflow.com/a/42908613
 # Clean up code from other .mk files
 clean:
-	@rm -rf $(OBJ) *~ ubqt-$(BACK) $(CLEAN)
+	@rm -rf $(OBJ) *~ ubqt-$(DRAW) $(CLEAN)
 
-install: ubqt-$(BACK)
+install: ubqt-$(DRAW)
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
-	@cp -f ubqt-$(BACK) $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
-	@chmod 755 $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
+	@cp -f ubqt-$(DRAW) $(DESTDIR)$(PREFIX)/bin/ubqt-$(DRAW)
+	@chmod 755 $(DESTDIR)$(PREFIX)/bin/ubqt-$(DRAW)
 	@mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	@sed "s/VERSION/${VERSION}/g" < ubqt.1 > $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 	@chmod 644 $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 
 uninstall:
-	@rm -f $(DESTDIR)$(PREFIX)/bin/ubqt-$(BACK)
+	@rm -f $(DESTDIR)$(PREFIX)/bin/ubqt-$(DRAW)
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/ubqt.1
 
 .PHONY: all options clean dist install uninstall

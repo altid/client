@@ -39,7 +39,7 @@ Linux Client allows compile-time pluggable back ends for the drawing library, th
 
 ### Input
 
- - Vi-mode coming soon!
+ - [Vi-mode](https://github.com/ubqt-systems/linux-client/tree/master/plugins/vi/README.md)
  - Leanback coming soon!
  - Touch coming soon!
 

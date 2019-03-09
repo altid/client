@@ -17,4 +17,9 @@ Add the following to config.mk
 
 ## Menu Control Interface
 
-The Cairo Pango drawing plugin uses a traditional gtk-style menu interface to access the underlying control, but additionaly supports leading slash-style commands, common from chat services such as IRC and Discord. 
+The Cairo Pango drawing plugin uses a traditional gtk-style menu interface to access the underlying controls.
+
+## Screenshots & Other Media
+
+Coming soon!
+

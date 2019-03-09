@@ -1,5 +1,4 @@
 # Linux Client for Ubqt
-![What it looks like so far](https://ptpb.pw/9OGR.png)
 
 ** This is pre-alpha, please do not expect anything of this **
 
@@ -58,3 +57,7 @@ Modify config.mk to fit your setup, and set which plugins you wish to target, th
 
 Refer to the documentation for each plugin for the libraries they require to build.
 Linux Client itself requires `make` and `gcc`
+
+## Screenshots & Other Media
+
+Coming Soon!

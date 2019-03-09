@@ -6,10 +6,7 @@ This plugin leverages Pango and Cairo to draw a traditional user interface, comp
 
 Add the following to config.mk
 
-```
-DRAW=9p
-
-```
+`DRAW=9p`
 
 ### Required libraries
 

@@ -5,10 +5,7 @@ This plugin allows direct connection to a running 9p-server instance.
 ## Building
 Add the following to config.mk
 
-```
-TRANSPORT=9p
-
-```
+`TRANSPORT=9p`
 
 Required https://github.com/0intro/libixp
 

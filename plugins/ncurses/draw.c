@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <ncurses.h>
 #include "draw.h"
-#include "../../src/ubqt.h"
+#include "../../src/altid.h"
 
 #define U_MAX_BYTES 4
 
@@ -23,11 +23,11 @@ WINDOW *win[6];
  * we have to translate it when it's finally written to
  * screen - these functions simply no-op and return
  */
-char *ubqt_markup_code(char *md) { return md; }
-char *ubqt_markup_line(char *md, unsigned line) { (void)line; return md; }
+char *altid_markup_code(char *md) { return md; }
+char *altid_markup_line(char *md, unsigned line) { (void)line; return md; }
 
 int
-ubqt_draw_init(char *title) {
+altid_draw_init(char *title) {
 	setlocale(LC_ALL, "");
 
 	/* Attempt to set title */
@@ -64,7 +64,7 @@ ubqt_draw_init(char *title) {
 	epoll_ctl(epfd, EPOLL_CTL_ADD, STDIN_FILENO, &ev);
 
 	//TODO: If :set input hidden
-	ubqt_win.input = " ‣ ";
+	altid_win.input = " ‣ ";
 	return 0;
 
 }
@@ -102,76 +102,76 @@ get_width(int cols, char *buf) {
 }
 
 void
-ubqt_draw() {	
+altid_draw() {	
 	int bottom = 0, x = 0, y = 0, w = COLS, h = LINES;
 
 	//TODO: Add cursor in appropriate if here 
-	if (ubqt_win.title != NULL) {
+	if (altid_win.title != NULL) {
 		delwin(win[0]);
 		pthread_mutex_lock(&mutex);
-		int lineh = get_height(ubqt_win.title);
+		int lineh = get_height(altid_win.title);
 		win[0] = newwin(lineh, w, y, x);
-		ubqt_ncurses_markup(win[0], ubqt_win.title);
+		altid_ncurses_markup(win[0], altid_win.title);
 		pthread_mutex_unlock(&mutex);
 		wrefresh(win[0]);
 		y += lineh;
 		h -= lineh;
 	}
 
-	if (ubqt_win.sidebar != NULL) {
+	if (altid_win.sidebar != NULL) {
 		delwin(win[1]);
 		pthread_mutex_lock(&mutex);
-		int linew = get_width(w, ubqt_win.sidebar);
+		int linew = get_width(w, altid_win.sidebar);
 		win[1] = newwin(h, linew, y, x);
 		scrollok(win[1], TRUE);
-		ubqt_ncurses_markup(win[1], ubqt_win.sidebar);
+		altid_ncurses_markup(win[1], altid_win.sidebar);
 		pthread_mutex_unlock(&mutex);
 		wrefresh(win[1]);
 		x += linew;
 		w -= linew;
 	}
 
-	if (ubqt_win.tabs != NULL) {
+	if (altid_win.tabs != NULL) {
 		delwin(win[2]);
 		pthread_mutex_lock(&mutex);
-		int lineh = get_height(ubqt_win.tabs);
+		int lineh = get_height(altid_win.tabs);
 		win[2] = newwin(lineh, y, y, x);
-		ubqt_ncurses_markup(win[2], ubqt_win.tabs);
+		altid_ncurses_markup(win[2], altid_win.tabs);
 		pthread_mutex_unlock(&mutex);
 		wrefresh(win[2]);
 		y += lineh;
 		h -= lineh;
 	}
 
-	if (ubqt_win.input != NULL) {
+	if (altid_win.input != NULL) {
 		delwin(win[3]);
 		pthread_mutex_lock(&mutex);
 		win[3] = newwin(1, w, LINES - 1, x);
 		scrollok(win[3], TRUE);
-		wprintw(win[3], ubqt_win.input);
+		wprintw(win[3], altid_win.input);
 		pthread_mutex_unlock(&mutex);
 		wrefresh(win[3]);
 		bottom += 1;
 		h -= 1;
 	}
 
-	if (ubqt_win.status != NULL) {
+	if (altid_win.status != NULL) {
 		delwin(win[4]);
 		pthread_mutex_lock(&mutex);
-		int lineh = get_height(ubqt_win.status);
+		int lineh = get_height(altid_win.status);
 		win[4] = newwin(lineh, w, LINES - lineh - bottom, x);
-		ubqt_ncurses_markup(win[4], ubqt_win.status);
+		altid_ncurses_markup(win[4], altid_win.status);
 		pthread_mutex_unlock(&mutex);
 		wrefresh(win[4]);
 		h -= lineh;
 	}
 
-	if (ubqt_win.main != NULL) {
+	if (altid_win.main != NULL) {
 		delwin(win[5]);
 		win[5] = newwin(h, w, y, x);
 		scrollok(win[5], TRUE);
 		pthread_mutex_lock(&mutex);
-		ubqt_ncurses_markup(win[5], ubqt_win.main);
+		altid_ncurses_markup(win[5], altid_win.main);
 		wscrl(win[5], -2);
 		pthread_mutex_unlock(&mutex);
 		wrefresh(win[5]);
@@ -179,22 +179,22 @@ ubqt_draw() {
 }
 
 int
-ubqt_draw_new_data_callback() {
+altid_draw_new_data_callback() {
 	eventfd_write(evfd, 1);
 	return 0;
 }
 
 int
-ubqt_draw_loop() {
+altid_draw_loop() {
 	struct epoll_event ev;
 	static unsigned short mask[] = {192, 224, 240};
 	char *c = (char*)calloc(U_MAX_BYTES + 1, sizeof(char));
 	int done = 0;
 
 	while (!done) {
-		ubqt_draw();
+		altid_draw();
 
-		/* We implicitly handle the eventfd, as we'll no-op back to ubqt_draw */		
+		/* We implicitly handle the eventfd, as we'll no-op back to altid_draw */		
 		int fds = epoll_wait(epfd, &ev, 1, -1);
 		if (fds == -1 && errno != EINTR) {
 			free(c);
@@ -238,7 +238,7 @@ ubqt_draw_loop() {
 				}
 				break;
 			}
-			done = ubqt_input_handle(c);
+			done = altid_input_handle(c);
 		}
 	}
 	close(epfd);
@@ -248,7 +248,7 @@ ubqt_draw_loop() {
 }
 
 int
-ubqt_draw_destroy() {
+altid_draw_destroy() {
 	echo();
 	nocbreak();
 	endwin();

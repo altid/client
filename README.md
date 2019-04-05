@@ -1,4 +1,4 @@
-# Linux Client for Ubqt
+# Linux Client for Altid
 
 ** This is pre-alpha, please do not expect anything of this **
 
@@ -17,7 +17,7 @@ Each service may describe its own set of available controls, but the default are
 
  - `close <buffer name>` ends the session with the named buffer, removing its entry from `tabs`, as well as relaying the message to the underlying service; which should result in the path being removed from its runtime directory.
  - `open <buffer name>` attempts to begin a session for the named resource. For example, 
-   - `open ##ubqt` sent to an IRC service will join that IRC channel
+   - `open #altid` sent to an IRC service will join that IRC channel
    - `open /path/to/some/document.pdf` sent to docfs will open the document for viewing
  - `buffer <buffer name>` will attempt to switch the client session to the named buffer. This will not notify the underlying service.
  - `quit` sends a quit message to the underlying service
@@ -32,19 +32,19 @@ Linux Client allows compile-time pluggable back ends for the drawing library, th
 
 ### Drawing
 
- - [Cairo](https://github.com/ubqt-systems/linux-client/tree/master/plugins/cairo/README.md)
+ - [Cairo](https://github.com/altid/linux-client/tree/master/plugins/cairo/README.md)
  - Ncurses coming soon!
  - Nuklear coming soon!
 
 ### Input
 
- - [Vi-mode](https://github.com/ubqt-systems/linux-client/tree/master/plugins/vi/README.md)
+ - [Vi-mode](https://github.com/altid/linux-client/tree/master/plugins/vi/README.md)
  - Leanback coming soon!
  - Touch coming soon!
 
 ### Transport
 
- - [9p](https://github.com/ubqt-systems/linux-client/tree/master/plugins/9p/README.md)
+ - [9p](https://github.com/altid/linux-client/tree/master/plugins/9p/README.md)
  - Ssh coming soon!
 
 ## Building

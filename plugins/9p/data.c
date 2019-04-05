@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ixp.h>
-#include "../../src/ubqt.h"
+#include "../../src/altid.h"
 
 #define MAX_EVENTS 16
 IxpClient *client;
@@ -110,18 +110,18 @@ check_data(int bitmask) {
 		stat = ixp_stat(client, file);
 		if (stat) {
 			char *buf;
-			buf = ubqt_data_read(file, "");
-			ubqt_data_update(file, buf);
+			buf = altid_data_read(file, "");
+			altid_data_update(file, buf);
 			free(buf);
 		} else {
-			ubqt_data_remove(file);
+			altid_data_remove(file);
 			ixp_freestat(stat);
 		}
 	}
 }
 
 int
-ubqt_data_init(char *path) {
+altid_data_init(char *path) {
 	ixp_pthread_init();
 	client = ixp_mount(path);
 	if (!client)
@@ -132,7 +132,7 @@ ubqt_data_init(char *path) {
 }
 
 int
-ubqt_data_loop(char *unused) {
+altid_data_loop(char *unused) {
 	(void)unused;
 	IxpCFid *eid;
 	char *event;
@@ -148,7 +148,7 @@ ubqt_data_loop(char *unused) {
 		int mask = dir_to_mask();
 		// may need to realloc
 		check_data((initmask & mask) | map(event));
-		ubqt_draw_new_data_callback();
+		altid_draw_new_data_callback();
 	}
 	free(event);
 	ixp_close(eid);
@@ -157,7 +157,7 @@ ubqt_data_loop(char *unused) {
 }
 
 int
-ubqt_data_write(char *name, char *buffer) {
+altid_data_write(char *name, char *buffer) {
 	IxpCFid *fid;
 	// Verify we have a usable fd
 	long len;
@@ -174,7 +174,7 @@ ubqt_data_write(char *name, char *buffer) {
 }
 
 char *
-ubqt_data_read(char *name, char *unused) {
+altid_data_read(char *name, char *unused) {
 	(void) unused;
 	IxpCFid *fid;
 	char *buf;
@@ -188,7 +188,7 @@ ubqt_data_read(char *name, char *unused) {
 
 /* TODO: 
 void
-ubqt_clear_notification() {
+altid_clear_notification() {
 	// TODO: Does this return error?
 	ixp_remove(client, const char "notify");
 }

@@ -2,16 +2,16 @@
 #include <string.h>
 #include <stdio.h>
 #include "utf8.h"
-#include "../../src/ubqt.h"
+#include "../../src/altid.h"
 
 //TODO: Modes
 
 int
-ubqt_input_init() {
+altid_input_init() {
 	/* Set up modes, cursor, default end of input if it exists */
-	if (ubqt_win.input) {
-		cursor.index = strlen(ubqt_win.input);
-		cursor.cur = ubqt_win.input;
+	if (altid_win.input) {
+		cursor.index = strlen(altid_win.input);
+		cursor.cur = altid_win.input;
 	}	
 	else
 		cursor.cur = NULL;
@@ -21,7 +21,7 @@ ubqt_input_init() {
 }
 
 int
-ubqt_input_handle(char *buffer) {
+altid_input_handle(char *buffer) {
 	int retval;
 
 	char KEY_back[2], KEY_enter[2], KEY_escape[2];
@@ -34,23 +34,23 @@ ubqt_input_handle(char *buffer) {
 	
 	//TODO: if cursor.cur == NULL don't draw cursor
 	if (!utf8cmp(KEY_escape, buffer)) {
-		ubqt_win.input = "-exit-";
+		altid_win.input = "-exit-";
 		return UBQT_FAILURE;
 	}
-	//TODO: ubqt prompt handling, readline mode as well as raw newline inserts on not-input window
+	//TODO: altid prompt handling, readline mode as well as raw newline inserts on not-input window
 	else if (!utf8cmp(KEY_enter, buffer)) {
 		pthread_mutex_lock(&mutex);
-		if (utf8cmp(ubqt_win.input, " ‣ :")) {
-			ubqt_data_write("ctrl", ubqt_win.input + utf8size(" ‣ :") - 1);
-			asprintf(&ubqt_win.input, "%s", " ‣ ");
+		if (utf8cmp(altid_win.input, " ‣ :")) {
+			altid_data_write("ctrl", altid_win.input + utf8size(" ‣ :") - 1);
+			asprintf(&altid_win.input, "%s", " ‣ ");
 		}
-		else if (utf8cmp(ubqt_win.input, " ‣ /")) {
-			ubqt_data_write("ctrl", ubqt_win.input + utf8size(" ‣ /") - 1);
-			asprintf(&ubqt_win.input, "%s", " ‣ ");
+		else if (utf8cmp(altid_win.input, " ‣ /")) {
+			altid_data_write("ctrl", altid_win.input + utf8size(" ‣ /") - 1);
+			asprintf(&altid_win.input, "%s", " ‣ ");
 		}
-		else if (utf8cmp(ubqt_win.input, " ‣ ")) {
-			ubqt_data_write("ctrl", ubqt_win.input + utf8size(" ‣ ") - 1);
-			asprintf(&ubqt_win.input, "%s", " ‣ ");
+		else if (utf8cmp(altid_win.input, " ‣ ")) {
+			altid_data_write("ctrl", altid_win.input + utf8size(" ‣ ") - 1);
+			asprintf(&altid_win.input, "%s", " ‣ ");
 		}
 		pthread_mutex_unlock(&mutex);
 		return UBQT_SUCCESS;
@@ -60,23 +60,23 @@ ubqt_input_handle(char *buffer) {
 		pthread_mutex_lock(&mutex);
 		
 		/* Ignore current character in backwards search */
-		size_t i = utf8size(ubqt_win.input) - 1;
+		size_t i = utf8size(altid_win.input) - 1;
 
 		/* 0x80 AND result means we are on continuation char */
 		/* move back until we are on the start char          */
-		while(i > 0 && (0x80 == (ubqt_win.input[i--] & 0xc0)));
-		ubqt_win.input[i] = 0;
+		while(i > 0 && (0x80 == (altid_win.input[i--] & 0xc0)));
+		altid_win.input[i] = 0;
 		pthread_mutex_unlock(&mutex);
 		return UBQT_SUCCESS;
 	}
 	else {
 		pthread_mutex_lock(&mutex);
-		if (ubqt_win.input)
-			asprintf(&ubqt_win.input, "%s%s", ubqt_win.input, buffer);
+		if (altid_win.input)
+			asprintf(&altid_win.input, "%s%s", altid_win.input, buffer);
 		else
-			asprintf(&ubqt_win.input, "%s", buffer);
+			asprintf(&altid_win.input, "%s", buffer);
 		pthread_mutex_unlock(&mutex);
 	}
-	cursor.index = strlen(ubqt_win.input);	
+	cursor.index = strlen(altid_win.input);	
 	return UBQT_SUCCESS;
 }

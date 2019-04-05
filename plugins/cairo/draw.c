@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "../../src/ubqt.h"
+#include "../../src/altid.h"
 
 enum {
 	BORDER = 2
@@ -38,7 +38,7 @@ int width = 800;
 int height = 600;
 
 char *
-ubqt_draw_error(int err)
+altid_draw_error(int err)
 {
 
 	return "To be implemented\n";
@@ -72,10 +72,10 @@ update_keymap() {
 }
 
 int
-ubqt_draw_init(char *title) {
+altid_draw_init(char *title) {
 	setlocale(LC_CTYPE, "");
 	xcb_visualtype_t *visual;
-	asprintf(&ubqt_win.input, "%s", " ‣ ");
+	asprintf(&altid_win.input, "%s", " ‣ ");
 	
 	c = xcb_connect(NULL, NULL);
 	int ret;
@@ -158,7 +158,7 @@ ubqt_draw_init(char *title) {
 }
 
 int
-ubqt_draw_destroy() {
+altid_draw_destroy() {
 	xkb_state_unref(state);
 	xkb_keymap_unref(keymap);
 	g_object_unref(layout);
@@ -169,7 +169,7 @@ ubqt_draw_destroy() {
 }
 
 void
-ubqt_do_draw(cairo_t *cr, int x, int y) {
+altid_do_draw(cairo_t *cr, int x, int y) {
 	cairo_save (cr);
 	cairo_move_to(cr, x, y);
 	pango_cairo_show_layout(cr, layout);
@@ -177,7 +177,7 @@ ubqt_do_draw(cairo_t *cr, int x, int y) {
 }
 
 void
-ubqt_draw() {	
+altid_draw() {	
 	pango_layout_set_width(layout, width * PANGO_SCALE);
 	pango_layout_set_height(layout, height * PANGO_SCALE);
 	PangoRectangle *ink = malloc(sizeof(PangoRectangle));
@@ -194,62 +194,62 @@ ubqt_draw() {
 	int x = BORDER, y = BORDER, h = height - BORDER, w = width - BORDER;
 
 	//TODO: Draw cursor in appropriate if'd section
-	if (ubqt_win.title != NULL) {
+	if (altid_win.title != NULL) {
 		pango_layout_set_alignment(layout, PANGO_ALIGN_CENTER);
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.title, strlen(ubqt_win.title));
+		pango_layout_set_markup(layout, altid_win.title, strlen(altid_win.title));
 		pthread_mutex_unlock(&mutex);
 		pango_layout_get_pixel_extents(layout, ink, logical);
-		ubqt_do_draw(cr, x, y);
+		altid_do_draw(cr, x, y);
 		y += logical->height / 2;
 		pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
 	}
 	
-	if (ubqt_win.sidebar != NULL) {
+	if (altid_win.sidebar != NULL) {
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.sidebar, strlen(ubqt_win.sidebar));
+		pango_layout_set_markup(layout, altid_win.sidebar, strlen(altid_win.sidebar));
 		pthread_mutex_unlock(&mutex);
-		ubqt_do_draw(cr, x, y);
+		altid_do_draw(cr, x, y);
 		pango_layout_get_pixel_extents(layout, ink, logical);
 		x += (logical->width) > w / 2 ? w / 2 : logical->width + (BORDER * 2);
 		pango_layout_set_width(layout, (w - x) * PANGO_SCALE);
 		//TODO: Draw a bar here to seperate
 	}
 
-	if (ubqt_win.tabs != NULL) {
+	if (altid_win.tabs != NULL) {
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.tabs, strlen(ubqt_win.tabs));
+		pango_layout_set_markup(layout, altid_win.tabs, strlen(altid_win.tabs));
 		pthread_mutex_unlock(&mutex);
-		ubqt_do_draw(cr, x, y);
+		altid_do_draw(cr, x, y);
 		pango_layout_get_pixel_extents(layout, ink, logical);
 		y += logical->height / 2;
 	}
 
-	if (ubqt_win.input != NULL) {
+	if (altid_win.input != NULL) {
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.input, strlen(ubqt_win.input));
+		pango_layout_set_markup(layout, altid_win.input, strlen(altid_win.input));
 		pthread_mutex_unlock(&mutex);
 		pango_layout_get_pixel_extents(layout, ink, logical);
 		h -= logical->height;
-		ubqt_do_draw(cr, x, h);
+		altid_do_draw(cr, x, h);
 
 	}
 
-	if (ubqt_win.status != NULL) {
+	if (altid_win.status != NULL) {
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.status, strlen(ubqt_win.status));
+		pango_layout_set_markup(layout, altid_win.status, strlen(altid_win.status));
 		pthread_mutex_unlock(&mutex);
 		pango_layout_get_pixel_extents(layout, ink, logical);
 		h -= logical->height / 2;
-		ubqt_do_draw(cr, x, h);
+		altid_do_draw(cr, x, h);
 	}
 
-	if (ubqt_win.main != NULL) {
+	if (altid_win.main != NULL) {
 		//TODO: Flag option to toggle pango_layout_set_justify(layout, true);
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, ubqt_win.main, strlen(ubqt_win.main));
+		pango_layout_set_markup(layout, altid_win.main, strlen(altid_win.main));
 		pthread_mutex_unlock(&mutex);
-		ubqt_do_draw(cr, x, y);
+		altid_do_draw(cr, x, y);
 	}
 	
 	free(ink);
@@ -259,7 +259,7 @@ ubqt_draw() {
 }
 
 int
-ubqt_draw_new_data_callback() {
+altid_draw_new_data_callback() {
 	/* Make sure we zero out the message first */
 	xcb_client_message_event_t ev;
 	memset(&ev, 0, sizeof(xcb_client_message_event_t));
@@ -272,7 +272,7 @@ ubqt_draw_new_data_callback() {
 }
 
 int
-ubqt_keypress_event(xcb_generic_event_t *e) {
+altid_keypress_event(xcb_generic_event_t *e) {
 	//TODO: Handle modmasks
 	size_t size = 0;
 	xcb_key_press_event_t *ev;
@@ -282,7 +282,7 @@ ubqt_keypress_event(xcb_generic_event_t *e) {
 
 	char *buffer = malloc(xkb_state_key_get_utf8(state, keycode, NULL, size) + 1);
 	xkb_state_key_get_utf8(state, keycode, buffer, sizeof(buffer));
-	if(ubqt_input_handle(buffer))
+	if(altid_input_handle(buffer))
 		return 1;
 
 	free(buffer);
@@ -290,7 +290,7 @@ ubqt_keypress_event(xcb_generic_event_t *e) {
 }
 
 void
-ubqt_resize_event(xcb_generic_event_t *e) {
+altid_resize_event(xcb_generic_event_t *e) {
 	xcb_expose_event_t *ev;
 	ev = (xcb_expose_event_t *)e;
 	width = ev->width;
@@ -299,8 +299,8 @@ ubqt_resize_event(xcb_generic_event_t *e) {
 }
 
 int
-ubqt_draw_loop() {
-	ubqt_draw();
+altid_draw_loop() {
+	altid_draw();
 
 	xcb_generic_event_t *e;
 	int done = 0;
@@ -308,16 +308,16 @@ ubqt_draw_loop() {
 		e = xcb_wait_for_event(c);
 		switch(e->response_type & ~0x80) {
 		case XCB_EXPOSE:
-			ubqt_resize_event(e);
-			ubqt_draw();
+			altid_resize_event(e);
+			altid_draw();
 			break;
 		case XCB_KEY_PRESS:
-			done = ubqt_keypress_event(e);
-			ubqt_draw();
+			done = altid_keypress_event(e);
+			altid_draw();
 			break;
 		case XCB_CLIENT_MESSAGE:
 		case XCB_KEY_RELEASE:
-			ubqt_draw();
+			altid_draw();
 			break;
 		}
 	}

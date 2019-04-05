@@ -4,10 +4,10 @@
 #include <pthread.h>
 #include <string.h>
 #include <errno.h>
-#include "ubqt.h"
+#include "altid.h"
 
 void
-ubqt_data_update(char *data, char *path) {
+altid_data_update(char *data, char *path) {
 	/*
 	 * Ordered by presumed frequency
 	 * file read errors will result in NULL value assignment
@@ -18,95 +18,95 @@ ubqt_data_update(char *data, char *path) {
 	char *tmp = NULL;
 
 	if (!strcmp(data, "feed")) {
-		tmp = ubqt_data_read(data, path);
+		tmp = altid_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		if (ubqt_win.main != NULL)
-			free(ubqt_win.main);
-		ubqt_win.main = tmp;
+		if (altid_win.main != NULL)
+			free(altid_win.main);
+		altid_win.main = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 	else if (!strcmp(data, "tabs")) {
-		tmp = ubqt_data_read(data, path);
+		tmp = altid_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		if (ubqt_win.tabs != NULL)
-			free(ubqt_win.tabs);
-		ubqt_win.tabs = tmp;
+		if (altid_win.tabs != NULL)
+			free(altid_win.tabs);
+		altid_win.tabs = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 	else if (!strcmp(data, "title")) {
-		tmp = ubqt_data_read(data, path);
+		tmp = altid_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		if (ubqt_win.title != NULL)
-			free(ubqt_win.title);
-		ubqt_win.title = tmp;
+		if (altid_win.title != NULL)
+			free(altid_win.title);
+		altid_win.title = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 	else if (!strcmp(data, "status")) {
-		tmp = ubqt_data_read(data, path);
+		tmp = altid_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		if (ubqt_win.status != NULL)
-			free(ubqt_win.status);
-		ubqt_win.status = tmp;
+		if (altid_win.status != NULL)
+			free(altid_win.status);
+		altid_win.status = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 	else if (!strcmp(data, "sidebar")) {
-		tmp = ubqt_data_read(data, path);
+		tmp = altid_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		if (ubqt_win.sidebar != NULL)
-			free(ubqt_win.sidebar);
-		ubqt_win.sidebar = tmp;
+		if (altid_win.sidebar != NULL)
+			free(altid_win.sidebar);
+		altid_win.sidebar = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
 	else if (!strcmp(data, "slideout")) {
-		tmp = ubqt_data_read(data, path);
+		tmp = altid_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		if (ubqt_win.slideout != NULL)
-			free(ubqt_win.slideout);
-		ubqt_win.slideout = tmp; 
+		if (altid_win.slideout != NULL)
+			free(altid_win.slideout);
+		altid_win.slideout = tmp; 
 		pthread_mutex_unlock(&mutex);
 	}
 }
 
 void
-ubqt_data_remove(char *data) {
+altid_data_remove(char *data) {
 	pthread_mutex_lock(&mutex);
 
 	/* Ordered by frequency */
 	if (!strcmp(data, "title")) {
-		if (ubqt_win.title != NULL)
-			free(ubqt_win.title);
-		ubqt_win.title = NULL;
+		if (altid_win.title != NULL)
+			free(altid_win.title);
+		altid_win.title = NULL;
 	}
 	else if (!strcmp(data, "tabs")) {
 		if (ubqt_win.tabs != NULL)
-			free(ubqt_win.tabs);
-		ubqt_win.tabs = NULL;
+			free(altid_win.tabs);
+		altid_win.tabs = NULL;
 	}
 	else if (!strcmp(data, "status")) {
-		if (ubqt_win.status != NULL)
-			free(ubqt_win.status);
-		ubqt_win.status = NULL;
+		if (altid_win.status != NULL)
+			free(altid_win.status);
+		altid_win.status = NULL;
 	}
 	else if (!strcmp(data, "sidebar")) {
-		if (ubqt_win.sidebar != NULL)
-			free(ubqt_win.sidebar);
-		ubqt_win.sidebar = NULL;
+		if (altid_win.sidebar != NULL)
+			free(altid_win.sidebar);
+		altid_win.sidebar = NULL;
 	}
 	else if (!strcmp(data, "slideout")) {
-		if (ubqt_win.slideout != NULL)
-			free(ubqt_win.slideout);
-		ubqt_win.slideout = NULL;
+		if (altid_win.slideout != NULL)
+			free(altid_win.slideout);
+		altid_win.slideout = NULL;
 	}
 	else if (!strcmp(data, "feed")) {
-		if (ubqt_win.main != NULL)
-			free(ubqt_win.main);
-		ubqt_win.main = NULL;
+		if (altid_win.main != NULL)
+			free(altid_win.main);
+		altid_win.main = NULL;
 	}
 	pthread_mutex_unlock(&mutex);
 }
 
 int
-ubqt_substr(char *str, unsigned start, unsigned end)
+altid_substr(char *str, unsigned start, unsigned end)
 {
 
 	/* If we have a string that is 4 chars long, and
@@ -136,7 +136,7 @@ ubqt_substr(char *str, unsigned start, unsigned end)
 }
 
 int
-ubqt_insert(char **str, const char *token, unsigned index) {
+altid_insert(char **str, const char *token, unsigned index) {
 
 	/* Out of bounds */
 	if (str == NULL)
@@ -155,7 +155,7 @@ ubqt_insert(char **str, const char *token, unsigned index) {
 }
 
 int
-ubqt_replace(char **str, const char *token, unsigned index, unsigned range)
+altid_replace(char **str, const char *token, unsigned index, unsigned range)
 {
 
 	unsigned start = strlen(*str);
@@ -175,7 +175,7 @@ ubqt_replace(char **str, const char *token, unsigned index, unsigned range)
 }
 
 int
-ubqt_replace_ch(char **str, const char token, unsigned index, unsigned range) {
+altid_replace_ch(char **str, const char token, unsigned index, unsigned range) {
 	unsigned start = strlen(*str);
 
 	if(range > start)
@@ -189,7 +189,7 @@ ubqt_replace_ch(char **str, const char token, unsigned index, unsigned range) {
 }
 
 unsigned
-ubqt_next(char *md, const char token, unsigned i) {
+altid_next(char *md, const char token, unsigned i) {
 	if (i > strlen(md))
 		return 0;
 	for(; i < strlen(md); i++) {

@@ -1,2 +1,2 @@
 #include <ncurses.h>
-void ubqt_ncurses_markup(WINDOW *, char *);
+void altid_ncurses_markup(WINDOW *, char *);

@@ -19,8 +19,8 @@ struct Altid_win {
 	char *title;
 	char *tabs;
 	char *status;
-	char *sidebar;
-	char *slideout;
+	char *aside;
+	char *navi;
 	char *path;
 } altid_win;
 

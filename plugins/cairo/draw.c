@@ -205,9 +205,9 @@ altid_draw() {
 		pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
 	}
 	
-	if (altid_win.sidebar != NULL) {
+	if (altid_win.aside != NULL) {
 		pthread_mutex_lock(&mutex);
-		pango_layout_set_markup(layout, altid_win.sidebar, strlen(altid_win.sidebar));
+		pango_layout_set_markup(layout, altid_win.aside, strlen(altid_win.aside));
 		pthread_mutex_unlock(&mutex);
 		altid_do_draw(cr, x, y);
 		pango_layout_get_pixel_extents(layout, ink, logical);

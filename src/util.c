@@ -49,20 +49,20 @@ altid_data_update(char *data, char *path) {
 		altid_win.status = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
-	else if (!strcmp(data, "sidebar")) {
+	else if (!strcmp(data, "aside")) {
 		tmp = altid_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		if (altid_win.sidebar != NULL)
-			free(altid_win.sidebar);
-		altid_win.sidebar = tmp;
+		if (altid_win.aside != NULL)
+			free(altid_win.aside);
+		altid_win.aside = tmp;
 		pthread_mutex_unlock(&mutex);
 	}
-	else if (!strcmp(data, "slideout")) {
+	else if (!strcmp(data, "navi")) {
 		tmp = altid_data_read(data, path);
 		pthread_mutex_lock(&mutex);
-		if (altid_win.slideout != NULL)
-			free(altid_win.slideout);
-		altid_win.slideout = tmp; 
+		if (altid_win.navi != NULL)
+			free(altid_win.navi);
+		altid_win.navi = tmp; 
 		pthread_mutex_unlock(&mutex);
 	}
 }
@@ -87,15 +87,15 @@ altid_data_remove(char *data) {
 			free(altid_win.status);
 		altid_win.status = NULL;
 	}
-	else if (!strcmp(data, "sidebar")) {
-		if (altid_win.sidebar != NULL)
-			free(altid_win.sidebar);
-		altid_win.sidebar = NULL;
+	else if (!strcmp(data, "aside")) {
+		if (altid_win.aside != NULL)
+			free(altid_win.aside);
+		altid_win.aside = NULL;
 	}
-	else if (!strcmp(data, "slideout")) {
-		if (altid_win.slideout != NULL)
-			free(altid_win.slideout);
-		altid_win.slideout = NULL;
+	else if (!strcmp(data, "navi")) {
+		if (altid_win.navi != NULL)
+			free(altid_win.navi);
+		altid_win.navi = NULL;
 	}
 	else if (!strcmp(data, "feed")) {
 		if (altid_win.main != NULL)

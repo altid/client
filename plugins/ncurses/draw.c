@@ -118,13 +118,13 @@ altid_draw() {
 		h -= lineh;
 	}
 
-	if (altid_win.sidebar != NULL) {
+	if (altid_win.aside != NULL) {
 		delwin(win[1]);
 		pthread_mutex_lock(&mutex);
-		int linew = get_width(w, altid_win.sidebar);
+		int linew = get_width(w, altid_win.aside);
 		win[1] = newwin(h, linew, y, x);
 		scrollok(win[1], TRUE);
-		altid_ncurses_markup(win[1], altid_win.sidebar);
+		altid_ncurses_markup(win[1], altid_win.aside);
 		pthread_mutex_unlock(&mutex);
 		wrefresh(win[1]);
 		x += linew;

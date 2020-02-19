@@ -5,8 +5,8 @@ usage() {
 	exit 1
 }
 
-# Make sure we have ctl and event at a bare minimum
-if ! test -e "$1"/ctl; then
+# Make sure we have ctrl and event at a bare minimum
+if ! test -e "$1"/ctrl; then
 	printf 'No %s/ctl, exiting\n' "$1"
 	exit 1
 fi

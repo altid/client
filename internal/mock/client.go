@@ -49,9 +49,9 @@ func (c *Client) Auth() error {
 	return nil
 }
 
-func (c *Client) Command(cmd *fs.Command) error {
+func (c *Client) Command(cmd *fs.Command) (int, error) {
 	c.debug(util.CmdComm, cmd)
-	return nil
+	return 0, nil
 }
 
 func (c *Client) GetCommands() ([]*fs.Command, error) {
@@ -90,17 +90,6 @@ func (c *Client) GetCommands() ([]*fs.Command, error) {
 	return d, nil
 }
 
-// We want to eventually create and track tabs internally to the library
-func (c *Client) Ctl(cmd int, args ...string) (int, error) {
-	data, err := util.RunClientCtl(cmd, args...)
-	if err != nil {
-		return 0, err
-	}
-
-	c.debug(cmd, data)
-	return 0, nil
-}
-
 func (c *Client) Tabs() ([]byte, error) {
 	//c.debug(util.CmdTabs, c.tablist)
 	return nil, nil
@@ -109,6 +98,10 @@ func (c *Client) Tabs() ([]byte, error) {
 func (c *Client) Title() ([]byte, error) {
 	//c.debug(util.CmdTitle, c.current)
 	//return c.current, nil
+	return nil, nil
+}
+
+func (c *Client) Ctl() ([]byte, error) {
 	return nil, nil
 }
 

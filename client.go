@@ -3,9 +3,8 @@ package client
 import (
 	"io"
 
-	"github.com/altid/libs/client/internal/defaults"
-	"github.com/altid/libs/client/internal/mock"
-	"github.com/altid/libs/client/internal/util"
+	"github.com/altid/client/internal/defaults"
+	"github.com/altid/client/internal/mock"
 	"github.com/altid/libs/fs"
 	"github.com/lionkov/go9p/p"
 )
@@ -19,12 +18,12 @@ type Client struct {
 }
 
 type runner interface {
+	Ctl() ([]byte, error)
 	Cleanup()
 	Connect(int) error
 	Attach() error
 	Auth() error
-	Command(*fs.Command) error
-	Ctl(int, ...string) (int, error)
+	Command(*fs.Command) (int, error)
 	Tabs() ([]byte, error)
 	Title() ([]byte, error)
 	Status() ([]byte, error)
@@ -74,7 +73,7 @@ func (c *Client) Connect(debug int) (err error) {
 
 // Command sends the named command to the service
 // If command is invalid, it will return an error
-func (c *Client) Command(cmd *fs.Command) error {
+func (c *Client) Command(cmd *fs.Command) (int, error) {
 	return c.run.Command(cmd)
 }
 
@@ -90,22 +89,22 @@ func (c *Client) Auth() error {
 
 // Buffer changes the active buffer to the named buffer, or returns an error
 func (c *Client) Buffer(name string) (int, error) {
-	return c.run.Ctl(util.CmdBuffer, name)
+	return sendCmd(c, "buffer", name)
 }
 
 // Open attempts to open the named buffer
 func (c *Client) Open(name string) (int, error) {
-	return c.run.Ctl(util.CmdOpen, name)
+	return sendCmd(c, "open", name)
 }
 
 // Close attempts to close the named buffer
 func (c *Client) Close(name string) (int, error) {
-	return c.run.Ctl(util.CmdClose, name)
+	return sendCmd(c, "close", name)
 }
 
-// Link updates the current buffer to point to the `to`
-func (c *Client) Link(from, to string) (int, error) {
-	return c.run.Ctl(util.CmdLink, from, to)
+// Link updates the current buffer to the named buffer, closing the former
+func (c *Client) Link(name string) (int, error) {
+	return sendCmd(c, "link", name)
 }
 
 // Tabs returns the contents of the `tabs` file for the server
@@ -126,6 +125,11 @@ func (c *Client) Status() ([]byte, error) {
 // Aside returns the contents of the `aside` file for a given buffer
 func (c *Client) Aside() ([]byte, error) {
 	return c.run.Aside()
+}
+
+// Ctl returns the contents of the `ctl` file for a given service
+func (c *Client) Ctl() ([]byte, error) {
+	return c.run.Ctl()
 }
 
 // Input appends the given data string to input
@@ -171,4 +175,13 @@ func (f *FeedIterator) Next() ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+func sendCmd(c *Client, cmd, arg string) (int, error) {
+	command := &fs.Command{
+		Name:    cmd,
+		Heading: fs.DefaultGroup,
+		Args:    []string{arg},
+	}
+	return c.run.Command(command)
 }

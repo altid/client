@@ -1,12 +1,12 @@
 package defaults
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net"
 
 	"github.com/altid/libs/client/internal/feed"
-	"github.com/altid/libs/client/internal/util"
 	"github.com/altid/libs/fs"
 	"github.com/knieriem/g/go9p/user"
 	"github.com/lionkov/go9p/p"
@@ -14,11 +14,12 @@ import (
 )
 
 type Client struct {
-	afid   *clnt.Fid
-	root   *clnt.Fid
-	addr   string
-	buffer string
-	clnt   *clnt.Clnt
+	commands []*fs.Command
+	afid     *clnt.Fid
+	root     *clnt.Fid
+	addr     string
+	buffer   string
+	clnt     *clnt.Clnt
 }
 
 func NewClient(addr string) *Client {
@@ -71,26 +72,25 @@ func (c *Client) Auth() error {
 	return nil
 }
 
-func (c *Client) Command(cmd *fs.Command) error {
-	// TODO(halfwit) Send off named command
-	return nil
-}
-
-func (c *Client) Ctl(cmd int, args ...string) (int, error) {
+// Command sends off a named command
+func (c *Client) Command(cmd *fs.Command) (int, error) {
 	nfid := c.clnt.FidAlloc()
 	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
 	if err != nil {
 		return 0, err
 	}
+
+	cmd.Name = c.buffer
+
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
 
-	data, err := util.RunClientCtl(cmd, args...)
-	if err != nil {
-		return 0, err
+	for _, comm := range c.commands {
+		if comm.Name == cmd.Name {
+			return c.clnt.Write(nfid, cmd.Bytes(), 0)
+		}
 	}
-
-	return c.clnt.Write(nfid, data, 0)
+	return 0, errors.New("found no such command")
 }
 
 func (c *Client) Tabs() ([]byte, error) {
@@ -107,6 +107,10 @@ func (c *Client) Status() ([]byte, error) {
 
 func (c *Client) Aside() ([]byte, error) {
 	return getNamedFile(c, "aside")
+}
+
+func (c *Client) Ctl() ([]byte, error) {
+	return getNamedFile(c, "ctl")
 }
 
 func (c *Client) Document() ([]byte, error) {
@@ -140,12 +144,12 @@ func (c *Client) Notifications() ([]byte, error) {
 }
 
 func (c *Client) GetCommands() ([]*fs.Command, error) {
-	_, err := getNamedFile(c, "ctl")
+	b, err := getNamedFile(c, "ctl")
 	if err != nil {
 		return nil, err
 	}
-	// TODO(halfwit) Parse into Command struct
-	return nil, nil
+
+	return fs.FindCommands(b)
 }
 
 func (c *Client) Feed() (io.ReadCloser, error) {

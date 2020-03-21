@@ -1,0 +1,16 @@
+9fans.net/go v0.0.2/go.mod h1:lfPdxjq9v8pVQXUMBCx5EO5oLXWQFlKRQgs1kEkjoIM=
+github.com/altid/libs v0.0.1-config h1:+LMafZsZoIbi76kywR08BywOJ2Aymnly9LbeK7AyviI=
+github.com/altid/libs v0.0.1-config/go.mod h1:U8m8LG+xPdt5M3MXW+opofIYFS3iA6RrP/fQhBaH9N8=
+github.com/google/gofuzz v1.1.0 h1:Hsa8mG0dQ46ij8Sl2AYJDUv1oA9/d6Vk+3LG99Oe02g=
+github.com/google/gofuzz v1.1.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
+github.com/knieriem/g v0.1.2 h1:rsuzp2xAM3d3zkIkDPS9gV7G/60i30439bcNc3Nicsw=
+github.com/knieriem/g v0.1.2/go.mod h1:zYg1CmnYJBZ34OwOIRIqoBsvVxbGRjgE4kLQrHz7DBg=
+github.com/lionkov/go9p v0.0.0-20180620135904-0a603dd6808a/go.mod h1:Nbrxd4FljESFB/bUvzT5xm1VNO2VfzMKSIv4L++4J4U=
+github.com/lionkov/go9p v0.0.0-20190125202718-b4200817c487 h1:jmumGkeBN64JTR+Q4A6/Ed+tCGKZjQxyvbji3YyNF0E=
+github.com/lionkov/go9p v0.0.0-20190125202718-b4200817c487/go.mod h1:Nbrxd4FljESFB/bUvzT5xm1VNO2VfzMKSIv4L++4J4U=
+github.com/mischief/ndb v0.0.0-20131219140803-a27299009a40/go.mod h1:dumNHRNWG/onXBRnVYKT4aAqdFDvZzOu5hGYBPmOf/A=
+golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
+golang.org/x/net v0.0.0-20200301022130-244492dfa37a/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
+golang.org/x/sys v0.0.0-20180824143301-4910a1d54f87/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

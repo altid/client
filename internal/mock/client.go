@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/altid/libs/client/internal/feed"
-	"github.com/altid/libs/client/internal/util"
+	"github.com/altid/client/internal/feed"
+	"github.com/altid/client/internal/util"
 	"github.com/altid/libs/fs"
 	fuzz "github.com/google/gofuzz"
 )

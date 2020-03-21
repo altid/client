@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/altid/libs/client"
+	"github.com/altid/client"
 )
 
 var debug = flag.Bool("d", false, "enable debug output")

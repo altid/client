@@ -6,7 +6,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/altid/libs/client/internal/feed"
+	"github.com/altid/client/internal/feed"
 	"github.com/altid/libs/fs"
 	"github.com/knieriem/g/go9p/user"
 	"github.com/lionkov/go9p/p"

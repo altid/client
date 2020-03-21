@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/altid/libs/client"
+	"github.com/altid/client"
 	"github.com/altid/libs/fs"
 )
 

@@ -100,12 +100,12 @@ func otherMsg(l *listener, args []string) {
 
 	for _, cmd := range l.cmds {
 		if "/"+cmd.Name == args[0] {
-			l.c.Send(cmd)
+			line := strings.Join(args[1:], " ")
+			l.c.Send(cmd, []byte(line))
 		}
 	}
 
 	return
-
 }
 
 func emitDocumentData(l *listener) error {

@@ -27,7 +27,7 @@ type runner interface {
 	Tabs() ([]byte, error)
 	Title() ([]byte, error)
 	Status() ([]byte, error)
-	Send(*fs.Command) (int, error)
+	Send(*fs.Command, []byte) (int, error)
 	Aside() ([]byte, error)
 	Input([]byte) (int, error)
 	Notifications() ([]byte, error)
@@ -150,8 +150,9 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 	return c.run.Feed()
 }
 
-func (c *Client) Send(cmd *fs.Command) (int, error) {
-	return c.run.Send(cmd)
+// Send a named command with optional data
+func (c *Client) Send(cmd *fs.Command, data []byte) (int, error) {
+	return c.run.Send(cmd, data)
 }
 
 // FeedIterator allows you to step through lines of feed with Next()

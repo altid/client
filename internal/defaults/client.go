@@ -94,7 +94,7 @@ func (c *Client) Command(cmd *fs.Command) (int, error) {
 	return 0, errors.New("found no such command")
 }
 
-func (c *Client) Send(cmd *fs.Command) (int, error) {
+func (c *Client) Send(cmd *fs.Command, data []byte) (int, error) {
 	nfid := c.clnt.FidAlloc()
 	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
 	if err != nil {
@@ -104,7 +104,8 @@ func (c *Client) Send(cmd *fs.Command) (int, error) {
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
 
-	return c.clnt.Write(nfid, cmd.Bytes(), 0)
+	msg := append(cmd.Bytes(), data...)
+	return c.clnt.Write(nfid, msg, 0)
 }
 
 func (c *Client) Tabs() ([]byte, error) {

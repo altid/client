@@ -27,6 +27,7 @@ type runner interface {
 	Tabs() ([]byte, error)
 	Title() ([]byte, error)
 	Status() ([]byte, error)
+	Send(*fs.Command) (int, error)
 	Aside() ([]byte, error)
 	Input([]byte) (int, error)
 	Notifications() ([]byte, error)
@@ -50,7 +51,7 @@ func NewMockClient(addr string) *Client {
 	}
 }
 
-// GetCommands returns a list of available commands for the connected service
+// GetCommands initializes c.CmdList
 func (c *Client) GetCommands() ([]*fs.Command, error) {
 	return c.run.GetCommands()
 }
@@ -147,6 +148,10 @@ func (c *Client) Notifications() ([]byte, error) {
 // It is also expected for Feed to be called in its own thread
 func (c *Client) Feed() (io.ReadCloser, error) {
 	return c.run.Feed()
+}
+
+func (c *Client) Send(cmd *fs.Command) (int, error) {
+	return c.run.Send(cmd)
 }
 
 // FeedIterator allows you to step through lines of feed with Next()

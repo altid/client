@@ -49,7 +49,7 @@ func main() {
 	for {
 		select {
 		case <-l.done:
-			break
+			os.Exit(0)
 		case p := <-l.data:
 			os.Stdout.Write(p)
 		case e := <-l.err:

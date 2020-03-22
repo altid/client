@@ -4,7 +4,6 @@ before:
     - go mod download
 builds:
 - binary: altid-cli
-  main: ./cmd/altid-cli/main.go
   dir: ./cmd/altid-cli
   goos:
   - linux

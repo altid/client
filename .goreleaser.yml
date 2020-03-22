@@ -15,16 +15,6 @@ builds:
   - amd64
   - arm
   - arm64
-  goarch:
-  - 6
-  - 7
-  ignore:
-  - goos: darwin
-    goarch: arm
-    goarch: arm64
-  - goos: windows
-    goarch: arm
-    goarch: arm64
 signs:
   - artifacts: all
 archives:

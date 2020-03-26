@@ -2,7 +2,8 @@
 
 This includes libraries for writing Altid clients, as well as the clients themselves. In cmd/, you will find examples using each library; expressed as fully working, end-user clients.
 
-[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://godoc.org/github.com/altid/client) ![Tests](https://github.com/altid/server/workflows/Tests/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/altid/server)](https://goreportcard.com/report/github.com/altid/client) [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
+![Tests](https://github.com/altid/server/workflows/Tests/badge.svg) 
+[![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
 
 ## Libs
 
@@ -10,9 +11,13 @@ Libs exist currently for clients written in several languages
 
 ### Go
 
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://godoc.org/github.com/altid/client) [![Go Report Card](https://goreportcard.com/badge/github.com/altid/server)](https://goreportcard.com/report/github.com/altid/client)]
+
 `go get github.com/altid/client`
 
 ### Flutter
+
+[![flutter libs](https://img.shields.io/badge/pub-0.0.1-blueviolet.svg)]
 
 Add the following to your pubspec.yml
 

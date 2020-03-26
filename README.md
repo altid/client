@@ -2,8 +2,6 @@
 
 This includes libraries for writing Altid clients, as well as the clients themselves. In cmd/, you will find examples using each library; expressed as fully working, end-user clients.
 
-Additionally, there are simple shell example clients to showcase the ease with which a client can be implemented in this system!
-
 [![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://godoc.org/github.com/altid/client) ![Tests](https://github.com/altid/server/workflows/Tests/badge.svg) [![Go Report Card](https://goreportcard.com/badge/github.com/altid/server)](https://goreportcard.com/report/github.com/altid/client) [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
 
 ## Libs

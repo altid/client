@@ -80,7 +80,7 @@ func (c *Client) Command(cmd *fs.Command) (int, error) {
 		return 0, err
 	}
 
-	cmd.Name = c.buffer
+	cmd.From = c.buffer
 
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
@@ -90,7 +90,22 @@ func (c *Client) Command(cmd *fs.Command) (int, error) {
 			return c.clnt.Write(nfid, cmd.Bytes(), 0)
 		}
 	}
+
 	return 0, errors.New("found no such command")
+}
+
+func (c *Client) Send(cmd *fs.Command, data []byte) (int, error) {
+	nfid := c.clnt.FidAlloc()
+	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
+	if err != nil {
+		return 0, err
+	}
+
+	c.clnt.Open(nfid, p.OAPPEND)
+	defer c.clnt.Clunk(nfid)
+
+	msg := append(cmd.Bytes(), data...)
+	return c.clnt.Write(nfid, msg, 0)
 }
 
 func (c *Client) Tabs() ([]byte, error) {
@@ -143,13 +158,20 @@ func (c *Client) Notifications() ([]byte, error) {
 	return c.clnt.Read(nfid, 0, p.MSIZE)
 }
 
+// GetCommands initializes the internal cmdlist
 func (c *Client) GetCommands() ([]*fs.Command, error) {
 	b, err := getNamedFile(c, "ctl")
 	if err != nil {
 		return nil, err
 	}
 
-	return fs.FindCommands(b)
+	cmds, err := fs.FindCommands(b)
+	if err != nil {
+		return nil, err
+	}
+
+	c.commands = cmds
+	return cmds, nil
 }
 
 func (c *Client) Feed() (io.ReadCloser, error) {

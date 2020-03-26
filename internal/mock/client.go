@@ -87,7 +87,13 @@ func (c *Client) GetCommands() ([]*fs.Command, error) {
 			Description: "Exits the service",
 		},
 	}
+
 	return d, nil
+}
+
+func (c *Client) Send(cmd *fs.Command, data []byte) (int, error) {
+	//c.debug(util.CmdSend, cmd.Bytes())
+	return 0, nil
 }
 
 func (c *Client) Tabs() ([]byte, error) {

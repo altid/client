@@ -54,12 +54,13 @@ func (l *listener) listen() {
 			return
 		}
 
-		if line == "/quit" {
+		t := strings.Fields(line)
+		if t[0] == "/quit" {
 			close(l.done)
 			return
 		}
 
-		handle(l, strings.Fields(line))
+		handle(l, t)
 	}
 }
 
@@ -91,13 +92,20 @@ func handle(l *listener, args []string) {
 }
 
 func otherMsg(l *listener, args []string) {
-	if args[0][0] == '/' {
-		//cl.Ctl([]byte(line[1:]))
+	if args[0][0] != '/' {
+		line := strings.Join(args, " ")
+		l.c.Input([]byte(line))
 		return
 	}
 
-	line := strings.Join(args, " ")
-	l.c.Input([]byte(line))
+	for _, cmd := range l.cmds {
+		if "/"+cmd.Name == args[0] {
+			line := strings.Join(args[1:], " ")
+			l.c.Send(cmd, []byte(line))
+		}
+	}
+
+	return
 }
 
 func emitDocumentData(l *listener) error {

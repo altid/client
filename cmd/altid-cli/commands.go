@@ -43,7 +43,13 @@ func listCommands(cmds []*fs.Command) []byte {
 	var b bytes.Buffer
 
 	for _, cmd := range cmds {
-		b.WriteString("/" + cmd.Name + "\t#" + cmd.Description)
+		b.WriteString("/" + cmd.Name)
+		for _, arg := range cmd.Args {
+			b.WriteString(" <" + arg + ">")
+		}
+
+		b.WriteString("\t# " + cmd.Description)
+		b.WriteRune('\n')
 	}
 
 	return b.Bytes()

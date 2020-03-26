@@ -1,0 +1,22 @@
+PODS:
+  - altid_mobile (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - altid_mobile (from `.symlinks/plugins/altid_mobile/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  altid_mobile:
+    :path: ".symlinks/plugins/altid_mobile/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  altid_mobile: 449b5ce3609212ed68edb3074a5ea67a9249acbf
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+
+PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
+
+COCOAPODS: 1.9.1

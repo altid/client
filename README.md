@@ -11,13 +11,13 @@ Libs exist currently for clients written in several languages
 
 ### Go
 
-[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://godoc.org/github.com/altid/client) [![Go Report Card](https://goreportcard.com/badge/github.com/altid/server)](https://goreportcard.com/report/github.com/altid/client)]
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://godoc.org/github.com/altid/client) [![Go Report Card](https://goreportcard.com/badge/github.com/altid/server)](https://goreportcard.com/report/github.com/altid/client)
 
 `go get github.com/altid/client`
 
 ### Flutter
 
-[![flutter libs](https://img.shields.io/badge/pub-0.0.1-blueviolet.svg)]
+![flutter libs](https://img.shields.io/badge/pub-0.0.1-blueviolet.svg)
 
 Add the following to your pubspec.yml
 

@@ -60,22 +60,22 @@ func (l *listener) listen() {
 			return
 		}
 
-		handle(l, t)
+		handle(l, t[0], strings.Join(t[1:], " "))
 	}
 }
 
-func handle(l *listener, args []string) {
-	switch args[0] {
+func handle(l *listener, name, args string) {
+	switch name {
 	case "/help":
 		l.data <- listCommands(l.cmds)
 	case "/buffer":
-		sendCmd(l, l.c.Buffer, args[1])
+		sendCmd(l, l.c.Buffer, args)
 	case "/open":
-		sendCmd(l, l.c.Open, args[1])
+		sendCmd(l, l.c.Open, args)
 	case "/close":
-		sendCmd(l, l.c.Close, args[1])
+		sendCmd(l, l.c.Close, args)
 	case "/link":
-		sendCmd(l, l.c.Link, args[1])
+		sendCmd(l, l.c.Link, args)
 	case "/tabs":
 		getData(l, l.c.Tabs)
 	case "/title":
@@ -87,21 +87,19 @@ func handle(l *listener, args []string) {
 	case "/notify":
 		getData(l, l.c.Notifications)
 	default:
-		otherMsg(l, args)
+		otherMsg(l, name, args)
 	}
 }
 
-func otherMsg(l *listener, args []string) {
-	if args[0][0] != '/' {
-		line := strings.Join(args, " ")
-		l.c.Input([]byte(line))
+func otherMsg(l *listener, name, args string) {
+	if name[0] != '/' {
+		l.c.Input([]byte(name + " " + args))
 		return
 	}
 
 	for _, cmd := range l.cmds {
-		if "/"+cmd.Name == args[0] {
-			line := strings.Join(args[1:], " ")
-			l.c.Send(cmd, []byte(line))
+		if "/"+cmd.Name == name {
+			l.c.Send(cmd, strings.Fields(args))
 		}
 	}
 

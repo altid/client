@@ -72,7 +72,9 @@ func (c *Client) Auth() error {
 	return nil
 }
 
-// Command sends off a named command
+// Command will write a command, returning an error
+// if the command is not supported by the service
+// It will set cmd.From on your behalf
 func (c *Client) Command(cmd *fs.Command) (int, error) {
 	nfid := c.clnt.FidAlloc()
 	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
@@ -94,18 +96,20 @@ func (c *Client) Command(cmd *fs.Command) (int, error) {
 	return 0, errors.New("found no such command")
 }
 
-func (c *Client) Send(cmd *fs.Command, data []byte) (int, error) {
+func (c *Client) Send(cmd *fs.Command, data []string) (int, error) {
 	nfid := c.clnt.FidAlloc()
 	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
 	if err != nil {
 		return 0, err
 	}
 
+	cmd.From = c.buffer
+
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
 
-	msg := append(cmd.Bytes(), data...)
-	return c.clnt.Write(nfid, msg, 0)
+	cmd.Args = data
+	return c.clnt.Write(nfid, cmd.Bytes(), 0)
 }
 
 func (c *Client) Tabs() ([]byte, error) {

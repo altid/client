@@ -27,7 +27,7 @@ type runner interface {
 	Tabs() ([]byte, error)
 	Title() ([]byte, error)
 	Status() ([]byte, error)
-	Send(*fs.Command, []byte) (int, error)
+	Send(*fs.Command, []string) (int, error)
 	Aside() ([]byte, error)
 	Input([]byte) (int, error)
 	Notifications() ([]byte, error)
@@ -90,22 +90,46 @@ func (c *Client) Auth() error {
 
 // Buffer changes the active buffer to the named buffer, or returns an error
 func (c *Client) Buffer(name string) (int, error) {
-	return sendCmd(c, "buffer", name)
+	cmd := &fs.Command{
+		Heading: fs.DefaultGroup,
+		Name: "buffer",
+		Args: []string{name},
+	}
+
+	return c.run.Command(cmd)
 }
 
 // Open attempts to open the named buffer
 func (c *Client) Open(name string) (int, error) {
-	return sendCmd(c, "open", name)
+	cmd := &fs.Command{
+		Heading: fs.DefaultGroup,
+		Name: "open",
+		Args: []string{name},
+	}
+
+	return c.run.Command(cmd)
 }
 
 // Close attempts to close the named buffer
 func (c *Client) Close(name string) (int, error) {
-	return sendCmd(c, "close", name)
+	cmd := &fs.Command{
+		Heading: fs.DefaultGroup,
+		Name: "close",
+		Args: []string{name},
+	}
+
+	return c.run.Command(cmd)
 }
 
 // Link updates the current buffer to the named buffer, closing the former
 func (c *Client) Link(name string) (int, error) {
-	return sendCmd(c, "link", name)
+	cmd := &fs.Command{
+		Heading: fs.DefaultGroup,
+		Name: "link",
+		Args: []string{name},
+	}
+
+	return c.run.Command(cmd)
 }
 
 // Tabs returns the contents of the `tabs` file for the server
@@ -150,9 +174,9 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 	return c.run.Feed()
 }
 
-// Send a named command with optional data
-func (c *Client) Send(cmd *fs.Command, data []byte) (int, error) {
-	return c.run.Send(cmd, data)
+// Send a named command with optional args to the service
+func (c *Client) Send(cmd *fs.Command, args []string) (int, error) {
+	return c.run.Send(cmd, args)
 }
 
 // FeedIterator allows you to step through lines of feed with Next()
@@ -181,13 +205,4 @@ func (f *FeedIterator) Next() ([]byte, error) {
 	}
 
 	return b, nil
-}
-
-func sendCmd(c *Client, cmd, arg string) (int, error) {
-	command := &fs.Command{
-		Name:    cmd,
-		Heading: fs.DefaultGroup,
-		Args:    []string{arg},
-	}
-	return c.run.Command(command)
 }

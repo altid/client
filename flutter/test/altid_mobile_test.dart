@@ -22,7 +22,7 @@ void main() {
   });
 
   test('altidStart', () async {
-    expect(await AltidMobile.altidStart("127.0.0.1"), null);
-    expect(await AltidMobile.altidAttach, null);
+    expect(await AltidMobile.altidStart("127.0.0.1"), '42');
+    expect(await AltidMobile.altidAttach, '42');
   });
 }

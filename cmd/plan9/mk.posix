@@ -1,0 +1,8 @@
+<$PLAN9/src/mkhdr
+
+<mk.common
+
+<$PLAN9/src/mkone
+
+clean:V:
+	rm -f *.[$OS] [$OS].out *.acid $TARG

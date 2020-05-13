@@ -1,0 +1,6 @@
+TARG=altid-gui
+
+HFILES=\
+    altid.h
+OFILES=\
+	altid.$O\

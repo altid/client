@@ -78,7 +78,7 @@ altid_data_remove(char *data) {
 		altid_win.title = NULL;
 	}
 	else if (!strcmp(data, "tabs")) {
-		if (ubqt_win.tabs != NULL)
+		if (altid_win.tabs != NULL)
 			free(altid_win.tabs);
 		altid_win.tabs = NULL;
 	}

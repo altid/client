@@ -5,9 +5,9 @@ SRC := src/altid.c src/util.c
 OBJ := src/altid.o src/util.o
 
 include config.mk
-include plugins/$(TRANSPORT)/$(TRANSPORT).mk
-include plugins/$(DRAW)/$(DRAW).mk
-include plugins/$(SEAT)/$(SEAT).mk
+include plugins/transport/$(TRANSPORT)/$(TRANSPORT).mk
+include plugins/draw/$(DRAW)/$(DRAW).mk
+include plugins/seat/$(SEAT)/$(SEAT).mk
 
 all: altid-$(DRAW)
 

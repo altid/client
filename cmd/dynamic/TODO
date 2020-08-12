@@ -1,8 +1,3 @@
 use https://swtch.com/libtask/ and add a guide entry in the readme required libraries
-use https://github.com/mjansson/mdns for dns lookup at initialization
 use https://github.com/0intro/libixp for 9p connectivity
 use https://www.libssh2.org/ for ssh connectivity
-
-make markdown.h library
-make draw.h library for common processes - init, etc
-make seat.h library for common processes - mouse, keyboard (some things won't use mouse)

@@ -1,13 +1,13 @@
 # See LICENSE for copyright and license details.
 
 
-SRC := src/altid.c src/util.c
-OBJ := src/altid.o src/util.o
+SRC := src/altid.c src/scan.c
+OBJ := src/altid.o src/scan.o
 
 include config.mk
-include plugins/transport/$(TRANSPORT)/$(TRANSPORT).mk
-include plugins/draw/$(DRAW)/$(DRAW).mk
-include plugins/seat/$(SEAT)/$(SEAT).mk
+#include plugins/transport/$(TRANSPORT)/$(TRANSPORT).mk
+#include plugins/draw/$(DRAW)/$(DRAW).mk
+#include plugins/seat/$(SEAT)/$(SEAT).mk
 
 all: altid-$(DRAW)
 
@@ -18,6 +18,7 @@ all: altid-$(DRAW)
 
 # if altid.h changes, update all objects
 $(OBJ) : src/altid.h
+$(OBJ) : resources/mdns.h
 
 # if any objects change, update altid
 altid-$(DRAW): $(OBJ)

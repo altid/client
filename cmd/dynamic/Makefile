@@ -1,8 +1,8 @@
 # See LICENSE for copyright and license details.
 
 
-SRC := src/altid.c src/scan.c
-OBJ := src/altid.o src/scan.o
+SRC := altid.c mdns/scan.c
+OBJ := altid.o mdns/scan.o
 
 include config.mk
 #include plugins/transport/$(TRANSPORT)/$(TRANSPORT).mk
@@ -17,8 +17,8 @@ all: altid-$(DRAW)
 	@$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 # if altid.h changes, update all objects
-$(OBJ) : src/altid.h
-$(OBJ) : resources/mdns.h
+$(OBJ) : altid.h
+$(OBJ) : include/*.h
 
 # if any objects change, update altid
 altid-$(DRAW): $(OBJ)

@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include "../../src/altid.h"
+#include "../../../src/altid.h"
 
 enum {
 	BORDER = 2

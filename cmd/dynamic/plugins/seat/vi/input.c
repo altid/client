@@ -1,8 +1,8 @@
 #define _GNU_SOURCE
 #include <string.h>
 #include <stdio.h>
-#include "utf8.h"
-#include "../../src/altid.h"
+#include "../../../resources/utf8.h"
+#include "../../../src/altid.h"
 
 //TODO: Modes
 

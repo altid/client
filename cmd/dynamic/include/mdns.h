@@ -12,6 +12,7 @@
  *
  */
 
+#pragma clang diagnostic ignored "-Wunused-function"
 #pragma once
 
 #include <stdint.h>

@@ -3,8 +3,8 @@
 #include <netdb.h>
 #include <errno.h>
 
-#include "altid.h"
-#include "../resources/mdns.h"
+#include "../altid.h"
+#include "../include/mdns.h"
 
 /* scan.c - adapted from https://github.com/mjansson/mdns/blob/master/mdns.c
 
@@ -19,7 +19,6 @@
 static char addrbuffer[64];
 static char entrybuffer[256];
 static char namebuffer[256];
-static char sendbuffer[256];
 static mdns_record_txt_t txtbuffer[128];
 
 static int opensockets(int*, int, int);

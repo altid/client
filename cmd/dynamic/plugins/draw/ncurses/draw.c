@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <ncurses.h>
 #include "draw.h"
-#include "../../src/altid.h"
+#include "../../../src/altid.h"
 
 #define U_MAX_BYTES 4
 

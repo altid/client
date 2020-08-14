@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ixp.h>
-#include "../../src/altid.h"
+#include "../../../src/altid.h"
 
 #define MAX_EVENTS 16
 IxpClient *client;

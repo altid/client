@@ -1,6 +1,1 @@
-use https://swtch.com/libtask/ and add a guide entry in the readme required libraries
-use https://github.com/0intro/libixp for 9p connectivity
-use https://www.libssh2.org/ for ssh connectivity
-modify scan.c to return useful DNSEntry types
-use https://github.com/vurtun/nuklear for drawing backend
-adapt https://code.9front.org/hg/drawterm/file/9807ebf9d580/gui-cocoa/screen.m to host a window
+This should just be a bunch of clients

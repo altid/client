@@ -1,13 +1,14 @@
 # See LICENSE for copyright and license details.
 
 
-SRC := altid.c mdns/scan.c
-OBJ := altid.o mdns/scan.o
+SRC := altid.c
+OBJ := altid.o
 
 include config.mk
-#include plugins/transport/$(TRANSPORT)/$(TRANSPORT).mk
-#include plugins/draw/$(DRAW)/$(DRAW).mk
-#include plugins/seat/$(SEAT)/$(SEAT).mk
+
+# We use a non-recursive make structure. Each piece has a .mk with relevent includes
+# Should we need a recursion within a subdirectory, we can call that from a .mk
+include */*.mk
 
 all: altid-$(DRAW)
 
@@ -15,10 +16,6 @@ all: altid-$(DRAW)
 %.o: %.c
 	@echo LD $@
 	@$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
-
-# if altid.h changes, update all objects
-$(OBJ) : altid.h
-$(OBJ) : include/*.h
 
 # if any objects change, update altid
 altid-$(DRAW): $(OBJ)

@@ -3,8 +3,8 @@
 #include <netdb.h>
 #include <errno.h>
 
-#include "../altid.h"
-#include "../include/mdns.h"
+#include "altid.h"
+#include "mdns.h"
 
 /* scan.c - adapted from https://github.com/mjansson/mdns/blob/master/mdns.c
 

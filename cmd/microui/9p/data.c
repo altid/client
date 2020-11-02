@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ixp.h>
-#include "../../../src/altid.h"
+#include "altid.h"
 
 #define MAX_EVENTS 16
 IxpClient *client;
@@ -100,6 +100,7 @@ dir_to_mask() {
 	return mask;
 }
 
+/*
 void
 check_data(int bitmask) {
 	char *file;
@@ -186,7 +187,6 @@ altid_data_read(char *name, char *unused) {
 	return buf;
 }
 
-/* TODO: 
 void
 altid_clear_notification() {
 	// TODO: Does this return error?

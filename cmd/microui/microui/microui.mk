@@ -1,2 +1,4 @@
-SRC += plugins/draw/microui/draw.c
-OBJ += plugins/draw/microui/draw.o
+CFLAGS += "-lm -g"
+LDFLAGS +=
+SRC += microui/microui.c
+OBJ += microui/microui.o

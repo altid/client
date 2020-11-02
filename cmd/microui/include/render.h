@@ -14,3 +14,4 @@ void r_clear(mu_Color color);
 void r_present(void);
 
 #endif
+

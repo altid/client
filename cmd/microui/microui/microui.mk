@@ -1,4 +1,2 @@
-CFLAGS += "-lm -g"
-LDFLAGS +=
-SRC += microui/microui.c
-OBJ += microui/microui.o
+microui%.o : microui%.c
+	@$(CC) ${INCS} -Wall -pedantic `sdl2-config --libs` -framework OpenGL -o $@ $<

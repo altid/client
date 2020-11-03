@@ -5,20 +5,17 @@ SRC := altid.c
 OBJ := altid.o
 
 include config.mk
-
-# We use a non-recursive make structure. Each piece has a .mk with relevent includes
-# Should we need a recursion within a subdirectory, we can call that from a .mk
 include */*.mk
 
-all: altid-$(DRAW)
+all: altid
 
 # cc -c -l %.c -o %.o
 %.o: %.c
 	@echo LD $@
-	@$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $< -o $@
 
 # if any objects change, update altid
-altid-$(DRAW): $(OBJ)
+altid: $(OBJ)
 	@echo CC -o $@
 	@$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
@@ -32,12 +29,12 @@ dist: clean
 # from https://stackoverflow.com/a/42908613
 # Clean up code from other .mk files
 clean:
-	@rm -rf $(OBJ) *~ altid-$(DRAW) $(CLEAN)
+	@rm -rf $(OBJ) *~ altid $(CLEAN)
 
-install: altid-$(DRAW)
+install: altid
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
-	@cp -f altid-$(DRAW) $(DESTDIR)$(PREFIX)/bin/altid-$(DRAW)
-	@chmod 755 $(DESTDIR)$(PREFIX)/bin/altid-$(DRAW)
+	@cp -f altid $(DESTDIR)$(PREFIX)/bin/altid
+	@chmod 755 $(DESTDIR)$(PREFIX)/bin/altid
 	@mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	@sed "s/VERSION/${VERSION}/g" < altid.1 > $(DESTDIR)$(MANPREFIX)/man1/altid.1
 	@chmod 644 $(DESTDIR)$(MANPREFIX)/man1/altid.1

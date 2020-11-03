@@ -1,5 +1,7 @@
 #include <stdio.h>
-
+#include "c9.h"
+#include "mdns.h"
+#include "microui.h"
 #include "altid.h"
 
 int

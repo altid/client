@@ -1,16 +1,16 @@
 # See LICENSE for copyright and license details.
 
-
 SRC := altid.c
-OBJ := altid.o
-
-include config.mk
-include */*.mk
+OBJ := altid.o draw/draw.a
 
 all: altid
 
+include config.mk
+include draw/draw.mk
+include mdns/mdns.mk
+
 # cc -c -l %.c -o %.o
-%.o: %.c
+%.o: %.c ${INCLUDES}
 	@echo LD $@
 	@$(CC) -c $(CFLAGS) $< -o $@
 
@@ -29,7 +29,7 @@ dist: clean
 # from https://stackoverflow.com/a/42908613
 # Clean up code from other .mk files
 clean:
-	@rm -rf $(OBJ) *~ altid $(CLEAN)
+	@rm -rf $(OBJ) draw/*.gch *~ altid $(CLEAN)
 
 install: altid
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin

@@ -16,3 +16,5 @@ struct DNSEntry {
 };
 
 int scanmdns(DNSData*);
+void write_file(int, const char *);
+void draw_loop(void);

@@ -12,21 +12,19 @@ enum {
     SCROLLSTEP = -30,
 };
 
-/* scan.c */
-typedef struct DNSData DNSData;
-
-struct DNSData {
-	// We need a channel of DNSEntry
+typedef struct Service Service;
+struct Service {
+    char name[256];
+    char addr[256];
+    uint16_t port;
+    Service *next;
 };
 
-struct DNSEntry {
-    // name
-    // dialstring/port
-};
 
 pthread_mutex_t lock; 
 
-int scanmdns(DNSData*);
+Service* scanmdns(void);
+void freeservice(Service*);
 void send_input(const char *);
 void write_file(int, const char *);
 void draw_loop(void);

@@ -64,6 +64,25 @@ write_file(int fid, const char *text)
 }
 
 static void
+show_services(mu_Context *ctx)
+{
+    if(mu_begin_window(ctx, "list", mu_rect(100, 100, 300, 400))){
+        Service *service;
+
+        for(service = scanmdns(); service != NULL; service = service->next){
+            printf("%s service\n", service->name);
+            mu_layout_row(ctx, 1, (int[]) { -1 }, 0);
+            if(mu_button_ex(ctx, service->name, 0, 0)){
+                //connect(service);
+                printf("Pressed %s\n", service->name);
+            }
+        }
+        mu_end_window(ctx);
+        freeservice(service);
+    }
+}
+
+static void
 draw_window(mu_Context *ctx)
 {
     char title[512];
@@ -79,6 +98,9 @@ draw_window(mu_Context *ctx)
             }
             if(mu_button_ex(ctx, "ipsum", 0, 0)){
                 write_file(MAINBUF, "second\n");
+            }
+            if(mu_button_ex(ctx, "find services", 0, 0)){
+                show_services(ctx);
             }
             mu_end_treenode(ctx);
         }
@@ -125,9 +147,9 @@ draw_loop(void)
     SDL_Init(SDL_INIT_EVERYTHING);
     r_init();
 
-    write_file(MAINBUF, "Not currently connected to anything. type /scan to see available services, or /connect <service> to get started\n");
+    write_file(MAINBUF, "Not currently connected to anything.\n");
     write_file(TITLBUF, "Welcome to Altid");
-    write_file(STATBUF, "Existing in the void");
+    write_file(STATBUF, "Select/add a service from the drop down list");
     /* init microui */
     mu_Context *ctx = malloc(sizeof(mu_Context));
     mu_init(ctx);

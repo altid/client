@@ -8,8 +8,5 @@ main(int argc, char* argv[])
 	pthread_mutex_init(&lock, NULL);
 	//draw_loop(inputchan);
 	draw_loop();
-	// scanmdns will move to the main input switch, /scan, /connect will use
-	//struct DNSData* dns = NULL;
-	//scanmdns(dns);
 	pthread_mutex_destroy(&lock);
 }

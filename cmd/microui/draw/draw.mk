@@ -1,12 +1,13 @@
-DRAWLIB= 				\
-	draw/microui.h		\
-	draw/render.h		\
-	include/draw.h		\
+OBJ += draw/draw.o draw/microui.o draw/sdl.o
+CFLAGS += 
+LDFLAGS += `sdl2-config --libs` -framework OpenGL
 
-draw/draw.a : draw/sdl.c draw/draw.c draw/microui.c
-	ar -csr draw/draw.a draw/sdl.o draw/draw.o draw/microui.o
-	ranlib draw/draw.a
+UNAME := $(shell uname -s)
+ifeq ($(UNAME),Darwin)
+    LDFLAGS += -framework OpenGL
+else
+	LDFLAGS += -lGL
+endif 
 
-# This should be globbed in the future
-draw/%.o : draw/%.c
-	@$(CC) ${INCS} ${DRAWLIB} -Wall -pedantic `sdl2-config --libs` -framework OpenGL -c *.c
+draw%.o : draw%.c
+	@$(CC) ${INCS} -Wall -Ofast -g `sdl2-config --cflags`  -c $< -o $@

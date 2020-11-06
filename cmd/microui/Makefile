@@ -1,11 +1,12 @@
 # See LICENSE for copyright and license details.
 
 SRC := altid.c
-OBJ := altid.o draw/draw.a
+OBJ := altid.o
 
 all: altid
 
 include config.mk
+include c9/c9.mk
 include draw/draw.mk
 include mdns/mdns.mk
 

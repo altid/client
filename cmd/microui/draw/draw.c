@@ -7,9 +7,9 @@
 #include "altid.h"
 
 static  char mainbuf[64000];
-static  int  statbuf[640];
-static  int  titlbuf[640];
-static  int  tabsbuf[16000];
+static  char statbuf[640];
+static  char titlbuf[640];
+static  char tabsbuf[16000];
 static  float   bg[3] = {
     90,
     95,
@@ -61,6 +61,42 @@ write_file(int fid, const char *text)
     }
 }
 
+static void
+draw_window(mu_Context *ctx)
+{
+
+    /* Get title from c9 title */
+    if (mu_begin_window(ctx, "main", mu_rect(0, -24, 800, 624))) {
+        /* output text panel */
+    
+        mu_layout_row(ctx, 1, (int[]) { -1 }, -25);
+        mu_begin_panel(ctx, "titlebar");
+        mu_Container *panel = mu_get_current_container(ctx);
+        mu_layout_row(ctx, 1, (int[]) { -1 }, -1);
+        mu_text(ctx, mainbuf);
+        mu_end_panel(ctx);
+        panel->scroll.y = panel->content_size.y;
+    
+        /* input textbox + submit button */
+    
+        static char buf[128];
+        int submitted = 0;
+        mu_layout_row(ctx, 2, (int[]) { -70, -1 }, 0);
+        if (mu_textbox(ctx, buf, sizeof(buf)) & MU_RES_SUBMIT) {
+            mu_set_focus(ctx, ctx->last_id);
+            submitted = 1;
+        }
+        if (mu_button(ctx, "input"))
+            submitted = 1;
+        if (submitted) {
+            write_file(MAINB, buf);
+            buf[0] = '\0';
+        }
+    
+        mu_end_window(ctx);
+    }
+}
+
 void
 draw_loop(void)
 {
@@ -69,6 +105,7 @@ draw_loop(void)
     SDL_Init(SDL_INIT_EVERYTHING);
     r_init();
 
+    write_file(MAINB, "Not currently connected to anything. type /scan to see available services, or /connect <service> to get started\n");
     /* init microui */
     mu_Context *ctx = malloc(sizeof(mu_Context));
     mu_init(ctx);
@@ -82,7 +119,7 @@ draw_loop(void)
         while(SDL_PollEvent(&e)){
             switch(e.type){
             case SDL_QUIT:
-                taskexitall(EXIT_SUCCESS);
+                exit(EXIT_SUCCESS);
                 break;
             case SDL_MOUSEMOTION:
                 mu_input_mousemove(ctx, e.motion.x, e.motion.y);
@@ -112,7 +149,9 @@ draw_loop(void)
             }
         }
 
-        //draw_window(ctx);
+        mu_begin(ctx);
+        draw_window(ctx);
+        mu_end(ctx);
 
         /* render */
         r_clear(mu_color(bg[0], bg[1], bg[2], 255));

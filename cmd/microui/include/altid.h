@@ -1,6 +1,15 @@
+#include <pthread.h>
+
 enum {
     UBQT_SUCCESS= 0,
     UBQT_FAILURE= 1,
+
+    MAINBUF= 0,
+    STATBUF= 1,
+    TITLBUF= 2,
+    TABSBUF= 3,
+
+    SCROLLSTEP = -30,
 };
 
 /* scan.c */
@@ -15,6 +24,9 @@ struct DNSEntry {
     // dialstring/port
 };
 
+pthread_mutex_t lock; 
+
 int scanmdns(DNSData*);
+void send_input(const char *);
 void write_file(int, const char *);
 void draw_loop(void);

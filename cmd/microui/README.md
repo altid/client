@@ -9,5 +9,11 @@ At the moment, the current target backends will be microui for drawing, 9p for t
 ## Building
 
 ### Dependencies
- - [libtask](https://swtch.com/libtask)
- - [libixp](https://github.com/0intro/libixp)
+
+- [libtask](https://swtch.com/libtask)
+- [libixp](https://github.com/0intro/libixp)
+
+## Notes
+
+- Most everything happens in draw at this point
+- threading is clumsy at the moment, one thread is started per service

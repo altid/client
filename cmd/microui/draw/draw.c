@@ -3,7 +3,6 @@
 #include "task.h"
 #include "render.h"
 #include "microui.h"
-#include "draw.h"
 #include "altid.h"
 
 static  char mainbuf[64000];
@@ -45,31 +44,47 @@ static int text_height(mu_Font font) {
 void
 write_file(int fid, const char *text)
 {
+    /* Setter function for strings, guarded by mutex */
+    pthread_mutex_lock(&lock);
     switch(fid){
-    case MAINB:
+    case MAINBUF:
         strcat(mainbuf, text);
         break;
-    case STATB:
+    case STATBUF:
         strcat(statbuf, text);
         break;
-    case TITLB:
+    case TITLBUF:
         strcat(titlbuf, text);
         break;
-    case TABSB:
+    case TABSBUF:
         strcat(tabsbuf, text);
         break;
     }
+    pthread_mutex_unlock(&lock);
 }
 
 static void
 draw_window(mu_Context *ctx)
 {
+    char title[512];
+    const int opt = MU_OPT_NOTITLE| MU_OPT_NOFRAME | MU_OPT_NOSCROLL;
 
     /* Get title from c9 title */
-    if (mu_begin_window(ctx, "main", mu_rect(0, -24, 800, 624))) {
-        /* output text panel */
-    
-        mu_layout_row(ctx, 1, (int[]) { -1 }, -25);
+    if (mu_begin_window_ex(ctx, "main", mu_rect(0, 0, 800, 600), opt)) {
+        sprintf(title, "%s - %s", "current buffer", titlbuf);
+        mu_layout_row(ctx, 1, (int[]) { -1 }, 0 );
+        if(mu_begin_treenode(ctx, title)){
+            if(mu_button_ex(ctx, "lorem ipsum solor det amit", 0, 0)){
+                write_file(MAINBUF, "top\n");
+            }
+            if(mu_button_ex(ctx, "ipsum", 0, 0)){
+                write_file(MAINBUF, "second\n");
+            }
+            mu_end_treenode(ctx);
+        }
+
+        /* buffer text panel */
+        mu_layout_row(ctx, 1, (int[]) { -1 }, -50);
         mu_begin_panel(ctx, "titlebar");
         mu_Container *panel = mu_get_current_container(ctx);
         mu_layout_row(ctx, 1, (int[]) { -1 }, -1);
@@ -77,8 +92,11 @@ draw_window(mu_Context *ctx)
         mu_end_panel(ctx);
         panel->scroll.y = panel->content_size.y;
     
+        /* Status bar */
+        mu_layout_row(ctx, 1, (int[]) { -1 }, 0);
+        mu_text(ctx, statbuf);
+
         /* input textbox + submit button */
-    
         static char buf[128];
         int submitted = 0;
         mu_layout_row(ctx, 2, (int[]) { -70, -1 }, 0);
@@ -89,7 +107,9 @@ draw_window(mu_Context *ctx)
         if (mu_button(ctx, "input"))
             submitted = 1;
         if (submitted) {
-            write_file(MAINB, buf);
+            //send_input(buf);
+            strcat(buf, "\n");
+            write_file(MAINBUF, buf);
             buf[0] = '\0';
         }
     
@@ -105,7 +125,9 @@ draw_loop(void)
     SDL_Init(SDL_INIT_EVERYTHING);
     r_init();
 
-    write_file(MAINB, "Not currently connected to anything. type /scan to see available services, or /connect <service> to get started\n");
+    write_file(MAINBUF, "Not currently connected to anything. type /scan to see available services, or /connect <service> to get started\n");
+    write_file(TITLBUF, "Welcome to Altid");
+    write_file(STATBUF, "Existing in the void");
     /* init microui */
     mu_Context *ctx = malloc(sizeof(mu_Context));
     mu_init(ctx);

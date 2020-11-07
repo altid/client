@@ -73,6 +73,15 @@ ip_address_to_string(char* buffer, size_t capacity, const struct sockaddr* addr,
 	return ipv4_address_to_string(buffer, capacity, (const struct sockaddr_in*)addr, addrlen);
 }
 
+static bool
+isaltid(char* record)
+{
+	if(strstr(record, "altid") != 0)
+		return true;
+
+	return false;
+}
+
 static int
 scancb(int sock, const struct sockaddr* from, size_t addrlen, mdns_entry_type_t entry, uint16_t query_id, uint16_t rtype, uint16_t rclass, uint32_t ttl, const void* data, size_t size, size_t name_offset, size_t name_length, size_t record_offset, size_t record_length, void* user_data) {
 	(void)sizeof(sock);
@@ -86,15 +95,19 @@ scancb(int sock, const struct sockaddr* from, size_t addrlen, mdns_entry_type_t 
 
 	Service *service, *list;
 	mdns_string_t addrstr;
-	mdns_string_t record;
 
 	list = *(Service**)user_data;
 	addrstr = ip_address_to_string(addrbuffer, sizeof(addrbuffer), from, addrlen);
-	record = mdns_record_parse_ptr(data, size, record_offset, record_length, namebuffer, sizeof(namebuffer));
+	mdns_record_parse_ptr(data, size, record_offset, record_length, namebuffer, sizeof(namebuffer));
+	printf("%s\n", namebuffer);
+
+	/* Check if we have an Altid entry */
+	if(!isaltid(namebuffer))
+		return 0;
 
 	/* If we have zero entries */
 	if(list->isfirst){
-		sprintf(list->name, "%.*s", MDNS_STRING_FORMAT(record));
+		sprintf(list->name, "%s", namebuffer);
 		sprintf(list->addr, "%.*s", MDNS_STRING_FORMAT(addrstr));
 		list->isfirst = false;
 		list->next = NULL;
@@ -115,7 +128,7 @@ scancb(int sock, const struct sockaddr* from, size_t addrlen, mdns_entry_type_t 
 	//	return 0;
 	//}
 	
-	sprintf(list->name, "%.*s", MDNS_STRING_FORMAT(record));
+	sprintf(list->name, "%s", namebuffer);
 	sprintf(list->addr, "%.*s", MDNS_STRING_FORMAT(addrstr));
 
 	/* Walk to the end */

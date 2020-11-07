@@ -81,20 +81,20 @@ scancb(int sock, const struct sockaddr* from, size_t addrlen, mdns_entry_type_t 
 	(void)sizeof(entrybuffer);
 
 	/* Bail early */
-	if (rtype != MDNS_RECORDTYPE_SRV)
+	if (rtype != MDNS_RECORDTYPE_PTR)
 		return 0;
 
 	Service *service, *list;
 	mdns_string_t addrstr;
-	mdns_record_srv_t srv;
+	mdns_string_t record;
 
 	list = *(Service**)user_data;
 	addrstr = ip_address_to_string(addrbuffer, sizeof(addrbuffer), from, addrlen);
-	srv = mdns_record_parse_srv(data, size, record_offset, record_length, namebuffer, sizeof(namebuffer));
+	record = mdns_record_parse_ptr(data, size, record_offset, record_length, namebuffer, sizeof(namebuffer));
 
 	/* If we have zero entries */
 	if(list->isfirst){
-		sprintf(list->name, "%.*s", MDNS_STRING_FORMAT(srv.name));
+		sprintf(list->name, "%.*s", MDNS_STRING_FORMAT(record));
 		sprintf(list->addr, "%.*s", MDNS_STRING_FORMAT(addrstr));
 		list->isfirst = false;
 		list->next = NULL;
@@ -106,13 +106,24 @@ scancb(int sock, const struct sockaddr* from, size_t addrlen, mdns_entry_type_t 
 	service = malloc(sizeof(Service));
 	sprintf(service->name, "%s", list->name);
 	sprintf(service->addr, "%s", list->addr);
-	service->next = list->next;
+	service->next = NULL;
 	service->isfirst = false;
 
-	sprintf(list->name, "%.*s", MDNS_STRING_FORMAT(srv.name));
+	/* scrub out any entry if we're connected to it */
+	//if(isconnected(service)){
+	//	free(service);
+	//	return 0;
+	//}
+	
+	sprintf(list->name, "%.*s", MDNS_STRING_FORMAT(record));
 	sprintf(list->addr, "%.*s", MDNS_STRING_FORMAT(addrstr));
-	list->isfirst = false;
-	list->next = service;
+
+	/* Walk to the end */
+	for(Service *si = list; si; si = si->next)
+		if(si->next == NULL){
+			si->next = service;
+			return 1;
+		}
 
 	return 1;
 }
@@ -149,7 +160,7 @@ scanmdns(Service **service)
 
 	for(int i = 0; i < nsocks; i++)
 		mdns_discovery_send(sockets[i]);
-			
+
 	buffer = malloc(capacity);
 	
 	do {

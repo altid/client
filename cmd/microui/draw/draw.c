@@ -1,6 +1,5 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
-#include "task.h"
 #include "render.h"
 #include "microui.h"
 #include "altid.h"
@@ -95,6 +94,7 @@ draw_window(mu_Context *ctx, Service *service)
                     connect_svc(si);
 
             if(mu_button(ctx, "refresh")){
+                freeservice(service->next);
                 scanmdns(&service);
             }
 

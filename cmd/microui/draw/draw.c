@@ -68,7 +68,7 @@ draw_window(mu_Context *ctx, Service *service)
     char title[512];
     const int opt = MU_OPT_NOTITLE;
     if (mu_begin_window_ex(ctx, "main", mu_rect(0, 0, 800, 600), opt)) {
-        mu_layout_row(ctx, 4, (int[]) { 80, 80, 400, 400 }, 0 );
+        mu_layout_row(ctx, 4, (int[]) { 100, 100, 400, 400 }, 0 );
         
         if(mu_button(ctx, "find services"))
             mu_open_popup(ctx, "show services");
@@ -94,7 +94,6 @@ draw_window(mu_Context *ctx, Service *service)
                     connect_svc(si);
 
             if(mu_button(ctx, "refresh")){
-                freeservice(service->next);
                 scanmdns(&service);
             }
 

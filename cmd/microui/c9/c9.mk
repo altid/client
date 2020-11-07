@@ -1,4 +1,4 @@
-OBJ += c9/c9.o
+OBJ += c9/c9.o c9/connect.o c9/buffer.o
 CFLAGS +=
 LDFLAGS += 
 c9%.o : c9%.c

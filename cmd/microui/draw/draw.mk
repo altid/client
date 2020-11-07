@@ -1,6 +1,6 @@
 OBJ += draw/draw.o draw/microui.o draw/sdl.o
 CFLAGS += 
-LDFLAGS += `sdl2-config --libs` -framework OpenGL
+LDFLAGS += `sdl2-config --libs` -framework OpenGL -lm
 
 UNAME := $(shell uname -s)
 ifeq ($(UNAME),Darwin)
@@ -10,4 +10,4 @@ else
 endif 
 
 draw%.o : draw%.c
-	@$(CC) ${INCS} -Wall -Ofast -g `sdl2-config --cflags`  -c $< -o $@
+	@$(CC) ${INCS} -std=c11 -Wall -O3 -pedantic -g `sdl2-config --cflags` -c $< -o $@

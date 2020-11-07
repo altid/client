@@ -10,9 +10,9 @@ static  char statbuf[640];
 static  char titlbuf[640];
 static  char tabsbuf[16000];
 static  float   bg[3] = {
-    90,
-    95,
-    100,
+    120,
+    120,
+    120,
 };
 
 static const char button_map[256] = {
@@ -64,45 +64,41 @@ write_file(int fid, const char *text)
 }
 
 static void
-show_services(mu_Context *ctx)
-{
-    if(mu_begin_window(ctx, "list", mu_rect(100, 100, 300, 400))){
-        Service *service;
-
-        for(service = scanmdns(); service != NULL; service = service->next){
-            printf("%s service\n", service->name);
-            mu_layout_row(ctx, 1, (int[]) { -1 }, 0);
-            if(mu_button_ex(ctx, service->name, 0, 0)){
-                //connect(service);
-                printf("Pressed %s\n", service->name);
-            }
-        }
-        mu_end_window(ctx);
-        freeservice(service);
-    }
-}
-
-static void
-draw_window(mu_Context *ctx)
+draw_window(mu_Context *ctx, Service *service)
 {
     char title[512];
-    const int opt = MU_OPT_NOTITLE| MU_OPT_NOFRAME | MU_OPT_NOSCROLL;
-
-    /* Get title from c9 title */
+    const int opt = MU_OPT_NOTITLE;
     if (mu_begin_window_ex(ctx, "main", mu_rect(0, 0, 800, 600), opt)) {
+        mu_layout_row(ctx, 4, (int[]) { 80, 80, 400, 400 }, 0 );
+        
+        if(mu_button(ctx, "find services"))
+            mu_open_popup(ctx, "show services");
+        
+        if(mu_button(ctx, "channel")) {
+            /* Read all tabs files and get back aggregate list */
+            /* on selection, change buffer */
+            Buffer *bi = list_tabs();
+
+            for(; bi; bi = bi->next)
+                if(mu_button(ctx, bi->name))
+                    swap(bi);
+
+            freebuff(bi);
+        }
+        
         sprintf(title, "%s - %s", "current buffer", titlbuf);
-        mu_layout_row(ctx, 1, (int[]) { -1 }, 0 );
-        if(mu_begin_treenode(ctx, title)){
-            if(mu_button_ex(ctx, "lorem ipsum solor det amit", 0, 0)){
-                write_file(MAINBUF, "top\n");
+        mu_text(ctx, title);
+
+        if(mu_begin_popup(ctx, "show services")){
+            for(Service *si = service; si; si = si->next)
+                if(mu_button(ctx, si->name))
+                    connect_svc(si);
+
+            if(mu_button(ctx, "refresh")){
+                scanmdns(&service);
             }
-            if(mu_button_ex(ctx, "ipsum", 0, 0)){
-                write_file(MAINBUF, "second\n");
-            }
-            if(mu_button_ex(ctx, "find services", 0, 0)){
-                show_services(ctx);
-            }
-            mu_end_treenode(ctx);
+
+            mu_end_popup(ctx);
         }
 
         /* buffer text panel */
@@ -122,12 +118,15 @@ draw_window(mu_Context *ctx)
         static char buf[128];
         int submitted = 0;
         mu_layout_row(ctx, 2, (int[]) { -70, -1 }, 0);
+
         if (mu_textbox(ctx, buf, sizeof(buf)) & MU_RES_SUBMIT) {
             mu_set_focus(ctx, ctx->last_id);
             submitted = 1;
         }
+
         if (mu_button(ctx, "input"))
             submitted = 1;
+
         if (submitted) {
             //send_input(buf);
             strcat(buf, "\n");
@@ -140,7 +139,7 @@ draw_window(mu_Context *ctx)
 }
 
 void
-draw_loop(void)
+draw_loop(Service *service)
 {
     int b, c;
     /* init SDL and renderer */
@@ -194,7 +193,7 @@ draw_loop(void)
         }
 
         mu_begin(ctx);
-        draw_window(ctx);
+        draw_window(ctx, service);
         mu_end(ctx);
 
         /* render */

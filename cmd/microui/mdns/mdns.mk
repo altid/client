@@ -1,2 +1,2 @@
-SRC += mdns/scan.c mdns/connect.c mdns/service.c
-OBJ += mdns/scan.o mdns/connect.o mdns/service.o
+SRC += mdns/scan.c mdns/service.c
+OBJ += mdns/scan.o mdns/service.o

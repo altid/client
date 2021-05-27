@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/altid/client"
+	"github.com/gdamore/tcell/v2"
 )
 
 var debug = flag.Bool("d", false, "enable debug output")
@@ -41,18 +43,51 @@ func main() {
 
 	l, err := newListener(cl)
 	if err != nil {
-		log.Fatal(err)
+ 		log.Fatal(err)
+ 	}	
+
+
+	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
+	s, e := tcell.NewScreen()
+ 	if e != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", e)
+		os.Exit(1)
 	}
 
-	go l.listen()
+	if e = s.Init(); e != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", e)
+		os.Exit(1)
+	}
 
-	// Main loop
+	s.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack))
+	s.Clear()
+
+	go func() {
+		for {
+			ev := s.PollEvent()
+			switch ev := ev.(type) {
+			case *tcell.EventKey:
+				switch ev.Key() {
+				case tcell.KeyEscape, tcell.KeyEnter:
+					close(l.done)
+					return
+				case tcell.KeyCtrlL:
+					s.Sync()
+				}
+			case *tcell.EventResize:
+				s.Sync()
+			}
+		}
+	}()
+
+
 	for {
 		select {
 		case <-l.done:
+			s.Fini()
 			os.Exit(0)
 		case p := <-l.data:
-			os.Stdout.Write(p)
+			draw(s, p)
 		case e := <-l.err:
 			log.Println(e)
 		}

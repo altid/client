@@ -3,8 +3,6 @@ package main
 import (
 	"bufio"
 	"errors"
-	"io"
-	"os"
 	"strings"
 	"time"
 
@@ -31,7 +29,6 @@ func newListener(c *client.Client) (*listener, error) {
 
 	l := &listener{
 		cmds: cmds,
-		rd:   bufio.NewReader(os.Stdin),
 		err:  make(chan error),
 		data: make(chan []byte),
 		done: make(chan struct{}),
@@ -41,26 +38,10 @@ func newListener(c *client.Client) (*listener, error) {
 	return l, nil
 }
 
-func (l *listener) listen() {
+func (l *listener) fetch() {
 	if emitFeedData(l) != nil && emitDocumentData(l) != nil {
 		l.err <- errors.New("Unable to find feed or document for given buffer")
 		return
-	}
-
-	for {
-		line, err := l.rd.ReadString('\n')
-		if err != nil && err != io.EOF {
-			l.err <- err
-			return
-		}
-
-		t := strings.Fields(line)
-		if t[0] == "/quit" {
-			close(l.done)
-			return
-		}
-
-		handle(l, t[0], strings.Join(t[1:], " "))
 	}
 }
 
@@ -158,10 +139,8 @@ func sendCmd(l *listener, fn func(string) (int, error), args ...string) {
 		return
 	}
 
-	time.Sleep(time.Millisecond * 300)
-	if emitFeedData(l) != nil && emitDocumentData(l) != nil {
-		l.err <- errors.New("Unable to find feed or document for given buffer")
-	}
+	// Eventually, we should have a chan here we can block on
+	time.AfterFunc(time.Millisecond * 500, l.fetch)
 }
 
 func getData(l *listener, fn func() ([]byte, error)) {

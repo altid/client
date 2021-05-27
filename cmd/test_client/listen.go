@@ -158,7 +158,7 @@ func sendCmd(l *listener, fn func(string) (int, error), args ...string) {
 		return
 	}
 
-	time.Sleep(time.Millisecond * 200)
+	time.Sleep(time.Millisecond * 300)
 	if emitFeedData(l) != nil && emitDocumentData(l) != nil {
 		l.err <- errors.New("Unable to find feed or document for given buffer")
 	}

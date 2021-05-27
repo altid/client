@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"time"
 
 	"github.com/altid/client/internal/feed"
 	"github.com/altid/libs/fs"
@@ -18,18 +19,20 @@ type Client struct {
 	afid     *clnt.Fid
 	root     *clnt.Fid
 	addr     string
+	port	 string
 	buffer   string
 	clnt     *clnt.Clnt
 }
 
-func NewClient(addr string) *Client {
+func NewClient(addr, port string) *Client {
 	return &Client{
 		addr: addr,
+		port: port,
 	}
 }
 
 func (c *Client) Connect(debug int) (err error) {
-	dial := fmt.Sprintf("%s:564", c.addr)
+	dial := fmt.Sprintf("%s:%s", c.addr, c.port)
 
 	conn, err := net.Dial("tcp", dial)
 	if err != nil {
@@ -211,6 +214,7 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 			case <-done:
 				return
 			default:
+				time.Sleep(time.Millisecond * 300)
 				continue
 			}
 		}

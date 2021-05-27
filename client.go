@@ -36,10 +36,10 @@ type runner interface {
 	GetCommands() ([]*fs.Command, error)
 }
 
-// NewClient returns a client ready to connect to addr
-func NewClient(addr string) *Client {
+// NewClient returns a client ready to connect to addr:port
+func NewClient(addr, port string) *Client {
 	return &Client{
-		run: defaults.NewClient(addr),
+		run: defaults.NewClient(addr, port),
 	}
 }
 

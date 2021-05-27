@@ -11,6 +11,7 @@ import (
 
 var debug = flag.Bool("d", false, "enable debug output")
 var addr = flag.String("s", "127.0.0.1", "address to connect to")
+var port = flag.String("p", "564", "port to connect to")
 var errBadArgs = errors.New("Incorrect arguments to command")
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	cl := client.NewClient(*addr)
+	cl := client.NewClient(*addr, *port)
 
 	withDebug := 0
 	if *debug {

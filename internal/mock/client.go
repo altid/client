@@ -157,7 +157,7 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 				fuzz.Fuzz(&b)
 				c.debug(util.CmdFeed, b)
 				data <- b
-				time.Sleep(time.Millisecond * 100)
+				time.Sleep(time.Millisecond * 500)
 			}
 		}
 	}()

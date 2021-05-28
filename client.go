@@ -1,20 +1,27 @@
 package client
 
 import (
+	"context"
 	"io"
 
 	"github.com/altid/client/internal/defaults"
 	"github.com/altid/client/internal/mock"
+	"github.com/altid/client/internal/draw"
 	"github.com/altid/libs/fs"
 	"github.com/lionkov/go9p/p"
 )
 
 // MSIZE - maximum size for a message
-const MSIZE = p.MSIZE
+const MSIZE = defaults.MSIZE
 
 // Client represents a 9p client session
 type Client struct {
 	run runner
+}
+
+// Driver implementations are used to draw content to physical devices, terminals, screen readers, etc 
+type Driver interface {
+	
 }
 
 type runner interface {
@@ -205,4 +212,21 @@ func (f *FeedIterator) Next() ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+// Register a UI renderer for client
+func (c *Client) Register(d *Driver) {
+	
+}
+
+// Draw creates the UI based on the json-encoded declarative config passed in 
+// if no driver is registered, it will use the default stdio driver 
+// will return any errors encountered
+func (c *Client) Draw(config []byte) error {
+	// parse config, create each piece and call driver
+}
+
+// Redraw will force redraw of screen
+func (c *Client) Redraw() {
+
 }

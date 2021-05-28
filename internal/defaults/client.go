@@ -14,6 +14,8 @@ import (
 	"github.com/lionkov/go9p/p/clnt"
 )
 
+const MSIZE = p.MSIZE
+
 type Client struct {
 	commands []*fs.Command
 	afid     *clnt.Fid

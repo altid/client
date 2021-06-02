@@ -37,9 +37,13 @@ type Connector interface {
 	Connect(context.Context) (Conn, error)
 }
 
+// Element represents a single UI element 
+// This element will be instantiated with a payload from the backing file
+// and any widgets attached thereafter 
 type Element interface {
-	Redraw()
-	Clear()
+	Capabilities() Capabilities
+	Redraw() error
+	Clear() error
 }
 
 type Widget interface {
@@ -48,4 +52,14 @@ type Widget interface {
 
 	// SetContent shows, and optionally updates the payload of a widget
 	SetContent([]byte) error
+}
+
+// Capabilities is returned by the driver to show what text elements are supported
+// Any that are not supported will return a simple text variant of the given resource
+type Capabilities struct {
+	Emphasis	bool
+	Strike		bool
+	Image		bool	
+	Color		bool
+	Strong		bool
 }

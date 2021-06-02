@@ -6,9 +6,8 @@ import (
 
 	"github.com/altid/client/internal/defaults"
 	"github.com/altid/client/internal/mock"
-	"github.com/altid/client/internal/draw"
+	"github.com/altid/client/driver"
 	"github.com/altid/libs/fs"
-	"github.com/lionkov/go9p/p"
 )
 
 // MSIZE - maximum size for a message
@@ -20,27 +19,27 @@ type Client struct {
 }
 
 // Driver implementations are used to draw content to physical devices, terminals, screen readers, etc 
-type Driver interface {
-	
+type Renderer struct {
+	ui driver.Driver
 }
 
 type runner interface {
-	Ctl() ([]byte, error)
-	Cleanup()
-	Connect(int) error
+	Aside() ([]byte, error)
 	Attach() error
 	Auth() error
+	Ctl() ([]byte, error)
+	Cleanup()
 	Command(*fs.Command) (int, error)
-	Tabs() ([]byte, error)
-	Title() ([]byte, error)
-	Status() ([]byte, error)
-	Send(*fs.Command, []string) (int, error)
-	Aside() ([]byte, error)
+	Connect(int) error
+	Document() ([]byte, error)
+	Feed() (io.ReadCloser, error)
+	GetCommands() ([]*fs.Command, error)
 	Input([]byte) (int, error)
 	Notifications() ([]byte, error)
-	Feed() (io.ReadCloser, error)
-	Document() ([]byte, error)
-	GetCommands() ([]*fs.Command, error)
+	Send(*fs.Command, []string) (int, error)
+	Status() ([]byte, error)
+	Tabs() ([]byte, error)
+	Title() ([]byte, error)
 }
 
 // NewClient returns a client ready to connect to addr:port
@@ -215,18 +214,6 @@ func (f *FeedIterator) Next() ([]byte, error) {
 }
 
 // Register a UI renderer for client
-func (c *Client) Register(d *Driver) {
+func (c *Client) Register(d *driver.Driver) {
 	
-}
-
-// Draw creates the UI based on the json-encoded declarative config passed in 
-// if no driver is registered, it will use the default stdio driver 
-// will return any errors encountered
-func (c *Client) Draw(config []byte) error {
-	// parse config, create each piece and call driver
-}
-
-// Redraw will force redraw of screen
-func (c *Client) Redraw() {
-
 }

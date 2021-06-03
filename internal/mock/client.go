@@ -91,11 +91,6 @@ func (c *Client) GetCommands() ([]*fs.Command, error) {
 	return d, nil
 }
 
-func (c *Client) Send(cmd *fs.Command, args []string) (int, error) {
-	//c.debug(util.CmdSend, cmd.Bytes())
-	return 0, nil
-}
-
 func (c *Client) Tabs() ([]byte, error) {
 	//c.debug(util.CmdTabs, c.tablist)
 	return nil, nil

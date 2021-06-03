@@ -3,11 +3,11 @@ package main
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/altid/client"
+	//"github.com/altid-client/drivers/tcell"
 )
 
 var debug = flag.Bool("d", false, "enable debug output")
@@ -40,19 +40,5 @@ func main() {
 		log.Fatal(e)
 	}
 
-	l, err := newListener(cl)
-	if err != nil {
- 		log.Fatal(err)
- 	}	
-
-	for {
-		select {
-		case <-l.done:
-			os.Exit(0)
-		case p := <-l.data:
-			
-		case e := <-l.err:
-			log.Println(e)
-		}
-	}
+	//ui := cl.Register(tcell.Driver)
 }

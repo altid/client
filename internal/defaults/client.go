@@ -1,7 +1,6 @@
 package defaults
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -77,9 +76,8 @@ func (c *Client) Auth() error {
 	return nil
 }
 
-// Command will write a command, returning an error
-// if the command is not supported by the service
-// It will set cmd.From on your behalf
+// Command will send a given command to the server
+// returning any errors encountered
 func (c *Client) Command(cmd *fs.Command) (int, error) {
 	nfid := c.clnt.FidAlloc()
 	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
@@ -88,32 +86,9 @@ func (c *Client) Command(cmd *fs.Command) (int, error) {
 	}
 
 	cmd.From = c.buffer
-
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
 
-	for _, comm := range c.commands {
-		if comm.Name == cmd.Name {
-			return c.clnt.Write(nfid, cmd.Bytes(), 0)
-		}
-	}
-
-	return 0, errors.New("found no such command")
-}
-
-func (c *Client) Send(cmd *fs.Command, data []string) (int, error) {
-	nfid := c.clnt.FidAlloc()
-	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
-	if err != nil {
-		return 0, err
-	}
-
-	cmd.From = c.buffer
-
-	c.clnt.Open(nfid, p.OAPPEND)
-	defer c.clnt.Clunk(nfid)
-
-	cmd.Args = data
 	return c.clnt.Write(nfid, cmd.Bytes(), 0)
 }
 

@@ -9,6 +9,10 @@ data, until a connection is closed
 Widgets enable additional data to be included in addition to the stateful elements used internally 
 */
 
+import (
+	"context"
+)
+
 type Driver interface {
 	Open() (Conn, error)
 }

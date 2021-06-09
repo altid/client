@@ -57,3 +57,18 @@ func (c *Session) Auth() error {
 func (c *Session) Input(data []byte) (int, error) {
 	return c.run.Input(data)
 }
+
+// New returns a session.Session ready to connect to addr:port
+func New(addr, port string) *Session {
+	return &Session{
+		run: defaults.NewSession(addr, port),
+	}
+}
+
+// Mock returns a session for testing
+// Feed, if called, will be populated with data from google's GoFuzz every 100ms
+func NewMockSession(addr string) *Session {
+	return &Session{
+		run: mock.NewSession(addr),
+	}
+}

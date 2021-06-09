@@ -1,11 +1,10 @@
 package client
 
 import (
-	"github.com/altid/client/internal/defaults"
-	"github.com/altid/client/internal/mock"
-	"github.com/altid/client/internal/session"
+	"context
+	"sync"
+
 	"github.com/altid/client/driver"
-	"github.com/altid/libs/fs"
 )
 
 var (
@@ -28,17 +27,21 @@ func Register(name string, driver driver.Driver) {
 	drivers[name] = driver
 }
 
-// NewSession returns a session.Session ready to connect to addr:port
-func NewSession(addr, port string) *session.Session {
-	return &Session{
-		run: defaults.NewSession(addr, port),
-	}
+// UI is a ui handle representing a pool of zero or more underlying connections.
+// It's safe for concurrent use by multiple goroutines
+type UI struct {
+	ctx context.Context
+	connector driver.Connector
+	mu	sync.Mutex
 }
 
-// NewMockSession returns a session for testing
-// Feed, if called, will be populated with data from google's GoFuzz every 100ms
-func NewMockSession(addr string) *session.Session {
-	return &Session{
-		run: mock.NewSession(addr),
-	}
+// Open returns a handle to an uninitialized UI connector.
+func Open(driverName string) (*UI, error) {
+	return nil, nil
 }
+
+// WithSession will create a client session, using a given UI driver
+// and an underlying session state. 
+func WithSession(driverName string, session session.Session) (*UI, error) {
+	return nil, nil
+} 

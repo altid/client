@@ -1,7 +1,6 @@
 # client
 
 This repository is for the go-based client library. 
-If you are looking for end-user clients, they can be found at [Altid-clients](https://github.com/altid-clients)
 
 ![Tests](https://github.com/altid/server/workflows/Tests/badge.svg) 
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)

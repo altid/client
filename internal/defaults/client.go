@@ -3,11 +3,11 @@ package defaults
 import (
 	"errors"
 	"fmt"
-	//"io"
+	"io"
 	"net"
-	//"time"
+	"time"
 
-	//"github.com/altid/client/internal/feed"
+	"github.com/altid/client/internal/feed"
 	"github.com/altid/libs/service/commander"
 	"github.com/altid/libs/service/parser"
 	"github.com/knieriem/g/go9p/user"
@@ -183,11 +183,10 @@ func (c *Client) GetCommands() ([]*commander.Command, error) {
 	return cmds, nil
 }
 
-/*
 func (c *Client) Feed() (io.ReadCloser, error) {
 	nfid := c.clnt.FidAlloc()
 
-	_, err := c.clnt.Walk(c.root, nfid, []string{"stream"})
+	_, err := c.clnt.Walk(c.root, nfid, []string{"feed"})
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +231,7 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 	return f, nil
 
 }
-*/
+
 func getNamedFile(c *Client, name string) ([]byte, error) {
 	nfid := c.clnt.FidAlloc()
 	_, err := c.clnt.Walk(c.root, nfid, []string{name})

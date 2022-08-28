@@ -1,7 +1,7 @@
 package client
 
 import (
-	//"io"
+	"io"
 
 	"github.com/altid/client/internal/defaults"
 	"github.com/altid/client/internal/mock"
@@ -31,7 +31,7 @@ type runner interface {
 	Aside() ([]byte, error)
 	Input([]byte) (int, error)
 	Notifications() ([]byte, error)
-	//Feed() (io.ReadCloser, error)
+	Feed() (io.ReadCloser, error)
 	Document() ([]byte, error)
 	GetCommands() ([]*commander.Command, error)
 }
@@ -167,20 +167,19 @@ func (c *Client) Notifications() ([]byte, error) {
 	return c.run.Notifications()
 }
 
-/*
 // Feed returns a ReadCloser connected to `feed`. It's expected all reads
 // will be read into a buffer with a size of MSIZE
 // It is also expected for Feed to be called in its own thread
 func (c *Client) Feed() (io.ReadCloser, error) {
 	return c.run.Feed()
 }
-*/
+
 // Send a named command with optional args to the service
 func (c *Client) Send(cmd *commander.Command, args []string) (int, error) {
 	return c.run.Send(cmd, args)
 }
 
-/*
+
 // FeedIterator allows you to step through lines of feed with Next()
 // Useful for gomobile, etc
 type FeedIterator struct {
@@ -208,4 +207,3 @@ func (f *FeedIterator) Next() ([]byte, error) {
 
 	return b, nil
 }
-*/

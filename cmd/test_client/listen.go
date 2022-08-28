@@ -34,9 +34,8 @@ func newListener(c *client.Client) (*listener, error) {
 }
 
 func (l *listener) fetch() {
-	if e := emitDocumentData(l); e != nil {
-		fmt.Printf("%s\n", e)
-	}
+	go emitDocumentData(l)
+	go emitFeedData(l)
 }
 
 func handle(l *listener, args string) {
@@ -85,6 +84,34 @@ func otherMsg(l *listener, name, args string) {
 			l.c.Send(cmd, strings.Fields(args))
 		}
 	}
+}
+
+func emitFeedData(l *listener) error {
+	f, err := l.c.Feed()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		defer f.Close()
+
+		for {
+			// Ensure your buffer is MSIZE
+			b := make([]byte, client.MSIZE)
+
+			_, err := f.Read(b)
+			if err != nil {
+				fmt.Printf("%s\n", err)
+				return
+			}
+
+			if len(b) > 0 {
+				fmt.Printf("%s\n", b)
+			}
+		}
+	}()
+
+	return nil
 }
 
 func emitDocumentData(l *listener) error {

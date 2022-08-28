@@ -1,20 +1,18 @@
 package main
 
 import (
-	"errors"
+	"bufio"
 	"flag"
-	"fmt"
+
 	"log"
 	"os"
 
 	"github.com/altid/client"
-	"github.com/gdamore/tcell/v2"
 )
 
 var debug = flag.Bool("d", false, "enable debug output")
 var addr = flag.String("s", "127.0.0.1", "address to connect to")
 var port = flag.String("p", "564", "port to connect to")
-var errBadArgs = errors.New("Incorrect arguments to command")
 
 func main() {
 	flag.Parse()
@@ -32,64 +30,27 @@ func main() {
 	}
 
 	if e := cl.Connect(withDebug); e != nil {
-		log.Fatal(e)
+		log.Fatalf("connect error: %v", e)
 	}
 
 	// Ideally we would call auth here, when it's properly supported
-
 	if e := cl.Attach(); e != nil {
-		log.Fatal(e)
+		log.Fatalf("attach error: %v", e)
 	}
 
 	l, err := newListener(cl)
 	if err != nil {
- 		log.Fatal(err)
- 	}	
-
-
-	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
-	s, e := tcell.NewScreen()
- 	if e != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", e)
-		os.Exit(1)
+		log.Fatalf("listener error %s", err)
 	}
 
-	if e = s.Init(); e != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", e)
-		os.Exit(1)
-	}
-
-	s.SetStyle(tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorBlack))
-	s.Clear()
-
-	go func() {
-		for {
-			ev := s.PollEvent()
-			switch ev := ev.(type) {
-			case *tcell.EventKey:
-				switch ev.Key() {
-				case tcell.KeyEscape, tcell.KeyEnter:
-					close(l.done)
-					return
-				case tcell.KeyCtrlL:
-					s.Sync()
-				}
-			case *tcell.EventResize:
-				s.Sync()
-			}
-		}
-	}()
-
-
+	reader := bufio.NewReader(os.Stdin)
 	for {
-		select {
-		case <-l.done:
-			s.Fini()
-			os.Exit(0)
-		case p := <-l.data:
-			draw(s, p)
-		case e := <-l.err:
-			log.Println(e)
+		// read by one line (enter pressed)
+		s, err := reader.ReadString('\n')
+		// check for errors
+		if err != nil {
+			log.Println("Error in read string", err)
 		}
+		handle(l, s)
 	}
 }

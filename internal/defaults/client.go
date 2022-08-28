@@ -3,23 +3,24 @@ package defaults
 import (
 	"errors"
 	"fmt"
-	"io"
+	//"io"
 	"net"
-	"time"
+	//"time"
 
-	"github.com/altid/client/internal/feed"
-	"github.com/altid/libs/fs"
+	//"github.com/altid/client/internal/feed"
+	"github.com/altid/libs/service/commander"
+	"github.com/altid/libs/service/parser"
 	"github.com/knieriem/g/go9p/user"
 	"github.com/lionkov/go9p/p"
 	"github.com/lionkov/go9p/p/clnt"
 )
 
 type Client struct {
-	commands []*fs.Command
+	commands []*commander.Command
 	afid     *clnt.Fid
 	root     *clnt.Fid
 	addr     string
-	port	 string
+	port     string
 	buffer   string
 	clnt     *clnt.Clnt
 }
@@ -78,14 +79,15 @@ func (c *Client) Auth() error {
 // Command will write a command, returning an error
 // if the command is not supported by the service
 // It will set cmd.From on your behalf
-func (c *Client) Command(cmd *fs.Command) (int, error) {
+func (c *Client) Command(cmd *commander.Command) (int, error) {
 	nfid := c.clnt.FidAlloc()
-	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
+	_, err := c.clnt.Walk(c.root, nfid, []string{"ctrl"})
 	if err != nil {
 		return 0, err
 	}
 
 	cmd.From = c.buffer
+	fmt.Printf("Found command: %s\n", cmd.Bytes())
 
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
@@ -99,9 +101,9 @@ func (c *Client) Command(cmd *fs.Command) (int, error) {
 	return 0, errors.New("found no such command")
 }
 
-func (c *Client) Send(cmd *fs.Command, data []string) (int, error) {
+func (c *Client) Send(cmd *commander.Command, data []string) (int, error) {
 	nfid := c.clnt.FidAlloc()
-	_, err := c.clnt.Walk(c.root, nfid, []string{"ctl"})
+	_, err := c.clnt.Walk(c.root, nfid, []string{"ctrl"})
 	if err != nil {
 		return 0, err
 	}
@@ -132,11 +134,11 @@ func (c *Client) Aside() ([]byte, error) {
 }
 
 func (c *Client) Ctl() ([]byte, error) {
-	return getNamedFile(c, "ctl")
+	return getNamedFile(c, "ctrl")
 }
 
 func (c *Client) Document() ([]byte, error) {
-	return getNamedFile(c, "document")
+	return getNamedFile(c, "main")
 }
 
 func (c *Client) Input(data []byte) (int, error) {
@@ -166,13 +168,13 @@ func (c *Client) Notifications() ([]byte, error) {
 }
 
 // GetCommands initializes the internal cmdlist
-func (c *Client) GetCommands() ([]*fs.Command, error) {
-	b, err := getNamedFile(c, "ctl")
+func (c *Client) GetCommands() ([]*commander.Command, error) {
+	b, err := getNamedFile(c, "ctrl")
 	if err != nil {
 		return nil, err
 	}
 
-	cmds, err := fs.FindCommands(b)
+	cmds, err := parser.ParseCtrlFile(b)
 	if err != nil {
 		return nil, err
 	}
@@ -181,10 +183,11 @@ func (c *Client) GetCommands() ([]*fs.Command, error) {
 	return cmds, nil
 }
 
+/*
 func (c *Client) Feed() (io.ReadCloser, error) {
 	nfid := c.clnt.FidAlloc()
 
-	_, err := c.clnt.Walk(c.root, nfid, []string{"feed"})
+	_, err := c.clnt.Walk(c.root, nfid, []string{"stream"})
 	if err != nil {
 		return nil, err
 	}
@@ -229,16 +232,17 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 	return f, nil
 
 }
-
+*/
 func getNamedFile(c *Client, name string) ([]byte, error) {
 	nfid := c.clnt.FidAlloc()
 	_, err := c.clnt.Walk(c.root, nfid, []string{name})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("bad walk to %s: %s", name, err)
 	}
-
-	c.clnt.Open(nfid, p.OREAD)
 	defer c.clnt.Clunk(nfid)
+	if e := c.clnt.Open(nfid, p.OREAD); e != nil {
+		return nil, fmt.Errorf("issue in Open on %s: %s", name, e)
+	}
 
 	return c.clnt.Read(nfid, 0, p.MSIZE)
 }

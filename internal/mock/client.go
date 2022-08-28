@@ -8,7 +8,7 @@ import (
 
 	"github.com/altid/client/internal/feed"
 	"github.com/altid/client/internal/util"
-	"github.com/altid/libs/fs"
+	"github.com/altid/libs/service/commander"
 	fuzz "github.com/google/gofuzz"
 )
 
@@ -49,41 +49,41 @@ func (c *Client) Auth() error {
 	return nil
 }
 
-func (c *Client) Command(cmd *fs.Command) (int, error) {
+func (c *Client) Command(cmd *commander.Command) (int, error) {
 	c.debug(util.CmdComm, cmd)
 	return 0, nil
 }
 
-func (c *Client) GetCommands() ([]*fs.Command, error) {
-	d := []*fs.Command{
+func (c *Client) GetCommands() ([]*commander.Command, error) {
+	d := []*commander.Command{
 		{
 			Name:        "open",
 			Args:        []string{"<buffer>"},
-			Heading:     fs.DefaultGroup,
+			Heading:     commander.DefaultGroup,
 			Description: "Open and change buffers to a given service",
 		},
 		{
 			Name:        "close",
 			Args:        []string{"<buffer>"},
-			Heading:     fs.DefaultGroup,
+			Heading:     commander.DefaultGroup,
 			Description: "Close a buffer and return to the last opened previously",
 		},
 		{
 			Name:        "buffer",
 			Args:        []string{"<buffer>"},
-			Heading:     fs.DefaultGroup,
+			Heading:     commander.DefaultGroup,
 			Description: "Change to the named buffer",
 		},
 		{
 			Name:        "link",
 			Args:        []string{"<to>", "<from>"},
-			Heading:     fs.DefaultGroup,
+			Heading:     commander.DefaultGroup,
 			Description: "Overwrite the current <to> buffer with <from>, switching to from after. This destroys <to>",
 		},
 		{
 			Name:        "quit",
 			Args:        []string{},
-			Heading:     fs.DefaultGroup,
+			Heading:     commander.DefaultGroup,
 			Description: "Exits the service",
 		},
 	}
@@ -91,7 +91,7 @@ func (c *Client) GetCommands() ([]*fs.Command, error) {
 	return d, nil
 }
 
-func (c *Client) Send(cmd *fs.Command, args []string) (int, error) {
+func (c *Client) Send(cmd *commander.Command, args []string) (int, error) {
 	//c.debug(util.CmdSend, cmd.Bytes())
 	return 0, nil
 }
@@ -184,7 +184,7 @@ func mockLogging(cmd int, args ...interface{}) {
 		l.Printf("cmd %s", args[0])
 		l.Println()
 	case util.CmdComm:
-		m := args[0].(*fs.Command)
+		m := args[0].(*commander.Command)
 		l.Printf("%s from=\"%s\" args=\"%s\"\n", m.Name, m.From, m.Args)
 	case util.CmdTabs:
 		l.Printf("tabs list=\"%s\"\n", args[0])

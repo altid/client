@@ -1,11 +1,11 @@
 package client
 
 import (
-	"io"
+	//"io"
 
 	"github.com/altid/client/internal/defaults"
 	"github.com/altid/client/internal/mock"
-	"github.com/altid/libs/fs"
+	"github.com/altid/libs/service/commander"
 	"github.com/lionkov/go9p/p"
 )
 
@@ -23,17 +23,17 @@ type runner interface {
 	Connect(int) error
 	Attach() error
 	Auth() error
-	Command(*fs.Command) (int, error)
+	Command(*commander.Command) (int, error)
 	Tabs() ([]byte, error)
 	Title() ([]byte, error)
 	Status() ([]byte, error)
-	Send(*fs.Command, []string) (int, error)
+	Send(*commander.Command, []string) (int, error)
 	Aside() ([]byte, error)
 	Input([]byte) (int, error)
 	Notifications() ([]byte, error)
-	Feed() (io.ReadCloser, error)
+	//Feed() (io.ReadCloser, error)
 	Document() ([]byte, error)
-	GetCommands() ([]*fs.Command, error)
+	GetCommands() ([]*commander.Command, error)
 }
 
 // NewClient returns a client ready to connect to addr:port
@@ -52,7 +52,7 @@ func NewMockClient(addr string) *Client {
 }
 
 // GetCommands initializes c.CmdList
-func (c *Client) GetCommands() ([]*fs.Command, error) {
+func (c *Client) GetCommands() ([]*commander.Command, error) {
 	return c.run.GetCommands()
 }
 
@@ -74,7 +74,7 @@ func (c *Client) Connect(debug int) (err error) {
 
 // Command sends the named command to the service
 // If command is invalid, it will return an error
-func (c *Client) Command(cmd *fs.Command) (int, error) {
+func (c *Client) Command(cmd *commander.Command) (int, error) {
 	return c.run.Command(cmd)
 }
 
@@ -90,10 +90,10 @@ func (c *Client) Auth() error {
 
 // Buffer changes the active buffer to the named buffer, or returns an error
 func (c *Client) Buffer(name string) (int, error) {
-	cmd := &fs.Command{
-		Heading: fs.DefaultGroup,
-		Name: "buffer",
-		Args: []string{name},
+	cmd := &commander.Command{
+		Heading: commander.DefaultGroup,
+		Name:    "buffer",
+		Args:    []string{name},
 	}
 
 	return c.run.Command(cmd)
@@ -101,10 +101,10 @@ func (c *Client) Buffer(name string) (int, error) {
 
 // Open attempts to open the named buffer
 func (c *Client) Open(name string) (int, error) {
-	cmd := &fs.Command{
-		Heading: fs.DefaultGroup,
-		Name: "open",
-		Args: []string{name},
+	cmd := &commander.Command{
+		Heading: commander.DefaultGroup,
+		Name:    "open",
+		Args:    []string{name},
 	}
 
 	return c.run.Command(cmd)
@@ -112,10 +112,10 @@ func (c *Client) Open(name string) (int, error) {
 
 // Close attempts to close the named buffer
 func (c *Client) Close(name string) (int, error) {
-	cmd := &fs.Command{
-		Heading: fs.DefaultGroup,
-		Name: "close",
-		Args: []string{name},
+	cmd := &commander.Command{
+		Heading: commander.DefaultGroup,
+		Name:    "close",
+		Args:    []string{name},
 	}
 
 	return c.run.Command(cmd)
@@ -123,10 +123,10 @@ func (c *Client) Close(name string) (int, error) {
 
 // Link updates the current buffer to the named buffer, closing the former
 func (c *Client) Link(name string) (int, error) {
-	cmd := &fs.Command{
-		Heading: fs.DefaultGroup,
-		Name: "link",
-		Args: []string{name},
+	cmd := &commander.Command{
+		Heading: commander.DefaultGroup,
+		Name:    "link",
+		Args:    []string{name},
 	}
 
 	return c.run.Command(cmd)
@@ -167,18 +167,20 @@ func (c *Client) Notifications() ([]byte, error) {
 	return c.run.Notifications()
 }
 
+/*
 // Feed returns a ReadCloser connected to `feed`. It's expected all reads
 // will be read into a buffer with a size of MSIZE
 // It is also expected for Feed to be called in its own thread
 func (c *Client) Feed() (io.ReadCloser, error) {
 	return c.run.Feed()
 }
-
+*/
 // Send a named command with optional args to the service
-func (c *Client) Send(cmd *fs.Command, args []string) (int, error) {
+func (c *Client) Send(cmd *commander.Command, args []string) (int, error) {
 	return c.run.Send(cmd, args)
 }
 
+/*
 // FeedIterator allows you to step through lines of feed with Next()
 // Useful for gomobile, etc
 type FeedIterator struct {
@@ -206,3 +208,4 @@ func (f *FeedIterator) Next() ([]byte, error) {
 
 	return b, nil
 }
+*/

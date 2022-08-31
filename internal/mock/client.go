@@ -13,7 +13,7 @@ import (
 )
 
 type Client struct {
-	afid  io.ReadWriteCloser
+	//afid  io.ReadWriteCloser // TODO: Auth FID
 	addr  string
 	debug func(int, ...interface{})
 }
@@ -27,8 +27,8 @@ func NewClient(addr string) *Client {
 
 func (c *Client) Cleanup() {}
 
-func (c *Client) Connect(debug int) error {
-	if debug > 0 {
+func (c *Client) Connect(debug bool) error {
+	if debug {
 		c.debug = mockLogging
 	}
 

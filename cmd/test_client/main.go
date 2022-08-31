@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/altid/client"
+	"github.com/altid/client/slashcmd"
 )
 
 var debug = flag.Bool("d", false, "enable debug output")
@@ -23,13 +24,7 @@ func main() {
 	}
 
 	cl := client.NewClient(*addr, *port)
-
-	withDebug := 0
-	if *debug {
-		withDebug = 1
-	}
-
-	if e := cl.Connect(withDebug); e != nil {
+	if e := cl.Connect(*debug); e != nil {
 		log.Fatalf("connect error: %v", e)
 	}
 
@@ -38,19 +33,18 @@ func main() {
 		log.Fatalf("attach error: %v", e)
 	}
 
-	l, err := newListener(cl)
+	writer := bufio.NewWriter(os.Stdout)
+	l, err := slashcmd.NewListener(cl, writer)
 	if err != nil {
 		log.Fatalf("listener error %s", err)
 	}
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		// read by one line (enter pressed)
 		s, err := reader.ReadString('\n')
-		// check for errors
 		if err != nil {
-			log.Println("Error in read string", err)
+			log.Fatalf("reader error: %s", err)
 		}
-		handle(l, s)
+		l.Handle(s)
 	}
 }

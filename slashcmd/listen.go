@@ -1,31 +1,36 @@
-package main
+package slashcmd
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/altid/client"
+	"github.com/altid/client/internal/defaults"
 	"github.com/altid/libs/service/commander"
 )
 
-type listener struct {
+type Listener struct {
 	done chan struct{}
 	c    *client.Client
+	out  *bufio.Writer
 	cmds []*commander.Command
 }
 
-func newListener(c *client.Client) (*listener, error) {
+func NewListener(c *client.Client, out *bufio.Writer) (*Listener, error) {
 	cmds, err := c.GetCommands()
 	if err != nil {
 		return nil, err
 	}
 
-	cmds = append(cmds, additional...)
+	cmds = append(cmds, defaults.Commands...)
 
-	l := &listener{
+	l := &Listener{
 		cmds: cmds,
+		out:  out,
 		done: make(chan struct{}),
 		c:    c,
 	}
@@ -33,16 +38,17 @@ func newListener(c *client.Client) (*listener, error) {
 	return l, nil
 }
 
-func (l *listener) fetch() {
+func (l *Listener) fetch() {
 	go emitDocumentData(l)
 	go emitFeedData(l)
 }
 
-func handle(l *listener, args string) {
+func (l *Listener) Handle(args string) {
 	name := strings.Fields(args)
+	defer l.out.Flush()
 	switch name[0] {
 	case "/help":
-		fmt.Printf("%s", listCommands(l.cmds))
+		l.out.Write(ListCommands(l.cmds))
 	case "/buffer":
 		l.c.Buffer(name[1])
 		time.AfterFunc(time.Millisecond*1000, l.fetch)
@@ -73,7 +79,7 @@ func handle(l *listener, args string) {
 	}
 }
 
-func otherMsg(l *listener, name, args string) {
+func otherMsg(l *Listener, name, args string) {
 	if name[0] != '/' {
 		l.c.Input([]byte(args))
 		return
@@ -86,13 +92,13 @@ func otherMsg(l *listener, name, args string) {
 	}
 }
 
-func emitFeedData(l *listener) error {
+func emitFeedData(l *Listener) error {
 	f, err := l.c.Feed()
 	if err != nil {
 		return err
 	}
 
-	go func() {
+	go func(f io.ReadCloser) {
 		defer f.Close()
 
 		for {
@@ -100,36 +106,39 @@ func emitFeedData(l *listener) error {
 			b := make([]byte, client.MSIZE)
 
 			_, err := f.Read(b)
-			if err != nil {
-				fmt.Printf("%s\n", err)
+			if err != nil && err != io.EOF {
+				l.out.WriteString(fmt.Sprintf("error: %s\n", err))
+				f.Close()
 				return
 			}
 
 			if len(b) > 0 {
-				fmt.Printf("%s\n", b)
+				l.out.Write(b)
 			}
 		}
-	}()
+	}(f)
 
 	return nil
 }
 
-func emitDocumentData(l *listener) error {
+func emitDocumentData(l *Listener) error {
 	f, err := l.c.Document()
 	if err != nil {
-		fmt.Printf("%s\n", err)
+		l.out.WriteString(fmt.Sprintf("error: %s\n", err))
 		return err
 	}
 
-	fmt.Printf("%s\n", f)
+	l.out.Write(f)
+	l.out.WriteRune('\n')
 	return nil
 }
 
-func getData(l *listener, fn func() (b []byte, err error)) {
+func getData(l *Listener, fn func() (b []byte, err error)) {
 	t, err := fn()
 	if err != nil {
 		return
 	}
 
-	fmt.Printf("%s\n", t)
+	l.out.Write(t)
+	l.out.WriteRune('\n')
 }

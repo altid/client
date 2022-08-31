@@ -32,7 +32,7 @@ func NewClient(addr, port string) *Client {
 	}
 }
 
-func (c *Client) Connect(debug int) (err error) {
+func (c *Client) Connect(debug bool) (err error) {
 	dial := fmt.Sprintf("%s:%s", c.addr, c.port)
 
 	conn, err := net.Dial("tcp", dial)
@@ -45,7 +45,9 @@ func (c *Client) Connect(debug int) (err error) {
 		return err
 	}
 
-	c.clnt.Debuglevel = debug
+	if debug {
+		c.clnt.Debuglevel = 1
+	}
 
 	return
 }
@@ -193,10 +195,12 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 
 	c.clnt.Open(nfid, p.OREAD)
 
-	data := make(chan []byte)
-	done := make(chan struct{})
+	f := &feed.Feed{
+		Data: make(chan []byte),
+		Done: make(chan struct{}),
+	}
 
-	go func() {
+	go func(f *feed.Feed) {
 		var off uint64
 		defer c.clnt.Clunk(nfid)
 
@@ -208,28 +212,21 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 			}
 
 			if len(b) > 0 {
-				data <- b
+				f.Data <- b
 				off += uint64(len(b))
 			}
 
 			select {
-			case <-done:
+			case <-f.Done:
 				return
 			default:
 				time.Sleep(time.Millisecond * 300)
 				continue
 			}
 		}
-
-	}()
-
-	f := &feed.Feed{
-		Data: data,
-		Done: done,
-	}
+	}(f)
 
 	return f, nil
-
 }
 
 func getNamedFile(c *Client, name string) ([]byte, error) {

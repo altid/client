@@ -1,8 +1,6 @@
 package feed
 
-import (
-	"io"
-)
+import "io"
 
 type Feed struct {
 	Data chan []byte
@@ -20,6 +18,6 @@ func (f *Feed) Read(b []byte) (n int, err error) {
 }
 
 func (f *Feed) Close() error {
-	f.Done <- struct{}{}
+	close(f.Done)
 	return nil
 }

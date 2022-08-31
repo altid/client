@@ -20,7 +20,7 @@ type Client struct {
 type runner interface {
 	Ctl() ([]byte, error)
 	Cleanup()
-	Connect(int) error
+	Connect(bool) error
 	Attach() error
 	Auth() error
 	Command(*commander.Command) (int, error)
@@ -68,7 +68,7 @@ func (c *Client) Cleanup() {
 }
 
 // Connect performs the network dial for the connection
-func (c *Client) Connect(debug int) (err error) {
+func (c *Client) Connect(debug bool) (err error) {
 	return c.run.Connect(debug)
 }
 

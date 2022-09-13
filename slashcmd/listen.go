@@ -2,6 +2,7 @@ package slashcmd
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -48,7 +49,7 @@ func (l *Listener) Handle(args string) {
 	defer l.out.Flush()
 	switch name[0] {
 	case "/help":
-		l.out.Write(ListCommands(l.cmds))
+		l.out.Write(listCommands(l.cmds))
 	case "/buffer":
 		l.c.Buffer(name[1])
 		time.AfterFunc(time.Millisecond*1000, l.fetch)
@@ -141,4 +142,20 @@ func getData(l *Listener, fn func() (b []byte, err error)) {
 
 	l.out.Write(t)
 	l.out.WriteRune('\n')
+}
+
+func listCommands(cmds []*commander.Command) []byte {
+	var b bytes.Buffer
+
+	for _, cmd := range cmds {
+		b.WriteString("/" + cmd.Name)
+		for _, arg := range cmd.Args {
+			b.WriteString(" <" + arg + ">")
+		}
+
+		b.WriteString("\t# " + cmd.Description)
+		b.WriteRune('\n')
+	}
+
+	return b.Bytes()
 }

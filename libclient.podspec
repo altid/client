@@ -1,13 +1,6 @@
-#
-#  Be sure to run `pod spec lint libclient.podspec' to ensure this is a
-#  valid spec and to remove all comments including this before submitting the spec.
-#
-#  To learn more about Podspec attributes see https://guides.cocoapods.org/syntax/podspec.html
-#  To see working Podspecs in the CocoaPods repo see https://github.com/CocoaPods/Specs/
-
 Pod::Spec.new do |spec|
   spec.name                  = "libclient"
-  spec.version               = "0.0.2"
+  spec.version               = "0.0.4"
   spec.summary               = "Client helper Library for Altid."
   spec.description           = <<-DESC
   libclient is a helper library for writing Altid clients
@@ -21,7 +14,7 @@ Pod::Spec.new do |spec|
   spec.public_header_files   = "bindings/libclient.h"
   spec.source                = {
     :git => 'https://github.com/altid/client.git',
-    :tag => 'v0.0.2'
+    :tag => 'v0.0.4'
   }
 
   spec.ios.deployment_target  = '12.0'

@@ -76,22 +76,25 @@ func (l *Listener) Handle(args string) {
 		l.c.Cleanup()
 		os.Exit(0)
 	default:
-		otherMsg(l, name[0], args)
-	}
-}
+		if name[0][0] != '/' {
 
-func otherMsg(l *Listener, name, args string) {
-	if name[0] != '/' {
-		l.c.Input([]byte(args))
-		return
-	}
-
-	for _, cmd := range l.cmds {
-		if "/"+cmd.Name == name {
-			l.c.Send(cmd, strings.Fields(args))
+			l.c.Input([]byte(args))
+			s := "\033[1A" // Move up a line
+			s += "\033[K"  // Clear the line
+			s += "\r"      // Move back to the beginning of the line)
+			time.AfterFunc(time.Millisecond * 100, func() {
+				fmt.Fprint(l.out, s)
+			})
+			return
+		}
+		for _, cmd := range l.cmds {
+			if "/"+cmd.Name == name[0] {
+				l.c.Send(cmd, strings.Fields(args))
+			}
 		}
 	}
 }
+
 
 func emitFeedData(l *Listener) error {
 	f, err := l.c.Feed()
@@ -106,15 +109,15 @@ func emitFeedData(l *Listener) error {
 			// Ensure your buffer is MSIZE
 			b := make([]byte, client.MSIZE)
 
-			_, err := f.Read(b)
+			n, err := f.Read(b)
 			if err != nil && err != io.EOF {
 				l.out.WriteString(fmt.Sprintf("error: %s\n", err))
 				f.Close()
 				return
 			}
 
-			if len(b) > 0 {
-				l.out.Write(b)
+			if n > 0 {
+				l.out.Write(b[:n])
 			}
 		}
 	}(f)
@@ -128,9 +131,9 @@ func emitDocumentData(l *Listener) error {
 		l.out.WriteString(fmt.Sprintf("error: %s\n", err))
 		return err
 	}
-
-	l.out.Write(f)
-	l.out.WriteRune('\n')
+	if len(f) > 0 {
+		l.out.Write(f)
+	}
 	return nil
 }
 
@@ -141,7 +144,6 @@ func getData(l *Listener, fn func() (b []byte, err error)) {
 	}
 
 	l.out.Write(t)
-	l.out.WriteRune('\n')
 }
 
 func listCommands(cmds []*commander.Command) []byte {

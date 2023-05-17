@@ -61,7 +61,6 @@ func (c *Client) Attach() error {
 	if err != nil {
 		return err
 	}
-
 	c.root = root
 
 	return nil
@@ -89,11 +88,8 @@ func (c *Client) Command(cmd *commander.Command) (int, error) {
 	}
 
 	cmd.From = c.buffer
-	fmt.Printf("Found command: %s\n", cmd.Bytes())
-
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
-
 	for _, comm := range c.commands {
 		if comm.Name == cmd.Name {
 			return c.clnt.Write(nfid, cmd.Bytes(), 0)
@@ -152,7 +148,6 @@ func (c *Client) Input(data []byte) (int, error) {
 
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
-
 	return c.clnt.Write(nfid, data, 0)
 }
 

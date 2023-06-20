@@ -5,6 +5,7 @@ import (
 )
 
 type MsgType int
+
 const (
 	QuitMsg MsgType = iota
 	NullMsg
@@ -24,6 +25,7 @@ const (
 )
 
 const msgfmt = `%d:%s`
+
 type Message struct {
 	Data    []byte
 	MsgType MsgType

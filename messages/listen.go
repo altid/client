@@ -13,7 +13,7 @@ import (
 )
 
 type Listener struct {
-	c *client.Client
+	c    *client.Client
 	msgs chan *Message
 	cmds []*commander.Command
 }
@@ -95,12 +95,12 @@ func (l *Listener) Handle(args string) {
 }
 
 func (l *Listener) fetch() {
-	var msg *Message
 	data, err := l.c.Document()
-	if err == nil {
-		msg.Data = data
-		msg.MsgType = MainMsg
-		l.msgs <- msg
+	if err == nil && data != nil {
+		l.msgs <- &Message{
+			Data:    data,
+			MsgType: MainMsg,
+		}
 		return
 	}
 
@@ -125,7 +125,7 @@ func (l *Listener) fetch() {
 
 			if len(b) > 0 {
 				l.msgs <- &Message{
-					Data: b,
+					Data:    b,
 					MsgType: FeedMsg,
 				}
 			}
@@ -151,7 +151,7 @@ func listCommands(cmds []*commander.Command) []byte {
 
 func (l *Listener) send(data []byte, t MsgType) {
 	l.msgs <- &Message{
-		Data: data,
+		Data:    data,
 		MsgType: t,
 	}
 }

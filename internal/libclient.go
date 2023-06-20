@@ -45,7 +45,7 @@ func Start(address, port *C.char) {
 }
 
 //export Input
-func Input(input *C.char)  {
+func Input(input *C.char) {
 	in := C.GoString(input)
 	select {
 	case cmds <- in:
@@ -55,7 +55,7 @@ func Input(input *C.char)  {
 
 //export Next
 func Next() *C.char {
-	msg := <- msgs
+	msg := <-msgs
 	return C.CString(msg.String())
 }
 

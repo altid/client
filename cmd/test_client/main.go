@@ -12,7 +12,7 @@ import (
 )
 
 var debug = flag.Bool("d", false, "enable debug output")
-var addr = flag.String("s", "127.0.0.1", "address to connect to")
+var addr = flag.String("a", "127.0.0.1", "address to connect to")
 var port = flag.String("p", "564", "port to connect to")
 
 func main() {

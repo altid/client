@@ -179,7 +179,6 @@ func (c *Client) Send(cmd *commander.Command, args []string) (int, error) {
 	return c.run.Send(cmd, args)
 }
 
-
 // FeedIterator allows you to step through lines of feed with Next()
 // Useful for gomobile, etc
 type FeedIterator struct {

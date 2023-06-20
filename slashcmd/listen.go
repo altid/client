@@ -16,6 +16,7 @@ import (
 
 type Listener struct {
 	done chan struct{}
+	doc  bool
 	c    *client.Client
 	out  *bufio.Writer
 	cmds []*commander.Command
@@ -36,12 +37,19 @@ func NewListener(c *client.Client, out *bufio.Writer) (*Listener, error) {
 		c:    c,
 	}
 
+	if _, err := c.Document(); err != nil {
+		l.doc = false
+	}
 	return l, nil
 }
 
 func (l *Listener) fetch() {
-	go emitDocumentData(l)
-	go emitFeedData(l)
+	if l.doc {
+		go emitDocumentData(l)
+	} else {
+		go emitFeedData(l)
+	}
+
 }
 
 func (l *Listener) Handle(args string) {
@@ -82,7 +90,7 @@ func (l *Listener) Handle(args string) {
 			s := "\033[1A" // Move up a line
 			s += "\033[K"  // Clear the line
 			s += "\r"      // Move back to the beginning of the line)
-			time.AfterFunc(time.Millisecond * 100, func() {
+			time.AfterFunc(time.Millisecond*100, func() {
 				fmt.Fprint(l.out, s)
 			})
 			return
@@ -94,7 +102,6 @@ func (l *Listener) Handle(args string) {
 		}
 	}
 }
-
 
 func emitFeedData(l *Listener) error {
 	f, err := l.c.Feed()

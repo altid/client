@@ -33,11 +33,11 @@ func (v *view) Layout(gtx layout.Context) layout.Dimensions {
 		layout.Rigid(
 			func(gtx layout.Context) layout.Dimensions {
 				list := &widget.List{}
-				//list.ScrollToEnd = true
+				list.ScrollToEnd = true
 				list.Axis = layout.Vertical
 				vi := material.List(v.th, list)
 				return vi.Layout(gtx, len(v.svc.Data), func(gtx layout.Context, index int) layout.Dimensions {
-					return v.svc.Data[index](gtx)
+					return v.svc.Data[index](gtx, index)
 				})
 			},
 		),

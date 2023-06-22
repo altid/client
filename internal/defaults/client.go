@@ -200,12 +200,10 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 		defer c.clnt.Clunk(nfid)
 
 		for {
-
 			b, err := c.clnt.Read(nfid, off, p.MSIZE)
 			if err != nil {
 				return
 			}
-
 			if len(b) > 0 {
 				f.Data <- b
 				off += uint64(len(b))

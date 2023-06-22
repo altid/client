@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	gioui.org v0.0.0-20230619141907-b183774063fc
-	github.com/altid/libs v0.3.1
+	github.com/altid/libs v0.3.2
 	github.com/google/gofuzz v1.2.0
 	github.com/grandcat/zeroconf v1.0.0
 	github.com/knieriem/g v0.4.0

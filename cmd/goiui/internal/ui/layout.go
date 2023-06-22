@@ -1,8 +1,10 @@
 package ui
 
 import (
+	"errors"
 	"image"
-	"time"
+	//"log"
+	"sort"
 
 	"gioui.org/app"
 	"gioui.org/font/gofont"
@@ -33,14 +35,15 @@ func Run(w *app.Window, s *services.Services, debug bool) error {
 	// We share the theme with all of our widgets, the current service will be updated
 	// Any time we click a different service buffer or main window
 	// Create a list of listItems, update later on
-	items := []*listItem{}
+	i := []*listItem{}
 	for _, item := range s.List() {
 		li := &listItem{
 			svc: item,
 			th: th,
 			clickable: &widget.Clickable{},
 		}
-		items = append(items, li)
+		i = append(i, li)
+		sort.Sort(items(i))
 	}
 	sess := &session{
 		w: w,
@@ -62,10 +65,11 @@ func Run(w *app.Window, s *services.Services, debug bool) error {
 			th:  th,
 		},
 		list: &list{
-			items: items,
+			s:      s,
+			items:  i,
 			button: &widget.Clickable{},
-			th:      th,
-			hide:    true,
+			th:     th,
+			hide:   true,
 		},
 		input: &input{
 			s:  s,
@@ -73,19 +77,32 @@ func Run(w *app.Window, s *services.Services, debug bool) error {
 			ed: widget.Editor{},
 		},
 	}
-
 	for {
 		select {
 		case e := <-w.Events():
 			// NOTE: Only use reset if we have nothing as a macro
 			// https://pkg.go.dev/gioui.org/op#MacroOp
-			ops.Reset()
 			if err := sess.handle(e, &ops); err != nil {
 				return err
 			}
-		//case e := <-s.Events():
-		// If the stack is inactive for a few seconds, check for new data from the tabs list
-		case <-time.After(time.Second * 2):
+		// TODO: Store each ops on the type, build up and invalidate only when touched
+		case e := <-s.Event():
+			//log.Println("Svc event", e)
+			curr := s.Current()
+			switch e {
+			case "list":
+				sess.list.items.update(s, th)
+			case "scan":
+				sess.list.items.update(s, th)
+			case "buffer":
+				sess.status.svc = curr
+				sess.aside.svc = curr
+				sess.title.svc = curr
+			case "input":
+				sess.view.svc  = curr
+			case "feed":
+				sess.view.svc = curr
+			}
 			w.Invalidate()
 		}
 	}
@@ -94,7 +111,7 @@ func Run(w *app.Window, s *services.Services, debug bool) error {
 func (s *session) handle(e event.Event, ops *op.Ops) error {
 	switch e := e.(type) {
 	case system.DestroyEvent:
-		return e.Err
+		return errors.New("finished")
 	case system.FrameEvent:
 		gtx := layout.NewContext(ops, e)
 		layout.Inset{
@@ -124,9 +141,10 @@ func (s *session) handle(e event.Event, ops *op.Ops) error {
 				}),
 			)
 		})
-		//s.aside.Layout(gtx
 		//s.menu.Layout(gtx)
 		e.Frame(ops)
+	case system.StageEvent:
+		//
 	}
 	return nil
 }

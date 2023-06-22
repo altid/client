@@ -45,6 +45,7 @@ func (i *input) Handle() {
 			curr := i.s.Current()
 			if curr != nil {
 				curr.Client.Input([]byte(item.Text))
+				curr.Notify("input")
 			}
 		}
 	}

@@ -1,14 +1,21 @@
 package services
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"image/color"
+	//"io"
+	"log"
 	"strconv"
 
 	"gioui.org/font/gofont"
 	"gioui.org/layout"
+	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/altid/client"
+	"github.com/altid/libs/markup"
+	"github.com/altid/libs/service/commander"
 )
 
 type Service struct {
@@ -16,7 +23,10 @@ type Service struct {
 	// TODO: Some way to watch for new activity
 	Name      string
 	Ready     bool
-	Data      []layout.Widget
+	Notify    func(string)
+	Data      []layout.ListElement
+	cmds      []*commander.Command
+	tabs      map[string]*widget.Clickable
 	addr      string
 	port      int
 	isRunning bool
@@ -26,6 +36,7 @@ type Service struct {
 type Tab struct {
 	Name   string
 	Unread int
+	Click  *widget.Clickable
 }
 
 func (s *Service) Connect() error {
@@ -38,20 +49,49 @@ func (s *Service) Connect() error {
 		return e
 	}
 	s.Ready = true
-	// TODO: Start a goroutine to watch
 	// TODO: Handle commands to start Parse for other channels when we swap
 	return nil
 }
 
-func (s *Service) Parse() {
-	th := material.NewTheme(gofont.Collection())
-
-	s.Data = []layout.Widget{
-		material.Body1(th, "test").Layout,
-		material.Body1(th, "this").Layout,
-		material.Body1(th, "chortle").Layout,
-		material.Subtitle2(th, "Chickin").Layout,
+func (s *Service) Buffer(name string) {
+	if _, e := s.Client.Buffer(name); e != nil {
+		log.Println("attempting to go to buffer error: ", e)
 	}
+	s.Notify("buffer")
+	s.Parse()
+}
+
+func (s *Service) Parse() {
+	s.Data = []layout.ListElement{}
+	if !s.Ready {
+		return
+	}
+	th := material.NewTheme(gofont.Collection())
+	d, _ := s.Client.Document()
+	if len(d) > 0 {
+		// TODO: Client.Document returns a reader
+		//s.addLines(th, d)
+		return
+	}
+	// Read in feed and handle it
+	go func(s *Service) {
+		fd, err := s.Client.Feed()
+		if err != nil {
+			s.Data = []layout.ListElement{
+				func(gtx layout.Context, index int) layout.Dimensions {
+					return material.Body1(th, "Not connected").Layout(gtx)
+				},
+			}
+			return
+		}
+		c := make([]byte, client.MSIZE)
+		scanner := bufio.NewScanner(fd)
+		scanner.Buffer(c, client.MSIZE)
+		for scanner.Scan() {
+			d := scanner.Bytes()
+			s.addLine(th, d)
+		}
+	}(s)
 }
 
 func (s *Service) Tabs() []*Tab {
@@ -68,12 +108,73 @@ func (s *Service) Tabs() []*Tab {
 		if closing == -1 || opening == -1 {
 			continue
 		}
-		unread, _ := strconv.Atoi(string(item[opening+1 : closing-1]))
+
+		unread, _ := strconv.Atoi(string(item[opening+1:closing]))
 		tab := &Tab{
 			Name:   string(item[:opening-1]),
 			Unread: unread,
 		}
+		// Stash the clickable and look up later, we don't care about the rest
+		if t, ok := s.tabs[tab.Name]; ok {
+			tab.Click = t
+		} else {
+			tab.Click = &widget.Clickable{}
+			s.tabs[tab.Name] = tab.Click
+		}
 		list = append(list, tab)
 	}
 	return list
+}
+
+// TODO: Use gioui/x/richtext to colorize/bold the text instead of whatever this is, long lines break, for example
+func (s *Service) addLine(th *material.Theme, line []byte) {
+	l := markup.NewLexer(line)
+	var items []layout.FlexChild
+	for {
+		item := l.Next()
+	LOOP:
+		switch item.ItemType {
+		case markup.EOF:
+			d := func(gtx layout.Context, index int) layout.Dimensions {
+				return layout.Flex{}.Layout(gtx, items...)
+			}
+			s.Data = append(s.Data, d)
+			s.Notify("feed")
+			return
+		case markup.NormalText:
+			if len(item.Data) > 0 {
+				tt := material.Body1(th, string(item.Data))
+				items = append(items, layout.Rigid(tt.Layout))
+			}
+		case markup.ColorText:
+			tt := material.Body1(th, string(item.Data))
+			item = l.Next()
+			// If we don't have a colour code next, we're likely in a sub-format, catch those first
+			if item.ItemType == markup.ColorCode {
+				tt.Color = colorFromBytes(item.Data)
+				items = append(items, layout.Rigid(tt.Layout))
+			} else {
+				goto LOOP
+			}
+		case markup.ErrorText:
+			log.Printf("Error: %s", item.Data)
+		default:
+			log.Println("Markup TODO: ", string(item.Data))
+		}
+	}
+}
+
+// TODO: th.color.blue
+func colorFromBytes(in []byte) color.NRGBA {
+	switch string(in) {
+	case "green":
+		return color.NRGBA{R: 255, G: 0, B: 120, A: 255}
+	case "blue":
+		return color.NRGBA{B: 255, R: 80, G: 100, A: 255}
+	case "orange":
+		return color.NRGBA{B: 0, R: 255, G: 165, A: 255}
+	case "grey":
+		return color.NRGBA{R: 120, G: 120, B: 120, A: 255}
+	}
+	return color.NRGBA{B: 0, R: 0, G: 0, A: 255}
 }

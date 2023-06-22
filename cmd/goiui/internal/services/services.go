@@ -5,18 +5,21 @@ import (
 	"fmt"
 	"sync"
 
+	"gioui.org/widget"
 	"github.com/grandcat/zeroconf"
 )
 
 type Services struct {
-	srvlist map[string]*Service
-	current string
-	debug   bool
-	sync.Mutex
+	events    chan string
+	srvlist   map[string]*Service
+	current   string
+	debug     bool
+	sync.RWMutex
 }
 
 func NewServices(debug bool) *Services {
 	return &Services{
+		events: make(chan string, 64),
 		srvlist: make(map[string]*Service),
 		debug:   debug,
 	}
@@ -41,24 +44,46 @@ func (s *Services) Current() *Service {
 	return nil
 }
 
+func (s *Services) Notify(str string) {
+	s.events <- str
+}
+
+func (s *Services) Event() chan string {
+	return s.events
+}
+
 // Select will instantiate the named service if it has not been already, setting it as the current
 // It will return any errors encountered
 func (s *Services) Select(req string) error {
-	svc := s.Current()
-	if svc == nil {
+	svc, ok := s.srvlist[req]
+	if svc == nil || !ok {
 		return fmt.Errorf("no service available named %s", req)
-	}	
-	s.current = req	
+	}
+	if (s.current != req) {
+		// Pop the current buffer to "none" so unreads populate correctly
+		curr := s.Current()
+		if curr != nil && curr.Ready {
+			curr.Client.Buffer("none")
+		}
+		s.current = req
+	}
 	if svc.isRunning {
 		return nil
 	}
+	svc.isRunning = true
 	if e := svc.Connect(); e != nil {
 		return e
 	}
 	if e := svc.Client.Attach(); e != nil {
 		return e
 	}
-	svc.Parse()
+	// TODO: Build menu with this data too!
+	cmds, err := svc.Client.GetCommands()
+	if err != nil {
+		return err
+	}
+	svc.cmds = cmds
+	svc.Ready = true
 	return nil
 }
 
@@ -72,16 +97,17 @@ func (s *Services) Scan(ctx context.Context) error {
 	go func(results <-chan *zeroconf.ServiceEntry) {
 		for entry := range results {
 			svc := &Service{
-				Name: entry.ServiceRecord.Instance,
+				Name:   entry.ServiceRecord.Instance,
+				Notify: s.Notify,
 				// We only list one IP per service
 				addr:  entry.AddrIPv4[0].String(),
+				tabs:  make(map[string]*widget.Clickable),
 				port:  entry.Port,
 				debug: s.debug,
 			}
-			s.Lock()
 			svc.Parse()
+			svc.Notify("scan")
 			s.srvlist[svc.Name] = svc
-			s.Unlock()
 		}
 	}(entries)
 	return resolver.Browse(ctx, "_altid._tcp", "local", entries)

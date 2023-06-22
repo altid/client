@@ -1,6 +1,8 @@
 package feed
 
-import "io"
+import (
+	"io"
+)
 
 type Feed struct {
 	Data chan []byte

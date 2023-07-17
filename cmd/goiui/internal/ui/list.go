@@ -8,11 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	//"log"
-
 	"gioui.org/layout"
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
@@ -67,7 +63,6 @@ func (t items) update(s *services.Services, th *material.Theme) {
 func (t items) contains(item string) bool {
 	for _, d := range t {
 		if d.svc.Name == item {
-			log.Printf("svc %s item %s", d.svc.Name, item)
 			return true
 		}
 	}
@@ -76,57 +71,17 @@ func (t items) contains(item string) bool {
 
 // List of layout items, which are themselves nested
 func (l *list) Layout(gtx layout.Context) layout.Dimensions {
-	frame := layout.Flex{}
-	frame.Axis = layout.Vertical
-	bt := material.Button(l.th, l.button, "+")
-	bt.Background = color.NRGBA{B: 99, G: 30, R: 0, A: 255}
-	bt.Color = color.NRGBA{B: 255, G: 255, R: 255, A: 255}
-	for range l.button.Clicks() {
-		l.hide = !l.hide
-		l.s.Notify("list")
-	}
-	// Draw our button, menu
-	if l.hide {
-		return frame.Layout(gtx,
-			layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-				return bt.Layout(gtx)
-			}),
-		)
-	}
 	list := &widget.List{}
 	list.Axis = layout.Vertical
 	li := material.List(l.th, list)
-	return frame.Layout(gtx,
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			return bt.Layout(gtx)
-		}),
-		// TODO: Maybe make sidebar static, not popping in and out
-		//       the above button goes away
-		// TODO: Make sidebar scrollable
-		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-			menu := clip.Rect{
-				Min: image.Pt(0, 4),
-				Max: image.Pt(400, gtx.Constraints.Max.Y-50),
-			}
-			menu.Push(gtx.Ops)
-			paint.ColorOp{
-				Color: color.NRGBA{R: 220, G: 220, B: 220, A: 0xff},
-			}.Add(gtx.Ops)
-			paint.PaintOp{}.Add(gtx.Ops)
-			return li.Layout(gtx, len(l.items), l.layoutItem)
-		}),
-	)
+	// TODO: Make sidebar scrollable
+	return li.Layout(gtx, len(l.items), l.layoutItem)
 }
 
 func (l *list) layoutItem(gtx layout.Context, index int) layout.Dimensions {
 	tt := material.Subtitle1(l.th, l.items[index].svc.Name)
 	tt.TextSize = unit.Sp(16)
-	insets := layout.Inset{
-		Top:    4,
-		Bottom: 4,
-		Left:   4,
-		Right:  4,
-	}
+	insets := layout.UniformInset(4)
 	for range l.items[index].clickable.Clicks() {
 		if !l.items[index].svc.Ready {
 			// At least log the error
@@ -172,9 +127,8 @@ func (l *list) layoutItem(gtx layout.Context, index int) layout.Dimensions {
 					// back reference so we can set the right service
 					l.items[index].set = l.s.Select
 					d := ll.Layout(gtx, len(l.items[index].tabs), l.items[index].entry)
-					log.Println(len(l.items[index].tabs))
 					d.Size = image.Point{
-						X: gtx.Constraints.Max.X,
+						X: 400,
 						Y: int(unit.Sp(32)) * (len(l.items[index].tabs)),
 					}
 					return d

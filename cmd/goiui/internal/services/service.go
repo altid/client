@@ -5,14 +5,17 @@ import (
 	"bytes"
 	"fmt"
 	"image/color"
-	//"io"
+	"io"
+
 	"log"
 	"strconv"
 
+	"gioui.org/font"
 	"gioui.org/font/gofont"
-	"gioui.org/layout"
+	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"gioui.org/x/richtext"
 	"github.com/altid/client"
 	"github.com/altid/libs/markup"
 	"github.com/altid/libs/service/commander"
@@ -24,12 +27,13 @@ type Service struct {
 	Name      string
 	Ready     bool
 	Notify    func(string)
-	Data      []layout.ListElement
+	Data      []richtext.SpanStyle
 	cmds      []*commander.Command
 	tabs      map[string]*widget.Clickable
 	addr      string
 	port      int
 	isRunning bool
+	hasFeed   bool
 	debug     bool
 }
 
@@ -37,6 +41,10 @@ type Tab struct {
 	Name   string
 	Unread int
 	Click  *widget.Clickable
+}
+
+func (s *Service) HasFeed() bool {
+	return s.hasFeed
 }
 
 func (s *Service) Connect() error {
@@ -62,35 +70,31 @@ func (s *Service) Buffer(name string) {
 }
 
 func (s *Service) Parse() {
-	s.Data = []layout.ListElement{}
+	s.Data = []richtext.SpanStyle{}
 	if !s.Ready {
 		return
 	}
 	th := material.NewTheme(gofont.Collection())
 	d, _ := s.Client.Document()
 	if len(d) > 0 {
-		// TODO: Client.Document returns a reader
-		//s.addLines(th, d)
+		s.hasFeed = false
+		fd := bytes.NewBuffer(d)
+		s.toLines(fd, th)
 		return
 	}
 	// Read in feed and handle it
 	go func(s *Service) {
 		fd, err := s.Client.Feed()
 		if err != nil {
-			s.Data = []layout.ListElement{
-				func(gtx layout.Context, index int) layout.Dimensions {
-					return material.Body1(th, "Not connected").Layout(gtx)
-				},
-			}
+			s.Data = []richtext.SpanStyle{{
+				Content: "Not connected",
+				Color: 	color.NRGBA{A: 255},
+				Size: unit.Sp(24),
+			}}
 			return
 		}
-		c := make([]byte, client.MSIZE)
-		scanner := bufio.NewScanner(fd)
-		scanner.Buffer(c, client.MSIZE)
-		for scanner.Scan() {
-			d := scanner.Bytes()
-			s.addLine(th, d)
-		}
+		s.hasFeed = true
+		s.toLines(fd, th)
 	}(s)
 }
 
@@ -108,7 +112,6 @@ func (s *Service) Tabs() []*Tab {
 		if closing == -1 || opening == -1 {
 			continue
 		}
-
 		unread, _ := strconv.Atoi(string(item[opening+1:closing]))
 		tab := &Tab{
 			Name:   string(item[:opening-1]),
@@ -126,33 +129,51 @@ func (s *Service) Tabs() []*Tab {
 	return list
 }
 
-// TODO: Use gioui/x/richtext to colorize/bold the text instead of whatever this is, long lines break, for example
-func (s *Service) addLine(th *material.Theme, line []byte) {
+func (s *Service) toLines(fd io.Reader, th *material.Theme) {
+	c := make([]byte, client.MSIZE)
+	scanner := bufio.NewScanner(fd)
+	scanner.Buffer(c, client.MSIZE)
+	font := gofont.Collection()[0]
+	for scanner.Scan() {
+		d := scanner.Bytes()
+		s.addLine(th, d, font)
+	}
+}
+
+func (s *Service) addLine(th *material.Theme, line []byte, font font.FontFace) {
 	l := markup.NewLexer(line)
-	var items []layout.FlexChild
+	var items []richtext.SpanStyle
+	
 	for {
 		item := l.Next()
 	LOOP:
 		switch item.ItemType {
 		case markup.EOF:
-			d := func(gtx layout.Context, index int) layout.Dimensions {
-				return layout.Flex{}.Layout(gtx, items...)
-			}
-			s.Data = append(s.Data, d)
+			s.Data = append(s.Data, items...)
+			s.Data = append(s.Data, richtext.SpanStyle{Content: "\n"})
 			s.Notify("feed")
 			return
 		case markup.NormalText:
 			if len(item.Data) > 0 {
-				tt := material.Body1(th, string(item.Data))
-				items = append(items, layout.Rigid(tt.Layout))
+				d := richtext.SpanStyle{
+					Color: color.NRGBA{A: 255},
+					Content: string(item.Data),
+					Size: unit.Sp(14),
+					Font: font.Font,
+				}
+				items = append(items, d)
 			}
 		case markup.ColorText:
-			tt := material.Body1(th, string(item.Data))
+			d := richtext.SpanStyle{
+				Content: string(item.Data),
+				Size: unit.Sp(14),
+				Font: font.Font,
+			}
 			item = l.Next()
 			// If we don't have a colour code next, we're likely in a sub-format, catch those first
 			if item.ItemType == markup.ColorCode {
-				tt.Color = colorFromBytes(item.Data)
-				items = append(items, layout.Rigid(tt.Layout))
+				d.Color = colorFromBytes(item.Data)
+				items = append(items, d)
 			} else {
 				goto LOOP
 			}
@@ -164,7 +185,6 @@ func (s *Service) addLine(th *material.Theme, line []byte) {
 	}
 }
 
-// TODO: th.color.blue
 func colorFromBytes(in []byte) color.NRGBA {
 	switch string(in) {
 	case "green":

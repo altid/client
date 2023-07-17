@@ -3,12 +3,16 @@ package ui
 import (
 	"errors"
 	"image"
+	"image/color"
+
 	//"log"
 	"sort"
 
 	"gioui.org/app"
 	"gioui.org/font/gofont"
 	"gioui.org/io/event"
+	"gioui.org/op/clip"
+	"gioui.org/op/paint"
 	"gioui.org/widget"
 
 	"gioui.org/io/system"
@@ -38,18 +42,24 @@ func Run(w *app.Window, s *services.Services, debug bool) error {
 	i := []*listItem{}
 	for _, item := range s.List() {
 		li := &listItem{
-			svc: item,
-			th: th,
+			svc:       item,
+			th:        th,
 			clickable: &widget.Clickable{},
 		}
 		i = append(i, li)
 		sort.Sort(items(i))
 	}
+	// Only on feed, not document
+	viewList := &widget.List{Scrollbar: widget.Scrollbar{}}
+	viewList.Axis = layout.Vertical
+	viewList.ScrollToEnd = true
 	sess := &session{
 		w: w,
 		s: s,
 		view: &view{
+			position: layout.Position{},
 			svc: s.Current(),
+			list: viewList,
 			th:  th,
 		},
 		status: &status{
@@ -99,7 +109,7 @@ func Run(w *app.Window, s *services.Services, debug bool) error {
 				sess.aside.svc = curr
 				sess.title.svc = curr
 			case "input":
-				sess.view.svc  = curr
+				sess.view.svc = curr
 			case "feed":
 				sess.view.svc = curr
 			}
@@ -114,33 +124,44 @@ func (s *session) handle(e event.Event, ops *op.Ops) error {
 		return errors.New("finished")
 	case system.FrameEvent:
 		gtx := layout.NewContext(ops, e)
-		layout.Inset{
-			Top:    4,
-			Bottom: 4,
-			Left:   4,
-			Right:  4,
-		}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-			return layout.Stack{}.Layout(gtx,
-				layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+		layout.Stack{}.Layout(gtx,
+			layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+				return layout.Inset{
+					Left: 204,
+					Top: 4,
+					Bottom: 4,
+					Right: 4,
+				}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					return layout.Flex{
 						Axis: layout.Vertical,
+						Spacing: layout.SpaceEvenly,
 					}.Layout(gtx,
 						layout.Rigid(s.title.Layout),
 						layout.Flexed(1, s.view.Layout),
 						layout.Rigid(s.status.Layout),
 						layout.Rigid(s.input.Layout),
 					)
-				}),
-				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-					d := s.list.Layout(gtx)
-					d.Size = image.Point{
-						X: gtx.Constraints.Max.X,
-						Y: gtx.Constraints.Max.Y,
-					}
-					return d
-				}),
-			)
-		})
+				})
+			}),
+			layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+				menu := clip.Rect{
+					Min: image.Pt(0, 4),
+					Max: image.Pt(400, gtx.Constraints.Max.Y-4),
+				}
+				menu.Push(gtx.Ops)
+				paint.ColorOp{
+					Color: color.NRGBA{R: 220, G: 220, B: 220, A: 0xff},
+				}.Add(gtx.Ops)
+				paint.PaintOp{}.Add(gtx.Ops)
+				d := s.list.Layout(gtx)
+				d.Size = image.Point{
+					X: 400,
+					Y: gtx.Constraints.Max.Y,
+				}
+				return d
+			}),
+		)
+
 		//s.menu.Layout(gtx)
 		e.Frame(ops)
 	case system.StageEvent:

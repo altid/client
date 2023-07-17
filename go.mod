@@ -3,7 +3,7 @@ module github.com/altid/client
 go 1.19
 
 require (
-	gioui.org v0.0.0-20230619141907-b183774063fc
+	gioui.org v0.1.0
 	github.com/altid/libs v0.3.2
 	github.com/google/gofuzz v1.2.0
 	github.com/grandcat/zeroconf v1.0.0
@@ -14,6 +14,7 @@ require (
 require (
 	gioui.org/cpu v0.0.0-20220412190645-f1e9e8c3b1f7 // indirect
 	gioui.org/shader v1.0.6 // indirect
+	gioui.org/x v0.1.0
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/go-text/typesetting v0.0.0-20230618175549-b5753034b590 // indirect
 	github.com/miekg/dns v1.1.55 // indirect

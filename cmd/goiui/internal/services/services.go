@@ -10,16 +10,16 @@ import (
 )
 
 type Services struct {
-	events    chan string
-	srvlist   map[string]*Service
-	current   string
-	debug     bool
+	events  chan string
+	srvlist map[string]*Service
+	current string
+	debug   bool
 	sync.RWMutex
 }
 
 func NewServices(debug bool) *Services {
 	return &Services{
-		events: make(chan string, 64),
+		events:  make(chan string, 64),
 		srvlist: make(map[string]*Service),
 		debug:   debug,
 	}
@@ -59,7 +59,7 @@ func (s *Services) Select(req string) error {
 	if svc == nil || !ok {
 		return fmt.Errorf("no service available named %s", req)
 	}
-	if (s.current != req) {
+	if s.current != req {
 		// Pop the current buffer to "none" so unreads populate correctly
 		curr := s.Current()
 		if curr != nil && curr.Ready {
@@ -100,10 +100,11 @@ func (s *Services) Scan(ctx context.Context) error {
 				Name:   entry.ServiceRecord.Instance,
 				Notify: s.Notify,
 				// We only list one IP per service
-				addr:  entry.AddrIPv4[0].String(),
-				tabs:  make(map[string]*widget.Clickable),
-				port:  entry.Port,
-				debug: s.debug,
+				addr:    entry.AddrIPv4[0].String(),
+				tabs:    make(map[string]*widget.Clickable),
+				port:    entry.Port,
+				hasFeed: false,
+				debug:   s.debug,
 			}
 			svc.Parse()
 			svc.Notify("scan")

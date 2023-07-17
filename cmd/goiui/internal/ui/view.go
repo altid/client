@@ -6,40 +6,38 @@ import (
 	"gioui.org/layout"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
+	"gioui.org/x/richtext"
 	"github.com/altid/client/cmd/goiui/internal/services"
 )
 
 type view struct {
+	position layout.Position
 	svc *services.Service
-	// Scroll offset
+	list *widget.List
 	th  *material.Theme
 }
 
 // Main view - build up each line with formatting
 func (v *view) Layout(gtx layout.Context) layout.Dimensions {
-	// TODO: scrollable panel
 	if v.svc == nil || !v.svc.Ready {
-		d := layout.Dimensions{}
-		d.Size = image.Point{
-			X: gtx.Constraints.Max.X,
-			Y: gtx.Constraints.Max.Y,
+		d := layout.Dimensions{
+			Size: image.Point{
+				X: gtx.Constraints.Max.X,
+				Y: gtx.Constraints.Max.Y,
+			},
 		}
 		return d
 	}
-	return layout.Flex{
-		Axis:    layout.Vertical,
-		Spacing: layout.SpaceStart,
-	}.Layout(gtx,
-		layout.Rigid(
-			func(gtx layout.Context) layout.Dimensions {
-				list := &widget.List{}
-				list.ScrollToEnd = true
-				list.Axis = layout.Vertical
-				vi := material.List(v.th, list)
-				return vi.Layout(gtx, len(v.svc.Data), func(gtx layout.Context, index int) layout.Dimensions {
-					return v.svc.Data[index](gtx, index)
-				})
-			},
-		),
-	)
+	// Set up our scroll
+	if v.svc.HasFeed() {
+		v.list.ScrollToEnd = true
+	} else {
+		v.list.ScrollToEnd = false
+	}
+	var state richtext.InteractiveText
+	vi := material.List(v.th, v.list)
+	d := vi.Layout(gtx, len(v.svc.Data), func(gtx layout.Context, index int) layout.Dimensions {
+		return richtext.Text(&state, v.th.Shaper, v.svc.Data...).Layout(gtx)
+	})
+	return d
 }

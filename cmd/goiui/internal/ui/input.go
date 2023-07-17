@@ -19,7 +19,7 @@ type input struct {
 func (i *input) Layout(gtx layout.Context) layout.Dimensions {
 	i.ed.Submit = true
 	i.ed.SingleLine = true
-	ed := material.Editor(i.th, &i.ed, "")
+	ed := material.Editor(i.th, &i.ed, "Enter your message here...")
 	for _, ev := range ed.Editor.Events() {
 		if e, ok := ev.(widget.SubmitEvent); ok {
 			i.ed.SetText("")
@@ -28,12 +28,15 @@ func (i *input) Layout(gtx layout.Context) layout.Dimensions {
 			}
 		}
 	}
-	border := widget.Border{
+	e := ed.Layout(gtx)
+	e.Size.X = gtx.Constraints.Max.X
+	return widget.Border{
 		Color:        color.NRGBA{R: 204, G: 204, B: 204, A: 255},
 		CornerRadius: unit.Dp(3),
 		Width:        unit.Dp(2),
-	}
-	return border.Layout(gtx, ed.Layout)
+	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		return e
+	})
 }
 
 func (i *input) Handle() {

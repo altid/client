@@ -36,8 +36,7 @@ func (v *view) Layout(gtx layout.Context) layout.Dimensions {
 	}
 	var state richtext.InteractiveText
 	vi := material.List(v.th, v.list)
-	d := vi.Layout(gtx, len(v.svc.Data), func(gtx layout.Context, index int) layout.Dimensions {
-		return richtext.Text(&state, v.th.Shaper, v.svc.Data...).Layout(gtx)
+	return vi.Layout(gtx, len(v.svc.Data), func(gtx layout.Context, index int) layout.Dimensions {
+		return richtext.Text(&state, v.th.Shaper, v.svc.Data[index]...).Layout(gtx)
 	})
-	return d
 }

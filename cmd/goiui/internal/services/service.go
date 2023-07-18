@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"image/color"
 	"io"
-
 	"log"
+	"sync"
 	"strconv"
 
 	"gioui.org/font"
@@ -27,7 +27,7 @@ type Service struct {
 	Name      string
 	Ready     bool
 	Notify    func(string)
-	Data      []richtext.SpanStyle
+	Data      [][]richtext.SpanStyle
 	cmds      []*commander.Command
 	tabs      map[string]*widget.Clickable
 	addr      string
@@ -35,6 +35,7 @@ type Service struct {
 	isRunning bool
 	hasFeed   bool
 	debug     bool
+	sync.Mutex
 }
 
 type Tab struct {
@@ -65,15 +66,22 @@ func (s *Service) Buffer(name string) {
 	if _, e := s.Client.Buffer(name); e != nil {
 		log.Println("attempting to go to buffer error: ", e)
 	}
+	s.Data = [][]richtext.SpanStyle{{{
+		Content: "Loading",
+		Color: color.NRGBA{A: 255},
+		Size: unit.Sp(24),
+	}}}
 	s.Notify("buffer")
 	s.Parse()
 }
 
 func (s *Service) Parse() {
-	s.Data = []richtext.SpanStyle{}
 	if !s.Ready {
 		return
 	}
+	s.Lock()
+	defer s.Unlock()
+	s.Data = [][]richtext.SpanStyle{}
 	th := material.NewTheme(gofont.Collection())
 	d, _ := s.Client.Document()
 	if len(d) > 0 {
@@ -86,11 +94,11 @@ func (s *Service) Parse() {
 	go func(s *Service) {
 		fd, err := s.Client.Feed()
 		if err != nil {
-			s.Data = []richtext.SpanStyle{{
+			s.Data = [][]richtext.SpanStyle{{{
 				Content: "Not connected",
 				Color: 	color.NRGBA{A: 255},
 				Size: unit.Sp(24),
-			}}
+			}}}
 			return
 		}
 		s.hasFeed = true
@@ -131,9 +139,9 @@ func (s *Service) Tabs() []*Tab {
 
 func (s *Service) toLines(fd io.Reader, th *material.Theme) {
 	c := make([]byte, client.MSIZE)
+	font := gofont.Collection()[0]
 	scanner := bufio.NewScanner(fd)
 	scanner.Buffer(c, client.MSIZE)
-	font := gofont.Collection()[0]
 	for scanner.Scan() {
 		d := scanner.Bytes()
 		s.addLine(th, d, font)
@@ -149,8 +157,8 @@ func (s *Service) addLine(th *material.Theme, line []byte, font font.FontFace) {
 	LOOP:
 		switch item.ItemType {
 		case markup.EOF:
-			s.Data = append(s.Data, items...)
-			s.Data = append(s.Data, richtext.SpanStyle{Content: "\n"})
+			s.Data = append(s.Data, items)
+			s.Data = append(s.Data, []richtext.SpanStyle{{Content: "\n"}})
 			s.Notify("feed")
 			return
 		case markup.NormalText:

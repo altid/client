@@ -4,8 +4,6 @@ import (
 	"errors"
 	"image"
 	"image/color"
-
-	//"log"
 	"sort"
 
 	"gioui.org/app"
@@ -87,6 +85,7 @@ func Run(w *app.Window, s *services.Services, debug bool) error {
 			ed: widget.Editor{},
 		},
 	}
+	// Instead, fetch tabs each 5 seconds
 	for {
 		select {
 		case e := <-w.Events():
@@ -96,8 +95,8 @@ func Run(w *app.Window, s *services.Services, debug bool) error {
 				return err
 			}
 		// TODO: Store each ops on the type, build up and invalidate only when touched
+		// TODO: We call tabs about 30 times a second when scrolling
 		case e := <-s.Event():
-			//log.Println("Svc event", e)
 			curr := s.Current()
 			switch e {
 			case "list":

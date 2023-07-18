@@ -88,6 +88,7 @@ func (c *Client) Command(cmd *commander.Command) (int, error) {
 	}
 
 	cmd.From = c.buffer
+
 	c.clnt.Open(nfid, p.OAPPEND)
 	defer c.clnt.Clunk(nfid)
 	for _, comm := range c.commands {
@@ -189,7 +190,6 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 	}
 
 	c.clnt.Open(nfid, p.OREAD)
-
 	f := &feed.Feed{
 		Data: make(chan []byte),
 		Done: make(chan struct{}),
@@ -198,17 +198,16 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 	go func(f *feed.Feed) {
 		var off uint64
 		defer c.clnt.Clunk(nfid)
-
 		for {
 			b, err := c.clnt.Read(nfid, off, p.MSIZE)
 			if err != nil {
+				close(f.Done)
 				return
 			}
 			if len(b) > 0 {
 				f.Data <- b
 				off += uint64(len(b))
 			}
-
 			select {
 			case <-f.Done:
 				return

@@ -119,7 +119,6 @@ func (l *Listener) fetch() {
 			_, err := f.Read(b)
 			if err != nil && err != io.EOF {
 				log.Printf("error: %s\n", err)
-				f.Close()
 				return
 			}
 

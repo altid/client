@@ -9,8 +9,8 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/unit"
-	"github.com/altid/client/cmd/goiui/internal/services"
-	"github.com/altid/client/cmd/goiui/internal/ui"
+	"github.com/altid/client/cmd/gioui/internal/services"
+	"github.com/altid/client/cmd/gioui/internal/session"
 )
 
 var debug = flag.Bool("d", false, "enable debug logging")
@@ -27,10 +27,10 @@ func main() {
 	go s.Scan(ctx)
 	go func() {
 		w := app.NewWindow(
-			// Because 4:3
 			app.Size(unit.Dp(800), unit.Dp(600)),
 		)
-		if e := ui.Run(w, s, *debug); e != nil {
+		sess := session.NewSession(w, s)
+		if e := sess.Run(ctx, *debug); e != nil {
 			log.Fatal(e)
 		}
 		os.Exit(0)

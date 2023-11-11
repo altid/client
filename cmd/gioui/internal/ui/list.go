@@ -12,15 +12,17 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	"github.com/altid/client/cmd/goiui/internal/services"
+	"gioui.org/x/richtext"
+	"github.com/altid/client"
+	"github.com/altid/client/cmd/gioui/internal/services"
 )
 
-type list struct {
+type List struct {
 	s      *services.Services
-	items  items
 	th     *material.Theme
 	button *widget.Clickable
-	hide   bool
+	items  items
+	ready  bool
 }
 
 type listItem struct {
@@ -45,32 +47,52 @@ func (t items) Len() int           { return len(t) }
 func (t items) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
 func (t items) Less(i, j int) bool { return strings.Compare(t[i].svc.Name, t[j].svc.Name) <= 0 }
 
-func (t items) update(s *services.Services, th *material.Theme) {
-	for _, item := range s.List() {
-		if t.contains(item.Name) {
+func NewList(s *services.Services, th *material.Theme) *List {
+	return &List{
+		s: s,
+		th: th,
+		button: &widget.Clickable{},
+	}
+}
+
+func (l *List) Fallback() ([]byte, bool) { return nil, false }
+func (l *List) Clear() { }
+func (l *List) Status(ready bool) { l.ready = ready }
+func (l *List) Fetch(c *client.Client) ([]byte, error) { return c.Tabs() }
+func (l *List) Style() richtext.SpanStyle {
+	return richtext.SpanStyle{
+		Size: unit.Sp(14),
+	}
+}
+
+func (l *List) AddService(s *services.Services) {
+	for _, service := range s.List() {
+		if l.items.contains(service.Name) {
 			continue
 		}
 		li := &listItem{
-			svc:       item,
-			th:        th,
+			svc: service,
+			th: l.th,
 			clickable: &widget.Clickable{},
+			set: s.Select,
 		}
-		t = append(t, li)
+		l.items = append(l.items, li)
 	}
-	sort.Sort(t)
 }
 
-func (t items) contains(item string) bool {
-	for _, d := range t {
-		if d.svc.Name == item {
-			return true
+func (l *List) Set(data interface{}) {
+	if d, ok := data.([]*services.Tab); ok {
+		for _, item := range l.items {
+			if item.svc.Name == d[0].S.Name {
+				item.tabs = tabs(d)
+				return
+			}
 		}
 	}
-	return false
 }
 
 // List of layout items, which are themselves nested
-func (l *list) Layout(gtx layout.Context) layout.Dimensions {
+func (l *List) Layout(gtx layout.Context) layout.Dimensions {
 	list := &widget.List{}
 	list.Axis = layout.Vertical
 	li := material.List(l.th, list)
@@ -78,7 +100,7 @@ func (l *list) Layout(gtx layout.Context) layout.Dimensions {
 	return li.Layout(gtx, len(l.items), l.layoutItem)
 }
 
-func (l *list) layoutItem(gtx layout.Context, index int) layout.Dimensions {
+func (l *List) layoutItem(gtx layout.Context, index int) layout.Dimensions {
 	tt := material.Subtitle1(l.th, l.items[index].svc.Name)
 	tt.TextSize = unit.Sp(16)
 	insets := layout.UniformInset(4)
@@ -90,6 +112,7 @@ func (l *list) layoutItem(gtx layout.Context, index int) layout.Dimensions {
 				l.items[index].visible = false
 				log.Printf("Unable to switch/enable service %v", e)
 			}
+			l.s.Notify("list")
 		} else {
 			l.items[index].visible = !l.items[index].visible
 		}
@@ -102,9 +125,7 @@ func (l *list) layoutItem(gtx layout.Context, index int) layout.Dimensions {
 		})
 	}
 	// Border as well
-	t := l.items[index].svc.Tabs()
-	sort.Sort(tabs(t))
-	l.items[index].tabs = t
+	sort.Sort(l.items)
 	return insets.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 		return layout.Flex{
 			Axis:    layout.Vertical,
@@ -143,13 +164,23 @@ func (li *listItem) entry(gtx layout.Context, index int) layout.Dimensions {
 	if !li.visible {
 		return layout.Dimensions{}
 	}
+	sort.Sort(li.tabs)
 	for range li.tabs[index].Click.Clicks() {
 		li.set(li.svc.Name)
 		li.svc.Buffer(li.tabs[index].Name)
 	}
-	// We'd like to paint this differently in the future, but for now just draw it as a string
+	//TODO: Process into an array of richtext.SpanStyle
 	data := fmt.Sprintf("%s [%d]", li.tabs[index].Name, li.tabs[index].Unread)
 	tt := material.Body2(li.th, data)
 	tt.MaxLines = 1
 	return li.tabs[index].Click.Layout(gtx, tt.Layout)
+}
+
+func (t items) contains(item string) bool {
+	for _, d := range t {
+		if d.svc.Name == item {
+			return true
+		}
+	}
+	return false
 }

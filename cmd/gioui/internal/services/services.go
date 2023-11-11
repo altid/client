@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 	"sync"
 
 	"gioui.org/widget"
@@ -27,8 +28,8 @@ func NewServices(debug bool) *Services {
 
 // Don't bother leaking anything we don't need here
 func (s *Services) List() []*Service {
-	s.Lock()
-	defer s.Unlock()
+	s.RLock()
+	defer s.RUnlock()
 	list := []*Service{}
 	for _, item := range s.srvlist {
 		list = append(list, item)
@@ -99,16 +100,16 @@ func (s *Services) Scan(ctx context.Context) error {
 			svc := &Service{
 				Name:   entry.ServiceRecord.Instance,
 				Notify: s.Notify,
+				Tabs:   make(map[string]*widget.Clickable),
 				// We only list one IP per service
 				addr:    entry.AddrIPv4[0].String(),
-				tabs:    make(map[string]*widget.Clickable),
 				port:    entry.Port,
 				hasFeed: false,
 				debug:   s.debug,
 			}
-			svc.Parse()
-			svc.Notify("scan")
 			s.srvlist[svc.Name] = svc
+			log.Printf("Adding %v\n", svc.Name)
+			svc.Notify("scan")
 		}
 	}(entries)
 	return resolver.Browse(ctx, "_altid._tcp", "local", entries)

@@ -41,7 +41,7 @@ func NewSession(w *app.Window, s *services.Services) *Session {
 		status: ui.NewStatus(th),
 		title:  ui.NewTitle(th),
 		aside:  ui.NewAside(th),
-		input: ui.NewInput(s, th, s.Notify),
+		input: ui.NewInput(s, th),
 		list: ui.NewList(s, th),
 	}
 }
@@ -77,10 +77,11 @@ func (s *Session) Run(ctx context.Context, debug bool) error {
 				parser.RebuildTabs(s.list, s.svcs)
 			case "buffer":
 				parser.RebuildData(s.title, curr)
-				//parser.RebuildData(s.aside, curr)
-				//parser.RebuildData(s.status, curr)
+				parser.RebuildData(s.aside, curr)
+				parser.RebuildData(s.status, curr)
 				parser.RebuildData(s.view, curr)
 			case "input":
+				//
 			case "feed":
 				parser.BuildData(s.view, curr)
 			}

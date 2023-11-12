@@ -1,6 +1,4 @@
 eliasnaur.com/font v0.0.0-20230308162249-dd43949cb42d h1:ARo7NCVvN2NdhLlJE9xAbKweuI9L6UgfTbYb0YwPacY=
-gioui.org v0.0.0-20230619141907-b183774063fc h1:M5FvmaxY42BE61Svy8Ia6IsJaUkXzWvRFIQMLTmrywI=
-gioui.org v0.0.0-20230619141907-b183774063fc/go.mod h1:a3hz8FyrPMkt899D9YrxMGtyRzpPrJpz1Lzbssn81vI=
 gioui.org v0.1.0 h1:fEDY5A4+epOdzjCBYSUC4BzvjWqsjfqf5D6mskbthOs=
 gioui.org v0.1.0/go.mod h1:a3hz8FyrPMkt899D9YrxMGtyRzpPrJpz1Lzbssn81vI=
 gioui.org/cpu v0.0.0-20210808092351-bfe733dd3334/go.mod h1:A8M0Cn5o+vY5LTMlnRoK3O5kG+rH0kWfJjeKd9QpBmQ=

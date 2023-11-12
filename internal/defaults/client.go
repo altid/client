@@ -200,7 +200,7 @@ func (c *Client) Feed() (io.ReadCloser, error) {
 		defer c.clnt.Clunk(nfid)
 		for {
 			b, err := c.clnt.Read(nfid, off, p.MSIZE)
-			if err != nil {
+			if err != nil && err != io.EOF {
 				close(f.Done)
 				return
 			}

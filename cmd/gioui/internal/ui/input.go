@@ -11,15 +11,13 @@ import (
 )
 
 type Input struct {
-	notify func(string)
 	s  *services.Services
 	th *material.Theme
 	ed widget.Editor
 }
 
-func NewInput(s *services.Services, th *material.Theme, notify func(string)) *Input {
+func NewInput(s *services.Services, th *material.Theme) *Input {
 	return &Input{
-		notify: notify,
 		s: s,
 		th: th,
 		ed: widget.Editor{},
@@ -35,8 +33,8 @@ func (i *Input) Layout(gtx layout.Context) layout.Dimensions {
 			i.ed.SetText("")
 			if i.s.Current() != nil {
 				i.s.Current().Client.Input([]byte(e.Text))
-				i.notify("input")
 			}
+			i.s.Notify("input")
 		}
 	}
 	e := ed.Layout(gtx)
@@ -50,16 +48,6 @@ func (i *Input) Layout(gtx layout.Context) layout.Dimensions {
 	})
 }
 
+// No-op at the moment, but we can forward slash commands here 
 func (i *Input) Handle() {
-	for _, in := range i.ed.Events() {
-		// If we have a submit, clear our input send input to Service
-		if item, ok := in.(widget.SubmitEvent); ok {
-			i.ed.SetText("")
-			curr := i.s.Current()
-			if curr != nil {
-				curr.Client.Input([]byte(item.Text))
-				curr.Notify("input")
-			}
-		}
-	}
 }

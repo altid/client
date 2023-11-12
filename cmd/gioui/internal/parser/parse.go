@@ -133,6 +133,8 @@ func RebuildTabs(p Parser, svcs *services.Services) {
 
 func colorFromBytes(in []byte) color.NRGBA {
 	switch string(in) {
+	case "red":
+		return color.NRGBA{R:255, G: 0, B: 0, A: 255}
 	case "green":
 		return color.NRGBA{R: 255, G: 0, B: 120, A: 255}
 	case "blue":

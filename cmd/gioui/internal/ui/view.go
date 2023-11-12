@@ -77,30 +77,6 @@ func (v *View) Fetch(c *client.Client) (b []byte, err error) {
 
 }
 
-func (v *View) getData(c *client.Client) {
-	v.first = false
-	v.isFeed = true
-	d, _ := c.Document()
-	if len(d) > 0 {
-		v.isFeed = false
-		v.notify("feed")
-		v.bytes <- d
-		return
-	}
-	dd, e := c.Feed()
-	if e != nil {
-		return
-	}
-	rd := bufio.NewScanner(dd)
-	rb := make([]byte, client.MSIZE)
-	rd.Buffer(rb, client.MSIZE)
-	for rd.Scan() {
-		b := rd.Bytes()
-		v.notify("feed")
-		v.bytes <- b
-	}
-}
-
 func (v *View) Set(data interface{}) {
 	v.list.ScrollToEnd = v.isFeed
 	if d, ok := data.([]richtext.SpanStyle); ok {
@@ -129,11 +105,34 @@ func (v *View) Layout(gtx layout.Context) layout.Dimensions {
 		}
 		return d
 	}
-
 	vi := material.List(v.th, v.list)
 	return vi.Layout(gtx, len(v.data), func(gtx layout.Context, index int) layout.Dimensions {
 		d := richtext.Text(&state, v.th.Shaper, v.data[index]...).Layout(gtx)
 		d.Size.X = gtx.Constraints.Max.X
 		return d
 	})
+}
+
+func (v *View) getData(c *client.Client) {
+	v.first = false
+	v.isFeed = true
+	d, _ := c.Document()
+	if len(d) > 0 {
+		v.isFeed = false
+		v.notify("feed")
+		v.bytes <- d
+		return
+	}
+	dd, e := c.Feed()
+	if e != nil {
+		return
+	}
+	rd := bufio.NewScanner(dd)
+	rb := make([]byte, client.MSIZE)
+	rd.Buffer(rb, client.MSIZE)
+	for rd.Scan() {
+		b := rd.Bytes()
+		v.notify("feed")
+		v.bytes <- b
+	}
 }

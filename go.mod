@@ -1,6 +1,6 @@
 module github.com/altid/client
 
-go 1.19
+go 1.20
 
 require (
 	gioui.org v0.1.0

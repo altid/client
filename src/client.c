@@ -15,7 +15,6 @@ static struct { const char *file; int idx; } event_table[] = {
 };
 
 int svc_oper(alt_client *, const char *, void *, int(*)(const char *, int, int));
-
 int alt_msg_send(alt_client *cl, const char *msg) { return svc_oper(cl, "input", msg, cl->write); }
 int alt_cmd_send(alt_client *cl, alt_cmd *cmd) { return svc_oper(cl, "ctl", cmd->data, cl->write); }
 
@@ -32,7 +31,8 @@ alt_cmds_build(alt_client *cl)
 }
 
 /* Run the given operation, read/write */
-int svc_oper(alt_client *cl, const char *target, void *data, int (*oper)(const char *, int, int)) {
+int
+svc_oper(alt_client *cl, const char *target, void *data, int (*oper)(const char *, int, int)) {
     int fd;
     if(cl->open(target, &fd) < 0){
         return ALT_ERR_OPEN;

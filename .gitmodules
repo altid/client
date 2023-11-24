@@ -1,0 +1,3 @@
+[submodule "theft"]
+	path = theft
+	url = https://github.com/silentbicycle/theft

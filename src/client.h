@@ -46,8 +46,9 @@ struct alt_client {
     alt_cmd    *cmds;
     int (*read)(void *data, unsigned int msize, int fd);
     int (*write)(void *data, unsigned int msize, int fd);
+    int (*seek)(int whence, unsigned int offset, int fd);
     int (*rm)(const char *path, int fd);
-    int (*open)(const char *path, int *fd); /* We don't care about mode */
+    int (*open)(const char *path, int *fd);
     int (*close)(int fd);
 };
 

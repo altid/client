@@ -20,6 +20,7 @@
  */
 
 #include "queue.h"
+#include "atomic_ops.h"
 
 /*
  * The five following functions handle the low-order mark bit that indicates
@@ -29,7 +30,7 @@
  *  - get_(un)marked_ref sets the mark before returning the node.
  */
 inline int
-is_marked_ref(long i) 
+is_marked_ref(long i)
 {
   return (int) (i & 0x1L);
 }
@@ -42,31 +43,30 @@ unset_mark(long i)
 }
 
 inline long
-set_mark(long i) 
+set_mark(long i)
 {
   i |= 0x1L;
   return i;
 }
 
 inline long
-get_unmarked_ref(long w) 
+get_unmarked_ref(long w)
 {
   return w & ~0x1L;
 }
 
 inline long
-get_marked_ref(long w) 
+get_marked_ref(long w)
 {
   return w | 0x1L;
 }
-
 
 // Returns a new queue and initializes the memory pool.
 lqueue_t*
 queue_new()
 {
   lqueue_t* l = (lqueue_t*) malloc(sizeof(lqueue_t));
-    
+
   // Initialize tail.
   l->tail = malloc(sizeof(node_t));
   l->tail->val = INT_MAX;
@@ -95,9 +95,6 @@ queue_free(lqueue_t* l)
     i += 1;
   }
   free(mem);
-  free(l->head);
-  free(l->tail);	
-  free(l);
 }
 
 /* Adds the value to the top of the queue*/
@@ -135,7 +132,7 @@ queue_push(lqueue_t* l, val_t val)
     node_t *next = tail->next;
     if(get_unmarked_ref(next) != NULL){
       // Walk tail ahead before attempting to set
-      CAS_PTR(&(l->tail), tail, get_unmarked_ref(next));
+      CAS_PTR(&(l->tail), tail, get_unmarked_ref(tail->next));
     } else {
       node_t *mark = is_marked_ref(tail->next) ? get_marked_ref(node) : node;
       if(CAS_PTR_BOOL(&(l->tail->next), tail->next, mark)){
@@ -183,4 +180,3 @@ queue_pop(lqueue_t* l)
     // If CAS fails, something changed. Retry!
   } while (1);
 }
-

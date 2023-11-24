@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "atomic_ops_if.h"
+#include "atomic_ops.h"
 
 #ifdef DEBUG
 #define IO_FLUSH                        fflush(NULL)
@@ -52,12 +52,12 @@ typedef struct lqueue {
 // Memory pool
 node_t **mem; // Memory blocks
 uint32_t memptr; // Current cell
-#define MEM_BLOCK_SIZE 10000 //16KB (node_t = 16b)
+#define MEM_BLOCK_SIZE 20000 //16KB (node_t = 16b)
 #define MEM_BLOCK_CNT 100 // 1.6MB of mem max
 
 lqueue_t* queue_new();
 
-val_t val queue_pop(lqueue_t *q);
+val_t queue_pop(lqueue_t *q);
 void queue_push(lqueue_t *q, val_t val);
 void queue_free(lqueue_t *q);
 
